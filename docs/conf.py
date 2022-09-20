@@ -25,3 +25,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+
+html_theme_options = {
+    'logo': 'stsci_pri_combo_mark_white_bkgd.png',
+}
+html_favicon = '_static/stsci_favicon.ico'
