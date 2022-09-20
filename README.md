@@ -1,5 +1,7 @@
 # notebook-infrastructure
 
+[![Documentation Status](https://readthedocs.org/projects/notebook-infrastructure/badge/?version=latest)](https://notebook-infrastructure.readthedocs.io/en/latest/?badge=latest)
+
 This repository stores standards and software infrastructure for supporting Jupyter notebooks for public consumption at STScI.
 
 The repository is divided into three core pieces:
