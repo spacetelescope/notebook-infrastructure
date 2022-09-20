@@ -28,5 +28,14 @@ html_static_path = ['_static']
 
 html_theme_options = {
     'logo': 'stsci_pri_combo_mark_white_bkgd.png',
+    'github_user': 'spacetelescope',
+    'github_repo': 'notebook-infrastructure',
 }
 html_favicon = '_static/stsci_favicon.ico'
+
+html_context = {
+  'display_github': True,
+  'github_user': 'spacetelescope',
+  'github_repo': 'notebook-infrastructure',
+  'github_version': 'main',
+}

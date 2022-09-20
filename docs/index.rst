@@ -15,12 +15,17 @@ This repository stores standards and software infrastructure for supporting Jupy
 
 
 
-Indices and tables
-==================
+Search
+======
 
-* :ref:`genindex`
 * :ref:`search`
 
 ..
-  Put this index back in if we end up with any Python functions that need documenting 
+  Put this index instead of "search" if we end up with any Python functions that need documenting 
+
+  Indices and tables
+  ==================
+
   * :ref:`modindex`
+  * :ref:`genindex`
+  * :ref:`search`
