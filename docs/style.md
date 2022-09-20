@@ -1,0 +1,3 @@
+# Style Guides for Notebooks
+
+Style guides for notebooks are stored in a separate space, the [STScI Style Guide Repository](https://github.com/spacetelescope/style-guides), particularly the [Jupyter Notebook Style Guide](https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md) and [Python Language Style Guide](https://github.com/spacetelescope/style-guides/blob/master/guides/python.md).
