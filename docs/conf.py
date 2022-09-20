@@ -32,10 +32,3 @@ html_theme_options = {
     'github_repo': 'notebook-infrastructure',
 }
 html_favicon = '_static/stsci_favicon.ico'
-
-html_context = {
-  'display_github': True,
-  'github_user': 'spacetelescope',
-  'github_repo': 'notebook-infrastructure',
-  'github_version': 'main',
-}
