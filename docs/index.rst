@@ -1,10 +1,8 @@
-.. notebook-infrastructure documentation master file, created by
-   sphinx-quickstart on Tue Sep 20 12:57:40 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+The Space Telescope Science Institute's Notebook Infrastructure
+===============================================================
 
-Welcome to notebook-infrastructure's documentation!
-===================================================
+This repository stores standards and software infrastructure for supporting Jupyter notebooks for public consumption at STScI.
+
 
 .. toctree::
    :maxdepth: 2
