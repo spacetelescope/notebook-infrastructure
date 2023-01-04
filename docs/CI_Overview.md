@@ -4,7 +4,7 @@ Welcome to the CI system for Jupyter notebooks! This system is designed to help 
 
 The system is built using GitHub Actions, which are stored in the 'notebooks-actions' repository to allow for global updates. When a user submits a pull request (PR) with a new or updated notebook, the system automatically executes and validates the notebook as a pre-merge check. If the notebook is successfully validated and executed, the executed version of the notebook is pushed to the 'gh-storage' branch to be used in the later weekly validation and execution process.
 
-Jupyterbook is a powerful tool that allows you to customize the appearance and functionality of your documentation. You can configure the table of contents to your liking, add a Google Analytics tracking ID to gather usage statistics, and even customize the CSS and logos to match your brand.
+Jupyterbook is a powerful tool that allows you to customize the appearance and functionality of your documentation. You can configure the table of contents to your liking, add a Google Analytics tracking ID to gather usage statistics, and even customize the CSS and logos to match your mission.
 
 In addition to the testing and documentation actions, the system also includes a security testing action using bandit. This action scans the notebooks for any potential security vulnerabilities and reports any findings in the PR.
 
