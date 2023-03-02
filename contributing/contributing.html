@@ -1,0 +1,51 @@
+<h1>How to Contribute to Space Telescope Notebooks</h1>
+<p>Contributions are welcome from both inside and outside the Institute.</p>
+<h1>Submission Policies</h1>
+These are the high-level notebook submission policies. More comprehensive guidelines may be given in the other repositories. See the step-by-step guide below for the concrete steps to take while contributing.
+<h2>Foundations</h2>
+<p>Notebook code cells must be written in Python. Notebooks must use the kernel name python3. Version support is detailed in <a href="https://github.com/spacetelescope/style-guides/blob/master/guides/software-versioning.md">Version Support Guide</a>.
+Notebook documentation cells are written in Markdown.<br>
+<h3>Files and directories</h3>
+All notebooks must be in a sub-directory of the notebooks directory. The filesystem directory name and the names of the files contained within it cannot contain whitespace or non-printable characters. (Underscores should be used in lieu of a space)<br><br>
+In general, unique notebooks on different topics should each be in their own directory with only one notebook. However, multi-part notebooks are best implemented as multiple notebooks in the same directory. They will then be run in alphabetical order, sharing the same execution directory.  Hence, a "Part 1" can generate files that are used in later parts.<br><br>
+Given a minimal python environment, the notebook(s) should run correctly after the requirements are installed. <br>
+Each notebook directory must contain one or more .ipynb extension files, or directories that themselves contain notebooks. Each directory must contain a file named requirements.txt which lists the dependencies for the notebooks in that directory and any sub-directories. The "requirements.txt" file in a notebook directory follows these rules/guidelines:
+<ul>
+<li>The requirements.txt file must be non-empty.</li>
+<li>All package requirements in the requirements.txt file <b>must</b> use the '>=' operator, never '=='. Security updates may require newer version of package dependencies to be installed in future builds.</li>
+<li>When versions are given as ">=", that should be interpreted as "last known working version".  The prime goal here is to ensure there is a record of what version of dependencies is known to produce the output the notebook author intended, ensuring the scientific results are reproducible.</li>
+</ul>
+
+</p>
+<h2>Authorship</h2>
+<p>A notebook must have assigned: <ol>
+<li>An author(s): the individual(s) who wrote the notebook</li>
+<li>An owner: the branch, team, or group that maintains the notebook content in the future. The owner is expected to periodically check the notebook for science relevance.</li></ol></p>
+<h2>PEP8 Compliance</h2>
+<p>In addition to the <a href="https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md">Notebook Style Guide</a>, any code in the notebook should be PEP8 compliant. PEP 8 compliance can be checked with the <a href="https://flake8.pycqa.org/en/latest/">flake8</a> and <a href="https://github.com/mattijn/pycodestyle_magic">pycodestyle_magic</a> packages.
+These packages can be installed used pip:</p>
+<p><code>$ pip install flake8 pycodestyle_magic</code></p>
+<p>Then add these two lines in a cell at the beginning of the notebook to test them:</p>
+<p><code>%load_ext pycodestyle_magic</code></p>
+<p><code>%flake8_on --ignore E261,E501,W291,W293</code></p>
+
+<h1>Step-by-step Guide</h1>
+This is a reproduction of the workflow instructions on the <a href="https://github.com/spacetelescope/style-guides/blob/master/guides/git-workflow.md">git workflow document</a>.
+<ol>
+<li>Read over the <a href="https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md">style guide</a>. The style parts are guidelines and it is not always necessary to follow them to the letter, but contributions are expected to generally follow this guide.</li>
+<li>Fork your target repository. See the preferred method of doing this on the <a href="https://github.com/spacetelescope/style-guides/blob/master/guides/git-workflow.md">workflow page</a>.</li>
+<li>Create a feature branch to add or modify content (<code>git checkout -b my-new-feature</code>).  You should aim to do one branch (and therefore one Pull Request) per notebook, as that will make review faster and easier. </li>
+<li>Create your notebook, starting with the <a href="https://github.com/spacetelescope/notebooks/tree/master/notebooks/MAST/templates/jupyter_template/jupyter_template.ipynb">the Jupyter Notebook template</a>. This should be organized into the <code>notebooks</code> directory or appropriate sub-directory, with each notebook in its <em>own</em> directory with no other notebooks.</li>
+<li>Develop your notebook by adding and committing it (<code>git add path/to/my/notebook/notebook.ipynb</code>,  <code>git commit -m 'Added some feature'</code>), as many times as necessary to capture your development history.  Note that you must <em>never</em> commit a notebook with executed cells or commit large data files (see the guide).  Always "Clear Ouputs" on cells before adding/committing.</li>
+<li>Add a <code>requirements.txt</code> file next to your notebook.  Each line must be a separate package following <code>pip</code> <a href="https://pip.pypa.io/en/stable/reference/pip_install/#requirement-specifiers">requirements file conventions</a>, listing all the required packages for your notebook, including a "known good version" (e.g., if you wrote the notebook on numpy v1.14.0, the line should be <code>numpy&gt;=1.14.0</code>).<ul>
+<li><strong>A note on supplemental files:</strong> <ul>
+<li>Including supplemental files with your notebook is discouraged, and should only occur if the files are not accessible online (e.g. via MAST).</li>
+<li>See the <a href="https://github.com/spacetelescope/style-guides/blob/master/guides/where-to-put-your-data.md">style guide</a> for more detailed guidance on how to handle supplemental data.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Push to your github fork's branch (<code>git push origin my-new-feature</code>).</li>
+<li>Create a new Pull Request from your fork into <code>spacetelescope</code> using the GitHub web site.  Be sure to include a description that's sufficient for someone <em>not in your team</em> to understand the context of the notebook (not all reviewers will be from your team.)</li>
+</ol>
+<p>Once you've created a Pull Request, the CI tests will run on your changes. These ensure that the notebook actually runs.</p>
