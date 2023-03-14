@@ -8,7 +8,7 @@ Notebook documentation cells are written in Markdown.<br>
 <h3>Files and directories</h3>
 All notebooks must be in a sub-directory of the notebooks directory. The filesystem directory name and the names of the files contained within it cannot contain whitespace or non-printable characters. (Underscores should be used in lieu of a space)<br><br>
 In general, unique notebooks on different topics should each be in their own directory with only one notebook. However, multi-part notebooks are best implemented as multiple notebooks in the same directory. They will then be run in alphabetical order, sharing the same execution directory.  Hence, a "Part 1" can generate files that are used in later parts.<br><br>
-Given a minimal python environment, the notebook(s) should run correctly after the requirements are installed. <br>
+Given a minimal Python environment, the notebook(s) should run correctly after the requirements are installed. <br>
 Each notebook directory must contain one or more .ipynb extension files, or directories that themselves contain notebooks. Each directory must contain a file named requirements.txt which lists the dependencies for the notebooks in that directory and any sub-directories. The "requirements.txt" file in a notebook directory follows these rules/guidelines:
 <ul>
 <li>The requirements.txt file must be non-empty.</li>
@@ -25,7 +25,7 @@ Each notebook directory must contain one or more .ipynb extension files, or dire
 <p>In addition to the <a href="https://github.com/spacetelescope/style-guides/blob/master/guides/jupyter-notebooks.md">Notebook Style Guide</a>, any code in the notebook should be PEP8 compliant. PEP 8 compliance can be checked with the <a href="https://flake8.pycqa.org/en/latest/">flake8</a> and <a href="https://github.com/mattijn/pycodestyle_magic">pycodestyle_magic</a> packages.
 These packages can be installed used pip:</p>
 <p><code>$ pip install flake8 pycodestyle_magic</code></p>
-<p>Then add these two lines in a cell at the beginning of the notebook to test them:</p>
+<p>Then add these two lines in a cell at the beginning of the notebook:</p>
 <p><code>%load_ext pycodestyle_magic</code></p>
 <p><code>%flake8_on --ignore E261,E501,W291,W293</code></p>
 
@@ -45,7 +45,7 @@ This is a reproduction of the workflow instructions on the <a href="https://gith
 </li>
 </ul>
 </li>
-<li>Push to your github fork's branch (<code>git push origin my-new-feature</code>).</li>
-<li>Create a new Pull Request from your fork into <code>spacetelescope</code> using the GitHub web site.  Be sure to include a description that's sufficient for someone <em>not in your team</em> to understand the context of the notebook (not all reviewers will be from your team.)</li>
+<li>Push to your GitHub fork's branch (<code>git push origin my-new-feature</code>).</li>
+<li>Create a new Pull Request from your fork into <code>spacetelescope</code> using the GitHub web site.  Be sure to include a description that's sufficient for <em>a non-expert</em> to understand the context of the notebook.</li>
 </ol>
 <p>Once you've created a Pull Request, the CI tests will run on your changes. These ensure that the notebook actually runs.</p>
