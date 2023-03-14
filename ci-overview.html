@@ -6,13 +6,13 @@
 <h2>How each action works</h2>
 <ul>
 <li>
-<p><strong>Jupyter nbconvert</strong>: This action is used to execute the notebooks and ensure that they are free of syntax errors and run correctly. When a PR is submitted, the action will run the notebooks using nbconvert, and check for any errors that may have occurred during execution. If any errors are found, they will be highlighted in the PR so that the user can fix them before merging their changes.</p>
+<p><strong>Jupyter nbconvert</strong>: This action is used to execute the notebooks and ensure that they are free of syntax errors and run correctly. When a PR is submitted, the action will run the notebooks using nbconvert, and check for any errors that may have occurred during execution. If any errors are found, they will be highlighted in the PR so that the user can fix them before they are merged.</p>
 </li>
 <li>
 <p><strong>Pytest nbval</strong>: This action is used to validate the notebooks and ensure that their output is as expected. When a PR is submitted, the action will run the notebooks using nbval and compare the output to the expected results. If there are any discrepancies, they will be highlighted in the PR so that the user can investigate and fix the issue.</p>
 </li>
 <li>
-<p><strong>Jupyterbook</strong>: This action is used to generate clean, easy-to-read HTML documentation for the notebooks. When a PR is submitted, the action will run the notebooks through jupyterbook, which will generate a HTML version of the notebook with a customizable table of contents, Google Analytics tracking ID (if provided), and customizable CSS and logos. This allows users to easily navigate and read the documentation for the notebooks, and also helps you gather useful usage statistics and tailorthe documentation to match your brand.</p>
+<p><strong>Jupyterbook</strong>: This action is used to generate clean, easy-to-read HTML documentation for the notebooks. When a PR is submitted, the action will run the notebooks through jupyterbook, which will generate a HTML version of the notebook with a customizable table of contents, Google Analytics tracking ID (if provided), and customizable CSS and logos. This allows users to easily navigate and read the documentation for the notebooks, and also helps you gather useful usage statistics and tailor the documentation to match your brand.</p>
 </li>
 <li>
 <p><strong>Bandit</strong>: This action is used to scan the notebooks for potential security vulnerabilities. When a PR is submitted, the action will run the notebooks through bandit and report any findings in the PR. This helps to ensure that the notebooks are secure and do not introduce any security risks.</p>
