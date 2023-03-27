@@ -1,3 +1,18 @@
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Contributing Notebooks</title>
+    <meta name="description" content="Contributing to STScI's Jupyter Notebooks.">
+    <link rel="stylesheet" href="ancillary.css">
+    <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;900&display=swap" rel="stylesheet">
+    <link href="http://fonts.googleapis.com/css?family=Oswald" rel='stylesheet' type='text/css'>
+    <link href="http://fonts.googleapis.com/css?family=Oswald-light" rel='stylesheet' type='text/css'>                                                                                                    
+</head>
+
+<img src="images/stsci-logo.svg" alt="Space Telescope Science Institute">
+<a class="contact" style="color:white;" href="https://github.com/spacetelescope/notebook-infrastructure/issues/new">Contact Us</a>                               <br>                           
+<br>   
+
 <h1>Continuous Integration System for Jupyter Notebooks Overview</h1>
 <p>Welcome to the CI system for Jupyter notebooks! This system is designed to help developers test and validate their notebooks, as well as generate clear documentation for them.</p>
 <p>The system is built using GitHub Actions, which are stored in the 'notebooks-actions' repository to allow for global updates. When a user submits a pull request (PR) with a new or updated notebook, the system automatically executes and validates the notebook as a pre-merge check. If the notebook is successfully validated and executed, the executed version of the notebook is pushed to the 'gh-storage' branch to be used in the later weekly validation and execution process.</p>
@@ -20,5 +35,7 @@
 </ul>
 <p>In addition to running these actions when a PR is submitted, the system also runs weekly execution and validation against the notebooks in the 'gh-storage' branch to ensure that they remain error-free and up-to-date. This helps to ensure that the notebooks are always in good working condition and ready to be used.</p>
 <p>If any failures arise during the pre-merge checks or the weekly execution and validation process, they will be reported back and can be accessed through the Actions tab of the repository. This makes it easy to identify and fix any issues that may arise.</p>
-<p>To make it easy for developers to get started with the CI system, we've also included a deployable template for new notebook repositories. This template sets up the necessary actions and structure for testing and documentation, so that developers can quickly get their notebooks up and running with the system.</p>
-<p>We hope that this CI system helps you easily maintain and improve your notebooks. If you have any questions or suggestions, please don't hesitate to let us know. Happy coding!</p>
+<p>To make it easy for developers to get started with the CI system, we've also included a <a href="https://github.com/spacetelescope/notebook-ci-template">deployable template</a> for new notebook repositories. This template sets up the necessary actions and structure for testing and documentation, so that developers can quickly get their notebooks up and running with the system.</p>
+
+<h1>Getting Started</h1>
+Please see the <a href="ci-setup.html"> CI setup page</a> for instructions on creating your own CI system.

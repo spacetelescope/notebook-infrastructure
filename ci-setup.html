@@ -1,0 +1,38 @@
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Contributing Notebooks</title>
+    <meta name="description" content="Contributing to STScI's Jupyter Notebooks.">
+    <link rel="stylesheet" href="ancillary.css">
+    <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;900&display=swap" rel="stylesheet">
+    <link href="http://fonts.googleapis.com/css?family=Oswald" rel='stylesheet' type='text/css'>
+    <link href="http://fonts.googleapis.com/css?family=Oswald-light" rel='stylesheet' type='text/css'>                                                                                                    
+</head>
+
+<img src="images/stsci-logo.svg" alt="Space Telescope Science Institute">
+<a class="contact" style="color:white;" href="https://github.com/spacetelescope/notebook-infrastructure/issues/new">Contact Us</a>                               <br>                           
+<br>   
+
+  
+
+<h1>Setting up a new repository for notebook CI</h1>
+<p>To get started with the notebook CI system, you’ll need to create a new repository and set up the necessary structure. Here’s how to do it:</p>
+<ol class="arabic simple">
+<li><p>Create a new repository on GitHub. You can give it any name you like, but make sure to include the word “notebook” in the name so that it’s clear what the repository is for.</p></li>
+<li><p>Clone the ‘notebook-ci-template’ repository using the following command:</p></li>
+<p>git clone https://github.com/spacetelescope/notebook-ci-template.git</p>
+<li><p>Copy the entire structure of the <code class="docutils literal notranslate"><span class="pre">notebook-ci-template</span></code> repository, including all files and directories, into your new repository.</p></li>
+<li><p>Edit <code class="docutils literal notranslate"><span class="pre">_toc.yml</span></code> to include the notebooks that you want to include in your jupyterbook documentation. Simply add the name and path of each notebook to the list.</p></li>
+<li><p>Edit <code class="docutils literal notranslate"><span class="pre">_config.yml</span></code> to configure the jupyterbook system. You’ll need to specify the author, mission name, location of the repository, and any other options you’d like to include. You can also add a GitHub Analytics ID to gather usage statistics for your documentation.</p></li>
+<li><p>Set up GitHub Pages for your repository by creating a new branch called <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code>. You can do this using the following command:</p></li>
+<p>git checkout -b gh-pages</p>
+<p>Then, push the <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch to GitHub using the following command:</p>
+<p>git push origin gh-pages</p>
+<p>Finally, go to the repository settings and select the <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch under the “Source” section of the “GitHub Pages” section. This will allow you to access your documentation at <code class="docutils literal notranslate"><span class="pre">https://&lt;USERNAME&gt;.github.io/&lt;REPO&gt;</span></code>.</p>
+<li><p>Add and commit your changes to the repository using the following commands:</p></li>
+<p>git add .git commit -m “Initial commit”</p>
+<li><p>Push your changes to GitHub using the following command:</p></li>
+<p>git push origin main</p> </ol>
+<p>Once you’ve set up the structure and configured jupyterbook, your repository should be ready to start running checks and weekly tests on notebooks submitted by PR as described in the previous documentation. You can access your documentation at <code class="docutils literal notranslate"><span class="pre">https://&lt;USERNAME&gt;.github.io/&lt;REPO&gt;</span></code>.</p>
+<p>We hope this helps you get started with the notebook CI system. If you have any questions or need further assistance, please don’t hesitate to ask.</p>
