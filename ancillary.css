@@ -1,0 +1,40 @@
+body{
+    background:#153A4B;
+    font-family: 'Overpass', sans-serif;
+    color: white;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: none;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+a {
+    outline: none;
+  }
+  
+  a:link {
+    text-decoration: none;
+    color: #b95925;
+  }
+  
+ a:visited {
+    color: #b95925;
+  } 
+  
+  a:hover {
+    text-decoration: underline;
+    background: none;
+  }
+  
+  a:active {
+    background: none;
+    color: #cdfeaa;
+  }
+
+  .contact{
+    text-align: right;
+    display: block;
+    color: white;
+    margin-top: -35px;
+}
