@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This detailed guide is designed for contributors working with the STScI Continuous Integration (CI) system for Jupyter notebooks on GitHub. It provides an overview of the process from creating a pull request to the automated checks and the subsequent steps based on the outcomes of these checks.
+This guide is designed for contributors working with the STScI Continuous Integration (CI) system for Jupyter notebooks on GitHub. It provides an overview of the process from creating a pull request to the automated checks and the subsequent steps based on the outcomes of these checks.
 
 ## Key Components
 
