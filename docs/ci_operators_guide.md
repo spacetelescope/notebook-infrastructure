@@ -17,6 +17,9 @@ This guide is designed for contributors working with the STScI Continuous Integr
 ### Starting with a PR
 
 As a contributor, you begin by creating a Pull Request for your Jupyter notebook directly in the main repository.
+It is important to creat the PR merge to main from a branch on the main repository, due to security issues, you cannot merge to main directly from a fork.
+
+If you are working from a fork, create a new branch on the main repository and merge your forked branch to it.  Then create a PR from this new fork, tests will now run correctly.
 
 #### How to Create a PR
 
