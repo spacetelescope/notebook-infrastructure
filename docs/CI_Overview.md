@@ -20,7 +20,7 @@ In addition to the testing and documentation actions, the system also includes a
 
 In addition to running these actions when a PR is submitted, the system also runs weekly execution and validation against the notebooks in the 'gh-storage' branch to ensure that they remain error-free and up-to-date. This helps to ensure that the notebooks are always in good working condition and ready to be used.
 
-If any failures arise during the pre-merge checks or the weekly execution and validation process, they will be reported back and can be accessed through the Actions tab of the repository. This makes it easy to identify and fix any issues that may arise.
+If any failures arise during the pre-merge checks or the weekly execution and validation process, they will be reported back and can be accessed through the Actions tab of the repository. This makes it easy to identify and fix any issues that may arise. Additionally, failures during scheduled testing are reported back to slack channels specific to the repository.
 
 To make it easy for developers to get started with the CI system, we've also included a deployable template for new notebook repositories. This template sets up the necessary actions and structure for testing and documentation, so that developers can quickly get their notebooks up and running with the system.
 
