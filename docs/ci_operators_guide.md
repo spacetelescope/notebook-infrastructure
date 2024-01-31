@@ -89,7 +89,7 @@ If you are working from a fork, create a new branch on the main repository and m
 - **Manual Execution**: You can manually trigger the execution of all notebooks for immediate validation.
 - **Complete Overhaul**: A comprehensive action is available for a full re-execution and HTML regeneration, to be used selectively.
 
-### Troubleshooting Guide for Jupyter Notebook CI System
+# Troubleshooting Guide for Jupyter Notebook CI System
 
 When contributing to a GitHub project using a Continuous Integration (CI) system for Jupyter notebooks, encountering issues during the process is common. This troubleshooting guide aims to help you navigate through common problems, especially during pull request (PR) checks and notebook execution.
 
