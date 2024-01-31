@@ -89,6 +89,41 @@ If you are working from a fork, create a new branch on the main repository and m
 - **Manual Execution**: You can manually trigger the execution of all notebooks for immediate validation.
 - **Complete Overhaul**: A comprehensive action is available for a full re-execution and HTML regeneration, to be used selectively.
 
+### Troubleshooting Guide for Jupyter Notebook CI System
+
+When contributing to a GitHub project using a Continuous Integration (CI) system for Jupyter notebooks, encountering issues during the process is common. This troubleshooting guide aims to help you navigate through common problems, especially during pull request (PR) checks and notebook execution.
+
+#### Finding Errors During PR Checks
+
+1. **Check the PR Status and Details**: Whenever you submit a PR, the CI system initiates a series of automated checks. If there's an issue, the status section of the PR will indicate a failure. Click on the "Details" link next to the failed check to view the logs.
+
+2. **Review Automated Feedback**: The CI system provides feedback and error messages directly in the PR conversation or in the checks section. Look for any error messages or warnings that could indicate what went wrong.
+
+#### Handling Transient Data Access Errors
+
+1. **Identify the Error**: Sometimes, notebooks fail due to transient issues like temporary network problems or external resource unavailability. These errors often include messages like "timeout," "connection error," or "resource temporarily unavailable."
+
+2. **Re-Run the Notebook Execution**: If you suspect a transient error, you can re-trigger the CI checks. Typically, you can do this by adding a commit to your PR (even a small change like updating documentation or a comment in your notebook) or by using any re-run functionality provided by the CI system.
+
+#### Addressing Common Notebook Execution Errors
+
+1. **Requirements Issues**: Ensure that all dependencies required by your notebook are correctly listed and available. This includes checking the `requirements.txt` file or any other dependency management system in use. If a dependency is missing or there's a version conflict, your notebook might fail to execute properly.
+
+2. **Syntax or Runtime Errors**: Review the execution logs for any Python syntax errors or exceptions thrown during runtime. These errors are usually well-documented in the logs, indicating the cell that caused the issue and the traceback.
+
+3. **Output Validation Failures**: If your notebook uses output validation (e.g., with `pytest nbval`), ensure that the outputs in your notebook match the expected results. Fluctuations in data or non-deterministic outputs can cause these checks to fail.
+
+4. **Security Issues**: The Bandit security check might flag potentially insecure code. Review the Bandit report linked in the PR checks section and address any highlighted issues.
+
+#### General Tips for Troubleshooting
+
+- **Local Testing**: Before submitting your PR, run your notebook locally from start to finish in a clean environment. This can help catch issues early on.
+- **Isolate Changes**: If you're having trouble identifying the cause of a failure, try isolating changes to see if a specific modification is causing the issue.
+- **Seek Help**: If you're stuck, don't hesitate to ask for help in the PR comments. The project maintainers or other contributors might offer valuable insights.
+
+Remember, troubleshooting CI issues is often a process of trial and error. Patience and persistence are key to resolving these challenges and successfully contributing to the project.
+
+
 ## Conclusion
 
 This CI system offers a streamlined, automated process for managing and maintaining Jupyter notebooks. Your role as a contributor is vital in upholding the quality and functionality of these notebooks.
