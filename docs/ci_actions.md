@@ -86,3 +86,81 @@ This job orchestrates the execution and validation of the notebooks identified i
 
 ## Summary
 The "Scheduled Notebook Execution" GitHub Action facilitates the automated testing and validation of Jupyter Notebooks in a customizable Python environment. By incorporating CASJOBS authentication and allowing for Python version specification, this workflow ensures that notebooks are compatible, functional, and secure, maintaining high standards of quality and reliability within the project.
+
+
+## GitHub Action for Broken Link Checking on GitHub Pages - broken_link_checker.yml
+
+This GitHub Action is designed to automate the process of identifying and reporting broken links within the HTML pages of notebooks deployed to GitHub Pages. It provides an essential quality check to ensure the integrity and reliability of project documentation or educational content.
+
+## Workflow Configuration
+
+### Triggers
+- **`workflow_call`**: This action is configured to be invoked by other workflows, allowing for flexible integration into different CI/CD pipelines.
+
+### Inputs
+- **`website_url`** (optional): Specifies the URL to be checked for broken links. The default value targets the GitHub Pages site associated with the repository (`https://spacetelescope.github.io/<repository-name>`). For more precise control, it's recommended to specify the full URL to the starting page of the site (e.g., `https://spacetelescope.github.io/<repository-name>/intro.html`).
+
+## Jobs
+
+### `find_broken_links`
+This job systematically scans the specified website URL for broken links, employing a dedicated action for thorough link evaluation.
+
+#### Environment
+- **`runs-on: ubuntu-latest`**: Executes the job on the latest Ubuntu runner provided by GitHub Actions, ensuring a modern and consistent environment for link checking.
+
+#### Steps
+1. **Broken-Links-Crawler**: Utilizes the `ScholliYT/Broken-Links-Crawler-Action@v3.3.1` to crawl the specified website and identify any broken links.
+   - **`website_url`**: The target website URL derived from workflow inputs, directing the crawler's focus.
+   - **`resolve_before_filtering`**: Ensures URLs are resolved before any filtering is applied, enhancing the accuracy of the link check.
+   - **`verbose`**: Set to 'Error' to streamline the output, focusing on critical issues.
+   - **`max_retry_time`** and **`max_retries`**: Configures retry logic to address transient network issues, improving the robustness of the check.
+   - **`exclude_url_prefix`**: Excludes specific URL prefixes from the check, such as 'mailto:' links and GitHub issue creation URLs, to prevent false positives.
+
+## Summary
+This GitHub Action offers a proactive approach to maintaining the quality and user experience of documentation hosted on GitHub Pages. By regularly checking for and addressing broken links, projects can ensure their online content remains accessible, relevant, and user-friendly.
+
+## PEP8 Notebook Style Check Execution GitHub Action Documentation - notebook_pep8check.yml
+
+This GitHub Action is designed to enforce PEP8 style guidelines within Python code contained in Jupyter Notebook cells. By integrating this workflow, projects can ensure their notebook code adheres to standard Python coding conventions, promoting readability and maintainability.
+
+## Workflow Configuration
+
+### Triggers
+- **`workflow_call`**: Enables this action to be invoked by other workflows, allowing for flexible integration into various CI/CD pipelines.
+
+### Inputs
+- **`python-version`**: Specifies the Python version to be used for setting up the environment, ensuring compatibility with the project's requirements.
+
+## Jobs
+
+### `gather-notebooks`
+Identifies modified Jupyter Notebooks for PEP8 checks, optimizing the workflow to focus on relevant changes.
+
+#### Conditional Execution
+- The job only triggers for open pull requests, ensuring that style checks are performed in the context of ongoing changes rather than on merged or closed content.
+
+#### Steps:
+1. **Checkout**: Retrieves the repository's code to access the Jupyter Notebook files.
+2. **changed-files**: Lists modified `.ipynb` files using `tj-actions/changed-files@v41.0.1`, targeting only the notebooks that have been changed.
+3. **set-matrix**: Converts the list of changed notebooks into a JSON array, facilitating dynamic job processing based on modified content.
+
+### `notebook-style-checks`
+Executes PEP8 style checks on the identified notebooks, utilizing a custom script for detailed evaluation.
+
+#### Environment
+- **`ci_env`**: Specifies the environment in which the job runs, potentially including specific configurations or secrets relevant to CI processes.
+
+#### Strategy
+- **Fail-fast**: Disabled to allow individual notebook checks to proceed independently, ensuring comprehensive style evaluation across all modified notebooks.
+
+#### Steps:
+1. **Checkout**: Prepares the repository's content for access to the notebooks and associated resources.
+2. **Set up Python**: Configures the specified Python environment, optimizing dependency installations with pip caching.
+3. **Add conda to system path**: Ensures that conda commands are accessible for managing environments and dependencies.
+4. **Install dependencies**: Installs `flake8` for PEP8 compliance checking, along with other dependencies like `numpy` and `pytz` that might be required for notebook execution.
+5. **Check-out notebook-ci-actions repository**: Retrieves a helper script for PEP8 checks from a dedicated repository, ensuring access to up-to-date and maintained tools for style evaluation.
+6. **Run PEP8 style check**: Executes the PEP8 checker script on the modified notebooks, identifying any deviations from the PEP8 guidelines and reporting them for review and correction.
+
+## Summary
+The "PEP8 Notebook Style Check Execution" GitHub Action facilitates the automated enforcement of PEP8 coding standards within Jupyter Notebooks. By focusing on modified notebooks and employing a dedicated style checking script, this workflow contributes to the maintenance of high-quality, readable, and consistent Python code across notebook-based projects.
+
