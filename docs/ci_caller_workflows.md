@@ -1,4 +1,6 @@
-# Scheduled Notebook Execution GitHub Action Documentation
+# Overview of notebook CI caller scripts
+
+## Scheduled Notebook Execution - ci_nightly.yml
 
 The "Scheduled Notebook Execution" GitHub Action is designed to automate the regular execution of Jupyter Notebooks within a repository. This scheduled execution ensures that notebooks remain functional over time and that their outputs are up-to-date.
 
@@ -22,7 +24,7 @@ This job is tasked with the execution of Jupyter Notebooks according to the spec
 The "Scheduled Notebook Execution" GitHub Action facilitates the ongoing validation and maintenance of Jupyter Notebooks by scheduling their automatic execution on a weekly basis. By leveraging an external, specialized workflow, this action ensures that notebooks remain functional and their content relevant, contributing to the overall quality and usability of the repository's resources.
 
 
-# Manual Execute All Notebooks GitHub Action Documentation
+## Manual Execute All Notebooks - ci_buildondemand.yml
 
 The "Manual Execute All Notebooks" GitHub Action is designed for on-demand execution of Jupyter Notebooks within the repository. Below is an overview of its configuration and operational details.
 
@@ -47,7 +49,7 @@ This GitHub Action facilitates the manual execution of Jupyter Notebooks by leve
 
 
 
-# Manual Full Archive Execute-Store-Generate HTML GitHub Action Documentation
+## Manual Full Archive Execute-Store-Generate - ci_execute_merge_generate.yml
 
 The GitHub Action named "Manual Full Archive Execute-Store-Generate HTML" is configured for manual activation to execute Jupyter Notebooks, store the results, and generate HTML versions of the notebooks. This document provides a detailed overview of its configuration and functionality.
 
@@ -71,7 +73,7 @@ This job orchestrates the execution of notebooks, storage of execution results, 
 The "Manual Full Archive Execute-Store-Generate HTML" GitHub Action is designed for manual initiation, allowing users to execute a comprehensive workflow that includes notebook execution, result storage, and HTML generation. Leveraging an external workflow for these tasks promotes efficiency and reusability while maintaining a simplified and focused configuration in the current repository.
 
 
-# Build HTML on Merge GitHub Action Documentation
+## Build HTML on Merge - ci_html_build.yml
 
 The "Build HTML on Merge" GitHub Action is designed to automatically generate HTML versions of Jupyter Notebooks upon the successful merge of pull requests into the main branch. This documentation details the action's trigger conditions, job configuration, and operational specifics.
 
@@ -101,7 +103,7 @@ This job is responsible for the generation of HTML from Jupyter Notebooks follow
 The "Build HTML on Merge" action automates the conversion of Jupyter Notebooks to HTML following the successful merge of pull requests into the main branch. By employing an external workflow for the conversion process, this action ensures a consistent and maintainable approach to generating HTML representations of notebooks, facilitating easier review and sharing of the notebook content.
 
 
-# Manual HTML Deploy GitHub Action Documentation
+## Manual HTML Deploy-ci_manual_html_deploy.yml 
 
 The GitHub Action named "Manual HTML Deploy" is specifically crafted for manual invocation to generate HTML versions of Jupyter Notebooks. This document outlines its configuration and operational framework.
 
@@ -125,7 +127,7 @@ This job is centered around the conversion of Jupyter Notebooks into HTML format
 The "Manual HTML Deploy" GitHub Action provides a convenient mechanism for manually triggering the generation of HTML from Jupyter Notebooks. By leveraging an external, reusable workflow, it ensures a consistent approach to notebook processing while offering the flexibility to accommodate different Python environments and notebook specifications.
 
 
-# Notebook Execution and Validation GitHub Action Documentation
+## Notebook Execution and Validation - ci_runner.yml
 
 This GitHub Action, named "Notebook Execution and Validation," is designed to automate the execution and validation of Jupyter Notebooks within a repository, particularly upon direct pushes to the main branch or when pull requests are submitted. It is structured to sequentially run three distinct phases: Validation, Execution, and HTML Deployment, with each subsequent phase contingent on the successful completion of the preceding one.
 
@@ -157,7 +159,7 @@ This job encapsulates the core functionality of executing and validating the Jup
 The "Notebook Execution and Validation" GitHub Action is a comprehensive solution for ensuring the integrity and functionality of Jupyter Notebooks within a project. By leveraging an external, reusable workflow and enforcing a strict sequential operation of validation, execution, and HTML deployment phases, it maintains high standards of quality and reliability for notebook-based projects.
 
 
-# PEP8 Notebook Style Check Execution GitHub Action Documentation
+## PEP8 Notebook Style Check Execution - pep8_nb_style_check.yml
 
 The "PEP8 Notebook Style Check Execution" GitHub Action is specifically designed to enforce PEP8 style guidelines within the Python code contained in Jupyter Notebook cells. This action ensures that the code adheres to the widely accepted PEP8 standards for Python coding style, enhancing readability and maintainability.
 
@@ -181,7 +183,7 @@ This job is the core of the workflow, performing the PEP8 style checks on Python
 ## Summary
 The "PEP8 Notebook Style Check Execution" GitHub Action is an essential tool for maintaining high coding standards within Jupyter Notebooks. By automatically enforcing PEP8 compliance on every pull request to the main branch, it helps ensure that all notebook code remains clean, well-structured, and in line with best practices for Python development.
 
-# PEP8 Script Style Check Execution GitHub Action Documentation
+## PEP8 Script Style Check Execution - pep8_script_style_check.yml
 
 The "PEP8 Script Style Check Execution" GitHub Action is designed to enforce PEP8 style guidelines on Python scripts, particularly those located within a project's `notebooks/` directory. This workflow ensures that Python code complies with the PEP8 standards, promoting readability, consistency, and maintainability across the codebase.
 
@@ -206,7 +208,7 @@ This job is dedicated to performing the PEP8 style checks on the targeted Python
 The "PEP8 Script Style Check Execution" GitHub Action plays a crucial role in maintaining a high standard of code quality within Python scripts. By automatically enforcing PEP8 compliance for every pull request targeting the main branch, it fosters a culture of quality and consistency in coding practices across the project.
 
 
-# Weekly Broken Link Check GitHub Action Documentation
+# Weekly Broken Link Check - weekly_broken_link_finder.yml
 
 The "Weekly Broken Link Check" GitHub Action is designed to automatically scan for and identify broken links within the project's documentation or web pages. This scheduled action helps maintain the integrity and reliability of the project's external references.
 
@@ -226,8 +228,7 @@ This job focuses on the detection and reporting of broken links within the proje
 ## Summary
 The "Weekly Broken Link Check" GitHub Action is a critical maintenance tool for any project reliant on external links in its documentation or web pages. By automating the process of identifying broken links on a weekly basis, this action supports the project's commitment to quality, reliability, and a positive user experience.
 
-# Weekly PEP8 Style Checks GitHub Action Documentation
-
+# Weekly PEP8 Style Checks - weekly_pep8_style_check.yml
 The "Weekly PEP8 Style Checks" GitHub Action is configured to enforce PEP8 coding standards across Python scripts and Jupyter notebooks within the `hst_notebooks` repository. This automated workflow ensures consistent code quality and adherence to Python style guidelines on a weekly basis.
 
 ## Triggers
