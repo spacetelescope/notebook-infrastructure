@@ -57,7 +57,7 @@ This job executes the changed notebooks, installs dependencies, performs securit
 
 #### Steps:
 1. **Checkout**: Re-checks out the code for accessibility in this job.
-2. **Set up Python**: Installs Python 3.8.12 and configures pip caching.
+2. **Set up Python**: Installs Python and configures pip caching.
 3. **Add conda to system path**: Ensures that conda commands are available for dependency management.
 4. **Install dependencies**: Installs the necessary Python packages from requirements files located in the same directory as the notebooks or globally within the repository.
 5. **Security testing with Bandit**: Runs Bandit to perform static analysis on the notebook files, identifying common security issues in the Python code.
