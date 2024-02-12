@@ -1,70 +1,88 @@
-## GitHub Action for Broken Link Checking on GitHub Pages - broken_link_checker.yml
+# Functional descriptions of actions located in spacetelescope/notebook-ci-action
 
-This GitHub Action is designed to automate the process of checking for broken links within the HTML pages of notebooks deployed to `github.io`. If any broken links are discovered during the check, the workflow will fail and provide a detailed report of the broken links along with the pages that contain them.
+## GitHub Action for Notebook Execution with Python Version Control and CASJOBS Authentication - ci_runner.yml
 
-## Inputs
-- **`website_url`** (optional): The URL of the website to be checked. If this input is not explicitly provided, the default value is constructed using the pattern `https://spacetelescope.github.io/<repository-name>`. It's important to note that relying solely on the default value might not limit the search to the specified page; in such cases, it's advisable to specify the full URL of the starting page of the repository (e.g., `https://spacetelescope.github.io/<repository-name>/intro.html`).
+This GitHub Action, named "Scheduled Notebook Execution," is tailored for projects that require automated execution and validation of Jupyter Notebooks, with the added capability to specify the Python version and utilize CASJOBS authentication for notebooks that require external data access.
 
 ## Trigger
-- **`workflow_call`:** This action is designed to be invoked by other workflows, providing a flexible integration point for repositories requiring automated link validation.
+- **`workflow_call`**: Allows for modular integration into CI/CD pipelines, with customizable inputs for Python version and optional CASJOBS credentials.
 
-## Jobs
-
-### `find_broken_links`
-This job is tasked with the detection of broken links on the specified webpage.
-
-#### Environment
-- **`runs-on: ubuntu-latest`**: The job is executed on the latest Ubuntu runner provided by GitHub Actions, ensuring a stable and up-to-date environment for link checking.
-
-#### Steps
-- **Broken-Links-Crawler**: Utilizes the `ScholliYT/Broken-Links-Crawler-Action@v3.3.1` action to crawl the specified website and identify broken links.
-  - **`website_url`:** The URL to check, as provided by the `website_url` input.
-  - **`resolve_before_filtering`:** Set to `'true'` to ensure URLs are resolved before any filtering is applied, enhancing the accuracy of the check.
-  - **`verbose`:** Configured to `'Error'` to limit the output to error messages, making the output more concise and focused on issues.
-  - **`max_retry_time`:** The maximum time (in seconds) to retry a failed link check, set to `30` seconds.
-  - **`max_retries`:** The maximum number of retries for each failed link check, set to `5` attempts.
-  - **`exclude_url_prefix`:** URLs starting with this prefix (`https://github.com/spacetelescope/hst_notebooks/issues/new?`) are excluded from the check, preventing false positives from issue creation links.
-
-## Summary
-This GitHub Action provides an automated solution for monitoring the integrity of links within the HTML pages of notebooks hosted on `github.io`. By systematically checking for and reporting broken links, this workflow aids in maintaining the quality and reliability of the project's online documentation and resources.
-
-## GitHub Action for Notebook Execution and Validation with Security Checks - ci_runner.yml
-
-This GitHub Action is tailored for the execution and validation of Jupyter Notebooks, incorporating security testing using Bandit. It is designed to handle notebooks that have been modified in a pull request or direct push, ensuring they function as expected and adhere to security best practices.
+## Inputs
+- **`python-version`**: Specifies the Python version for the runtime environment, ensuring compatibility with notebook requirements.
 
 ## Secrets
-- **`CASJOBS_USERID`** and **`CASJOBS_PW`**: Optional secrets for CASJOBS authentication, not directly used in the notebook execution but available for jobs requiring CASJOBS services.
-
-## Environment Variables
-- Environment variables `CASJOBS_PW` and `CASJOBS_USERID` are set using the provided secrets, making them accessible to the notebooks during execution.
+- **`CASJOBS_USERID`** and **`CASJOBS_PW`**: Provide optional CASJOBS credentials for notebooks that interact with CASJOBS services, ensuring secure and authenticated data access.
 
 ## Jobs
 
 ### `gather-notebooks`
-This job identifies the changed Jupyter Notebook files and constructs a matrix for subsequent execution.
+Identifies changed Jupyter Notebooks to optimize workflow execution by focusing only on modified content.
 
 #### Steps:
-1. **Checkout**: Checks out the repository's code.
-2. **changed-files**: Utilizes `tj-actions/changed-files@v42.0.2` to list modified `.ipynb` files.
-3. **set-matrix**: Converts the list of changed files into a JSON array to be used as a matrix for the `notebook-execution` job.
+1. **Checkout**: Retrieves the full repository history to accurately determine changed files.
+2. **changed-files**: Lists modified `.ipynb` files using the `tj-actions/changed-files@v42` action, optimizing the workflow for relevant changes.
+3. **set-matrix**: Converts the list of changed notebooks into a JSON array for dynamic job processing.
 
 ### `notebook-execution`
-This job executes the changed notebooks, installs dependencies, performs security testing, and validates the notebook outputs.
+Executes and validates the identified notebooks, ensuring they function correctly and adhere to best practices.
+
+#### Permissions:
+- **`contents: write`**: Allows the workflow to commit and push changes, such as executed notebooks or fixed issues, back to the repository.
 
 #### Strategy:
-- **Fail-fast**: Disabled to ensure that the failure of one notebook does not prevent the execution of others.
-- **Matrix**: Dynamically generated from the `gather-notebooks` job to target only the changed notebooks.
+- **Fail-fast**: Disabled to ensure isolated handling of notebook execution results, allowing the workflow to proceed despite individual failures.
 
 #### Steps:
-1. **Checkout**: Re-checks out the code for accessibility in this job.
-2. **Set up Python**: Installs Python 3.8.12 and configures pip caching.
-3. **Add conda to system path**: Ensures that conda commands are available for dependency management.
-4. **Install dependencies**: Installs the necessary Python packages from requirements files located in the same directory as the notebooks or globally within the repository.
-5. **Security testing with Bandit**: Runs Bandit to perform static analysis on the notebook files, identifying common security issues in the Python code.
-6. **Execute notebooks**: Converts notebooks to HTML for execution, utilizing environment variables for any necessary authentication.
-7. **Validate notebooks**: Uses `pytest` with the `nbval` plugin to ensure that all notebook cells execute without errors.
+1. **Checkout**: Prepares the repository content, including the full history for accurate file tracking and modification.
+2. **Set up Python**: Configures the specified Python version, enhancing consistency and compatibility across execution environments.
+3. **Add conda to system path**: Ensures access to conda for environment management and package installations.
+4. **Install dependencies**: Installs required packages from local and global `requirements.txt` files, along with pre-installation scripts to prepare the environment.
+5. **Security testing with Bandit**: Conducts static analysis on notebook files to identify potential security issues, promoting best coding practices.
+6. **Validate notebooks**: Clears notebook outputs and validates execution using `nbval`, ensuring that notebooks are error-free and ready for execution.
+7. **Execute notebooks**: Executes notebooks in-place, capturing and processing execution results. Failed executions trigger a script to insert a failure message, aiding in debugging and transparency.
+8. **Commit modifications**: Commits executed or modified notebooks back to the current branch, ensuring that changes are tracked within the repository.
+9. **Manage storage branch**: Handles the checkout and update of a dedicated storage branch (`gh-storage`), facilitating isolated storage of executed notebooks and supporting version control of computational results.
 
 ## Summary
-This GitHub Action provides a comprehensive approach to maintaining the quality and security of Jupyter Notebooks within a project. By focusing on modified notebooks, it ensures efficient validation and testing workflows, incorporating security analysis with Bandit to highlight potential vulnerabilities. This process aids in keeping the project's notebooks reliable, secure, and up-to-date.
+The "Scheduled Notebook Execution" GitHub Action provides a comprehensive solution for maintaining, executing, and validating Jupyter Notebooks within a project. By incorporating dynamic Python version control, optional CASJOBS authentication, and focused execution on modified notebooks, this workflow ensures high-quality, functional, and secure notebook content, fostering reliability and reproducibility in computational projects.
 
 
+## Scheduled Notebook Execution with Custom Python Version GitHub Action Documentation - ci_scheduled.yml
+
+This GitHub Action, "Scheduled Notebook Execution," is designed for automated execution and validation of Jupyter Notebooks, with the flexibility to specify the Python version. It supports CASJOBS authentication for notebooks that require it, ensuring comprehensive testing and validation of notebook functionality.
+
+## Trigger
+- **`workflow_call`**: This action is triggered through workflow calls from other workflows, allowing for modular integration. It includes inputs for Python version customization and optional CASJOBS credentials.
+
+## Inputs
+- **`python-version`**: A required input specifying the Python version to be used for executing the notebooks. This allows for compatibility with various Python environments and requirements.
+
+## Secrets
+- **`CASJOBS_USERID`** and **`CASJOBS_PW`**: Optional secrets for CASJOBS authentication, enabling notebooks that interact with CASJOBS services to authenticate as needed.
+
+## Jobs
+
+### `gather-notebooks`
+This job locates all Jupyter Notebook files within the `notebooks/` directory, preparing them for subsequent execution and validation.
+
+#### Steps:
+1. **Checkout**: Retrieves the repository code to access the notebook files.
+2. **set-matrix**: Generates a matrix of notebook file paths using the `find` command and `jq` to create a JSON array for dynamic job processing.
+
+### `tests`
+This job orchestrates the execution and validation of the notebooks identified in the `gather-notebooks` job, using the specified Python version.
+
+#### Strategy:
+- **Fail-fast**: Disabled to ensure that issues in one notebook do not prevent the execution of others.
+- **Matrix**: Constructed dynamically from the `gather-notebooks` job output, targeting only the identified notebooks for execution.
+
+#### Steps:
+1. **Checkout**: Ensures access to the repository's notebooks and any associated files.
+2. **Set up Python**: Configures the specified Python version for the job, optimizing dependency installations with pip caching.
+3. **Add conda to system path**: Makes conda commands accessible, aiding in environment and package management.
+4. **Install dependencies**: Installs necessary packages from requirements files associated with the notebooks or the repository. Adjustments and pre-install scripts are executed as required to prepare the environment.
+5. **Execute notebooks**: Converts notebooks to HTML and executes them, using CASJOBS credentials if provided. This step ensures that notebooks are not only syntactically correct but also functionally valid.
+6. **Validate notebooks**: Employs `pytest` with `nbval` to verify that all notebook cells execute without errors, confirming the integrity and reliability of the notebook content.
+
+## Summary
+The "Scheduled Notebook Execution" GitHub Action facilitates the automated testing and validation of Jupyter Notebooks in a customizable Python environment. By incorporating CASJOBS authentication and allowing for Python version specification, this workflow ensures that notebooks are compatible, functional, and secure, maintaining high standards of quality and reliability within the project.
