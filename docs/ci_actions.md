@@ -28,44 +28,43 @@ This job is tasked with the detection of broken links on the specified webpage.
 ## Summary
 This GitHub Action provides an automated solution for monitoring the integrity of links within the HTML pages of notebooks hosted on `github.io`. By systematically checking for and reporting broken links, this workflow aids in maintaining the quality and reliability of the project's online documentation and resources.
 
+## GitHub Action for Notebook Execution and Validation with Security Checks - ci_runner.yml
 
-# GitHub Action for Deploying Jupyter Book to GitHub Pages - ci_builder.yml
-
-This GitHub Action is designed to automatically deploy a Jupyter Book to GitHub Pages upon the successful merge of a pull request. It includes steps for setting up the environment, installing necessary dependencies, building the Jupyter Book, and publishing the content to GitHub Pages.
-
-## Trigger
-- **`workflow_call`**: This action is intended to be called by other workflows, allowing for flexible integration into various CI/CD pipelines.
+This GitHub Action is tailored for the execution and validation of Jupyter Notebooks, incorporating security testing using Bandit. It is designed to handle notebooks that have been modified in a pull request or direct push, ensuring they function as expected and adhere to security best practices.
 
 ## Secrets
-- **`CASJOBS_USERID`**: An optional secret representing the CASJOBS user ID. It's not required for the deployment process but can be used for jobs that require CASJOBS authentication.
-- **`CASJOBS_PW`**: Similar to `CASJOBS_USERID`, this optional secret represents the CASJOBS password.
+- **`CASJOBS_USERID`** and **`CASJOBS_PW`**: Optional secrets for CASJOBS authentication, not directly used in the notebook execution but available for jobs requiring CASJOBS services.
 
 ## Environment Variables
-- **`CASJOBS_PW`**: Set from the `CASJOBS_PW` secret.
-- **`CASJOBS_USERID`**: Set from the `CASJOBS_USERID` secret.
+- Environment variables `CASJOBS_PW` and `CASJOBS_USERID` are set using the provided secrets, making them accessible to the notebooks during execution.
 
 ## Jobs
 
-### `deploy-book`
-This job handles the deployment of the Jupyter Book to GitHub Pages.
+### `gather-notebooks`
+This job identifies the changed Jupyter Notebook files and constructs a matrix for subsequent execution.
 
-#### Conditions
-- **Execution**: The job is executed only if the associated pull request is merged. This ensures that the deployment process is triggered by confirmed changes only.
+#### Steps:
+1. **Checkout**: Checks out the repository's code.
+2. **changed-files**: Utilizes `tj-actions/changed-files@v42.0.2` to list modified `.ipynb` files.
+3. **set-matrix**: Converts the list of changed files into a JSON array to be used as a matrix for the `notebook-execution` job.
 
-#### Environment
-- **`runs-on: ubuntu-latest`**: The job is executed on the latest Ubuntu runner, ensuring access to up-to-date tools and libraries.
+### `notebook-execution`
+This job executes the changed notebooks, installs dependencies, performs security testing, and validates the notebook outputs.
 
-#### Permissions
-- **`contents: write`**: Grants the job write permissions to the repository contents, enabling it to publish the built book to GitHub Pages.
+#### Strategy:
+- **Fail-fast**: Disabled to ensure that the failure of one notebook does not prevent the execution of others.
+- **Matrix**: Dynamically generated from the `gather-notebooks` job to target only the changed notebooks.
 
-#### Steps
-1. **Free up disk space**: Removes unnecessary directories to ensure there is enough disk space for the job's operations.
-2. **Checkout**: Checks out the repository's code to access the Jupyter Book source files.
-3. **Set up Python**: Installs Python 3.8.12 and sets up caching for pip to speed up dependency installation.
-4. **Add conda to system path**: Ensures conda commands are available in the system path, facilitating environment management and package installation.
-5. **Install Python dependencies**: Installs the required Python packages for building the Jupyter Book, including `jupyter-book` and its dependencies.
-6. **Build book HTML**: Executes the `jupyter-book build .` command to build the HTML version of the Jupyter Book from the source files.
-7. **GitHub Pages action**: Utilizes the `peaceiris/actions-gh-pages@v3.6.1` action to publish the built HTML content to GitHub Pages, making the Jupyter Book accessible online.
+#### Steps:
+1. **Checkout**: Re-checks out the code for accessibility in this job.
+2. **Set up Python**: Installs Python 3.8.12 and configures pip caching.
+3. **Add conda to system path**: Ensures that conda commands are available for dependency management.
+4. **Install dependencies**: Installs the necessary Python packages from requirements files located in the same directory as the notebooks or globally within the repository.
+5. **Security testing with Bandit**: Runs Bandit to perform static analysis on the notebook files, identifying common security issues in the Python code.
+6. **Execute notebooks**: Converts notebooks to HTML for execution, utilizing environment variables for any necessary authentication.
+7. **Validate notebooks**: Uses `pytest` with the `nbval` plugin to ensure that all notebook cells execute without errors.
 
 ## Summary
-This GitHub Action streamlines the process of deploying Jupyter Books to GitHub Pages, ensuring that the latest version of the book is always available online following the successful merge of changes. By automating environment setup, dependency installation, book building, and publishing, this action facilitates efficient and reliable updates to project documentation or educational materials hosted as Jupyter Books.
+This GitHub Action provides a comprehensive approach to maintaining the quality and security of Jupyter Notebooks within a project. By focusing on modified notebooks, it ensures efficient validation and testing workflows, incorporating security analysis with Bandit to highlight potential vulnerabilities. This process aids in keeping the project's notebooks reliable, secure, and up-to-date.
+
+
