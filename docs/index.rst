@@ -8,10 +8,15 @@ This repository stores standards and software infrastructure for supporting Jupy
    :maxdepth: 2
    :caption: Contents:
 
+   creating_a_repo
+   ci_actions.md
+   ci_caller_workflows.md
+   ci_operators_guide.md
+   ci_bestp_practices.md
    style
    contributing_notebooks
    reviewing
-   creating_a_repo
+   
 
 
 
