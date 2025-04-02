@@ -2,3 +2,7 @@
 	path = notebook-ci-template
 	url = https://github.com/spacetelescope/notebook-ci-template
 	branch = main
+[submodule "notebook-ci-actions"]
+	path = notebook-ci-actions
+	url = https://github.com/spacetelescope/notebook-ci-actions
+	branch = main
