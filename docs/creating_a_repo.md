@@ -1,39 +1,68 @@
-## Setting up a new repository for notebook CI
+# Setting Up a New Repository from a GitHub Template
 
-To get started with the notebook CI system, you'll need to create a new repository and set up the necessary structure. Here's how to do it:
+This detailed guide will walk you through setting up your own repository using a GitHub template designed specifically for notebook Continuous Integration (CI). This approach provides a structured way to manage and publish your Jupyter notebooks with ease.
 
-1. Create a new repository on GitHub. You can give it any name you like, but make sure to include the word "notebook" in the name so that it's clear what the repository is for. 
+**Important Note:** Repository creation via the GitHub template button is intended only for non-institute repositories. If you are creating a repository under the institute organization, you must use the Sack bot in the `github_administration` channel (documentation to follow).
 
-2. Clone the 'notebook-ci-template' repository using the following command:
+## Step 1: Using the GitHub Template
 
-git clone https://github.com/spacetelescope/notebook-ci-template.git
+- Navigate to the GitHub template repository: [Notebook CI Template](https://github.com/spacetelescope/notebook-ci-template).
+- Click on the green **"Use this template"** button located in the top-right corner of the page.
+- Select **"Create a new repository"** from the dropdown menu. Ensure the option **"Include all branches"** is checked to copy all necessary branches.
 
-3. Copy the entire structure of the `notebook-ci-template` repository, including all files and directories, into your new repository.
+## Step 2: Configuring Your New Repository
 
-4. Edit `_toc.yml` to include the notebooks that you want to include in your jupyterbook documentation. Simply add the name and path of each notebook to the list.
+- Provide a clear and descriptive name for your repository. It’s helpful to include "notebook" in the repository name to clearly indicate its purpose.
+- Select the visibility of your repository (**public** or **private**), depending on your project's requirements.
+- Click **"Create repository from template"** to finalize the creation.
 
-5. Edit `_config.yml` to configure the jupyterbook system. You'll need to specify the author, mission name, location of the repository, and any other options you'd like to include. You can also add a GitHub Analytics ID to gather usage statistics for your documentation.
+## Step 3: Customizing Repository Contents
 
-6. Set up GitHub Pages for your repository by creating a new branch called `gh-pages`. You can do this using the following command:
+Your new repository includes an `example.ipynb` notebook already listed in the `_toc.yml` file. This notebook serves as a helpful template to get you started.
 
-git checkout -b gh-pages
+- Edit `_toc.yml` in your repository:
+  - Keep or modify the existing `example.ipynb` notebook entry based on your needs.
+  - Add new notebook entries by listing their paths and filenames, ensuring all your notebooks are included in the published documentation.
 
-Then, push the `gh-pages` branch to GitHub using the following command:
+- Update `_config.yml`:
+  - Personalize the author information, project title, mission name, and the URL pointing to your repository.
+  - Optionally, add a GitHub Analytics ID to collect usage data and understand the documentation’s reach.
 
-git push origin gh-pages
+## Step 4: Managing Branches
 
+Ensure the following essential branches from the template repository are included in your new repository:
 
-Finally, go to the repository settings and select the `gh-pages` branch under the "Source" section of the "GitHub Pages" section. This will allow you to access your documentation at `https://<USERNAME>.github.io/<REPO>`.
+- `main` branch: This is where you'll make updates, edits, and push your notebook changes.
+- `gh-pages` branch: Used by GitHub Pages to host your published documentation.
+- `gh-storage` branch: Required for storing executed notebooks. This branch is used in generating notebook HTML and serves as a baseline for scheduled validation checks.
 
-7. Add and commit your changes to the repository using the following commands:
+## Step 5: Setting Repository Variables
 
-git add .
-git commit -m "Initial commit"
+Your repository requires a GitHub Actions variable for Python version management:
 
-8. Push your changes to GitHub using the following command:
+- Manually set a repository-level Actions variable named `PYTHON_VERSION`:
+  - Navigate to your repository on GitHub.
+  - Go to **Settings > Secrets and variables > Actions**.
+  - Click on **New repository variable**.
+  - Enter `PYTHON_VERSION` as the variable name and `3.11` (or your desired Python version) as the value.
+  - Click **"Add variable"**.
 
-git push origin master
+## Step 6: Publishing Your Documentation
 
-Once you've set up the structure and configured jupyterbook, your repository should be ready to start running checks and weekly tests on notebooks submitted by PR as described in the previous documentation. You can access your documentation at `https://<USERNAME>.github.io/<REPO>`.
+- Enable GitHub Pages to publish your documentation:
+  - Navigate to your repository settings (**Settings > Pages**).
+  - Select the `gh-pages` branch as the publishing source.
+  - Click **"Save"** to confirm the changes.
 
-We hope this helps you get started with the notebook CI system. If you have any questions or need further assistance, please don't hesitate to ask.
+## Step 7: Testing the GitHub Actions
+
+Ensure the CI system is working correctly by testing the actions:
+
+- Make a small modification to the existing `example.ipynb` notebook.
+- Commit the changes and submit a pull request (PR) to your repository.
+- After creating the PR, GitHub Actions should automatically start running checks.
+- Verify the "Checks" tab within your PR to confirm actions for notebook validation, execution, and security are running successfully.
+
+## Next Steps
+
+Your repository setup is complete. Regularly update your notebooks and push the changes to your repository; the notebook CI system will automatically test and publish updates to your documentation, providing a seamless and efficient workflow.
