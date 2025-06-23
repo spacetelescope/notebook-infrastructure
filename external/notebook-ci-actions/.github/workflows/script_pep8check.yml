@@ -1,0 +1,63 @@
+## This workflow performs PEP8 style checks on the python code in notebook code cells.
+name: PEP8 Script Style Check Execution
+
+on:
+  workflow_call:
+
+jobs:
+  gather-scripts:
+    # below logic will only allow workflow to trigger under specific conditions
+    if: github.event.pull_request.state == 'open'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - uses: actions/checkout@v4
+    ## routine to gather only the changed python files and supply them to the matrix
+    - name: changed-files
+      id: get-changed-files
+      uses: tj-actions/changed-files@v45.0.1
+      with:
+        separator: ","
+        files: |
+          **/*.py
+    ## convert the list of files to an array and push them into the matrix as a json object
+    - name: set-matrix
+      id: set-matrix
+      run: |
+        IFS=',' read -r -a array <<< "${{steps.get-changed-files.outputs.all_changed_files}}"
+        echo "{$array}"
+        echo "matrix=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${array[@]}")" >> $GITHUB_OUTPUT
+
+  script-style-checks:
+    needs: gather-scripts
+    environment: ci_env
+    runs-on: ubuntu-latest
+    strategy:
+        fail-fast: false
+        matrix:
+            scripts: ${{ fromJson(needs.gather-scripts.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.8.12
+        uses: actions/setup-python@v5 ## needed for caching
+        with:
+          python-version: 3.8.12
+          cache: 'pip'
+      - name: Add conda to system path
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          pip install flake8
+          pip install numpy
+          pip install pytz
+      - name: Check-out notebook-ci-actions repository
+        uses: actions/checkout@v4
+        with:
+          repository: spacetelescope/notebook-ci-actions
+          path: temp_pep8checker
+      - name: Run PEP8 style check
+        run: |
+          python temp_pep8checker/.github/helpers/pep8_script_style_checker.py ${{ matrix.scripts }}

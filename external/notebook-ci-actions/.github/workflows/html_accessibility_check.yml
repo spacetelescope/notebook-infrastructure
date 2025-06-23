@@ -1,0 +1,49 @@
+name: HTML Accessibility Check
+
+on:
+  workflow_call:
+    inputs:
+      target_url:
+        default: https://spacetelescope.github.io/${{ github.event.repository.name }}
+        description: "URL to scan"
+        required: false
+        type: 'string'
+    secrets:
+      A11YWATCH_TOKEN:
+        description: 'a11ywatch token'
+        required: false
+  workflow_dispatch:
+    inputs:
+      target_url:
+        default: null
+        description: "URL to scan"
+        required: false
+        type: 'string'
+
+jobs:
+  a11yWatchRun:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.8.12
+        uses: actions/setup-python@v5 ## needed for caching
+        with:
+          python-version: 3.8.12
+          cache: 'pip'
+      - name: Add conda to system path
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          pip install json_repair
+      - name: Check-out notebook-ci-actions repository
+        uses: actions/checkout@v4
+        with:
+          repository: spacetelescope/notebook-ci-actions
+          path: temp_jsonparser
+          ref: main
+      - name: Web Accessibility Evaluation of ${{ inputs.target_url }}
+        run: |
+          curl --location --request POST 'https://api.a11ywatch.com/api/crawl' --header 'Authorization: ${{ secrets.A11YWATCH_TOKEN }}' --header 'Content-Type: application/json'   -d '{ "url": "${{ inputs.target_url }}" }' > scan_results.json
+          python temp_jsonparser/.github/helpers/parse_a11ywatch_json_file.py scan_results.json
