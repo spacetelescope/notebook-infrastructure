@@ -1,4 +1,0 @@
-[submodule "notebook-ci-actions"]
-	path = notebook-ci-actions
-	url = https://github.com/spacetelescope/notebook-ci-actions
-	branch = main
