@@ -1,0 +1,17 @@
+# Name of the workflow as it will appear in the GitHub Actions UI
+name: Manual Execute All Notebooks
+
+# This workflow is triggered manually via the GitHub Actions UI
+on:
+  workflow_dispatch:
+
+jobs:
+  ExecuteNotebooks:
+    # This job reuses a centralized workflow for notebook execution
+    # Located in the shared notebook-ci-actions repo under the specified ref (branch or tag)
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/ci_scheduled.yml@multi_dev
+
+    # Inputs passed into the reusable workflow
+    with:
+      # The Python version is provided as a repository-level Actions variable
+      python-version: ${{ vars.PYTHON_VERSION }}
