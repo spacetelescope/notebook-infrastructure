@@ -1,0 +1,85 @@
+# Workflow name as shown in the GitHub Actions UI
+name: Move Deprecated Notebooks
+
+# Triggered manually or automatically on a schedule
+on:
+  workflow_dispatch:  # Allows manual runs
+  schedule:
+    - cron: '0 3 * * *'  # Runs daily at 3 AM UTC
+
+jobs:
+  check_and_move:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+      # Step 1: Checkout the repository contents from the gh-storage branch
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: gh-storage  # Ensure we're operating on the gh-storage branch
+
+      # Step 2: Capture the current UTC timestamp in ISO 8601 format
+      - name: Set up date variables
+        id: date_setup
+        run: |
+          CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "current_date=$CURRENT_DATE" >> $GITHUB_ENV
+
+      # Step 3: Identify notebooks with a deprecation flag set to true
+      - name: Find all deprecated notebooks
+        id: find_deprecated
+        run: |
+          DEPRECATED_NOTEBOOKS=$(find ./notebooks -name "*.ipynb" -exec jq -r 'select(.metadata.deprecated.status == true) | input_filename' {} \;)
+          if [ -z "$DEPRECATED_NOTEBOOKS" ]; then
+            echo "No deprecated notebooks found."
+            exit 0
+          fi
+          echo "deprecated_notebooks=$DEPRECATED_NOTEBOOKS" >> $GITHUB_ENV
+
+      # Step 4: Process each deprecated notebook
+      - name: Process deprecated notebooks
+        run: |
+          current_date="${{ env.current_date }}"
+          deprecated_notebooks="${{ env.deprecated_notebooks }}"
+
+          if [ -z "$deprecated_notebooks" ]; then
+            echo "No deprecated notebooks found, exiting."
+            exit 0
+          fi          
+
+          for notebook_path in $deprecated_notebooks; do
+            # Extract removal date from notebook metadata
+            removal_date=$(jq -r '.metadata.deprecated.removal_date' "$notebook_path")
+
+            # Check if notebook should be removed based on the current date
+            if [[ "$current_date" > "$removal_date" ]]; then
+              echo "Notebook $notebook_path is past the deprecation date ($removal_date). Moving to 'deprecated' branch."
+
+              # Determine the parent directory (assumes notebook folder organization)
+              notebook_dir=$(dirname "$notebook_path")
+
+              # Switch to or create the deprecated branch
+              git fetch origin deprecated
+              git checkout deprecated || git checkout -b deprecated
+
+              # Move the entire notebook folder to the deprecated branch
+              git mv "$notebook_dir" .
+
+              # Commit the move
+              git add .
+              git commit -m "Moved deprecated notebook $notebook_path to deprecated branch"
+              git push origin deprecated
+
+              # Switch to main to remove the notebook
+              git checkout main
+              git rm -r "$notebook_dir"
+              git add .
+              git commit -m "Removed deprecated notebook $notebook_path from main branch"
+              git push origin main
+
+              # Return to gh-storage for cleanup or further operations
+              git checkout gh-storage
+            else
+              echo "Notebook $notebook_path is not past the deprecation date ($removal_date)."
+            fi
+          done

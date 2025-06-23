@@ -1,0 +1,16 @@
+# Name of the workflow as it will appear in the GitHub Actions UI
+name: Manual Security Scan
+
+# Triggers for the workflow
+on:
+  workflow_dispatch:  # Allows the workflow to be run manually from the GitHub UI
+  #Uncomment the two lines below to enable scheduled testing
+  #schedule:
+  #  - cron: '0 3 * * *'  # Scheduled to run daily at 3:00 AM UTC
+
+jobs:
+  Scheduled:
+    # Reuses the security scan workflow defined in a shared actions repo
+    # This allows centralized maintenance of the scan logic
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/ci_security_scan.yml@v3
+

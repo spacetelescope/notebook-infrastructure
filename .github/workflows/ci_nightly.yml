@@ -1,0 +1,18 @@
+# Name of the workflow as shown in the GitHub Actions UI
+name: Scheduled Notebook Execution
+
+# This workflow is triggered automatically on a weekly schedule
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Runs at 00:00 (midnight) UTC every Sunday
+
+jobs:
+  Scheduled:
+    # This job reuses a shared workflow for executing notebooks
+    # The reusable workflow lives in the notebook-ci-actions repo
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/ci_scheduled.yml@v3
+
+    with:
+      # Set the Python version using a repository-level variable
+      python-version: ${{ vars.PYTHON_VERSION }}
+
