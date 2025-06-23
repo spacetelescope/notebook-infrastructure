@@ -1,0 +1,92 @@
+## This workflow calls a python script that updates the contents of the .github/dependabot.yml config file. As the
+## dependabot.yml file is version-controlled, the workflow commits and pushes the changes to a new branch, then creates
+## a new PR to merge the changes into main.
+##
+## Some background:
+## Automatic package version updating is controlled by the .github/dependabot.yml file. However, at this time,
+## wildcards are not supported, so the paths to all requirements.txt files must be explicitly listed in the file. This
+## workflow fully automates dynamic updates to the dependabot.yml file when notebooks are added or removed, thus
+## reducing the human interaction to only a single pull request approval when an updated version of dependabot.yml
+## needs to be merged into main.
+##
+## How it works:
+## If no updates are made to the dependabot.yml file, no new branches or PRs are created, and no further action is
+## required. However, if the dependabot.yml file is updated, A new pull request named "Updated contents of
+## configuration file .github/dependabot.yml" will be created. The PR needs a human to approve the merge the changes
+## into main. Once the changes are merged in, dependabot will automatically trigger new scans.
+
+name: Update Dependabot Config File
+
+on:
+  workflow_call:
+    inputs:
+      req_file_search_string:
+        default: notebooks/**/requirements.txt
+        description: "Search pattern used to locate notebook-level requirements.txt files. The path in the search 
+        string is assumed to start from the repository root"
+        required: false
+        type: 'string'
+      exclude_filename:
+        default: "***NO FILE***"
+        description: "Text file containing names of specific requirements.txt files and lists of packages that should be 
+        skipped from dependabot version updating, one requirements.txt file and package list per line.  
+        File syntax: <path of requirements.txt file from repository root>: <package1>, ..., <packageN>,
+        Example: skip depdendabot updates for packages 'package1' and 'package2' in file 
+        notebooks/foo/requirements.txt and package 'package3' in file notebooks/bar/requirements.txt: 
+        notebooks/foo/requirements.txt: package1, package2                             
+        notebooks/bar/requirements.txt: package3 
+        NOTE: unless explicitly specified, it is assumed that there is no file, and that all packages in all 
+        requirements.txt files should be included in dependabot version tracking."
+        required: false
+        type: 'string'
+      pull_request_source_branch:
+        default: dependabot_file_update
+        description: "Name of the branch that will be created to serve as the source branch for the pull request"
+        required: false
+        type: 'string'
+      pull_request_target_branch:
+        default: main
+        description: "Name of the branch that will serve as the target branch for the pull request"
+        required: false
+        type: 'string'
+
+jobs:
+  update-dependabot-config-file:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.8.12
+        uses: actions/setup-python@v5 ## needed for caching
+        with:
+          python-version: 3.8.12
+          cache: 'pip'
+      - name: Check-out notebook-ci-actions repository
+        uses: actions/checkout@v4
+        with:
+          repository: spacetelescope/notebook-ci-actions
+          sparse-checkout: |
+            .github/helpers/make_dependabot_file.py
+          sparse-checkout-cone-mode: false
+          path: temp_dpbot
+      - name: Run dependabot config file updater script
+        run: |
+          python temp_dpbot/.github/helpers/make_dependabot_file.py -e "${{ inputs.exclude_filename }}" -r "${{ inputs.req_file_search_string }}"
+          rm -rf temp_dpbot
+      - name: Commit and push changes to branch "${{ inputs.pull_request_source_branch }}"
+        uses: devops-infra/action-commit-push@v0.9.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          target_branch: dependabot_file_update
+          commit_message: "Updated contents of configuration file .github/dependabot.yml"
+      - name: Create pull request to merge changes in branch "${{ inputs.pull_request_source_branch }}" into "${{ inputs.pull_request_target_branch }}"
+        uses: devops-infra/action-pull-request@v0.5.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          body: "**Automated pull request**<br><br>Updated contents of .github/dependabot.yml"
+          title: "Updated contents of configuration file .github/dependabot.yml"
+          label: dependencies
+          source_branch: ${{ inputs.pull_request_source_branch }}
+          target_branch: ${{ inputs.pull_request_target_branch }}
