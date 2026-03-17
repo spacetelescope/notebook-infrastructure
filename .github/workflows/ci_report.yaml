@@ -28,6 +28,7 @@ jobs:
           spacetelescope/jdat_notebooks
           spacetelescope/hst_notebooks
           spacetelescope/roman_notebooks
+          spacetelescope/jwst-pipeline-notebooks
           EOF
 
       - name: Generate report
