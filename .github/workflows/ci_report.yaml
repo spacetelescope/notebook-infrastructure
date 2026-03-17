@@ -5,10 +5,6 @@ on:
     - cron: '0 4 * * 0'
   workflow_dispatch:
     inputs:
-      repositories:
-        description: "Newline-separated list of repositories in owner/repo form"
-        required: true
-        type: string
       workflow_name:
         description: "Workflow name to inspect in each repository"
         required: false
@@ -38,15 +34,18 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Write repositories input to file
+      - name: Write repositories list
         run: |
           cat <<'EOF' > repos.txt
-          ${{ inputs.repositories || vars.DEFAULT_REPORT_REPOSITORIES }}
+          spacetelescope/hellouniverse
+          spacetelescope/mast_notebooks
+          spacetelescope/jdat_notebooks
+          spacetelescope/hst_notebooks
+          spacetelescope/roman_notebooks
           EOF
 
       - name: Generate cross-repo failure report
         env:
-          # Prefer an org/repo secret with cross-repo read access.
           GH_TOKEN: ${{ secrets.ORG_ACTIONS_READ_TOKEN }}
           WORKFLOW_NAME: ${{ inputs.workflow_name || 'Notebook CI - Scheduled' }}
           LOOKBACK_DAYS: ${{ inputs.lookback_days || '7' }}
