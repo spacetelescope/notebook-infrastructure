@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python .github/scripts/scheduled_ci_report.py repos.txt report.md
+          python .github/scripts/cross_repo_ci_report.py repos.txt report.md
 
       - name: Write report to summary
         run: cat report.md >> "$GITHUB_STEP_SUMMARY"
