@@ -46,7 +46,7 @@ jobs:
 
       - name: Generate cross-repo failure report
         env:
-          GH_TOKEN: ${{ secrets.ORG_ACTIONS_READ_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WORKFLOW_NAME: ${{ inputs.workflow_name || 'Notebook CI - Scheduled' }}
           LOOKBACK_DAYS: ${{ inputs.lookback_days || '7' }}
         run: |
