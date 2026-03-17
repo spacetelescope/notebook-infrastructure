@@ -4,17 +4,6 @@ on:
   schedule:
     - cron: '0 4 * * 0'
   workflow_dispatch:
-    inputs:
-      workflow_name:
-        description: "Workflow name to inspect in each repository"
-        required: false
-        default: "Notebook CI - Scheduled"
-        type: string
-      lookback_days:
-        description: "How many days back to search"
-        required: false
-        default: "7"
-        type: string
 
 jobs:
   generate-report:
@@ -23,16 +12,13 @@ jobs:
       contents: read
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: pip install requests
+      - run: pip install requests
 
       - name: Write repositories list
         run: |
@@ -44,23 +30,16 @@ jobs:
           spacetelescope/roman_notebooks
           EOF
 
-      - name: Generate cross-repo failure report
+      - name: Generate report
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WORKFLOW_NAME: ${{ inputs.workflow_name || 'Notebook CI - Scheduled' }}
-          LOOKBACK_DAYS: ${{ inputs.lookback_days || '7' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python .github/scripts/cross_repo_ci_report.py \
-            --repos-file repos.txt \
-            --workflow-name "$WORKFLOW_NAME" \
-            --lookback-days "$LOOKBACK_DAYS" \
-            --output report.md
+          python .github/scripts/scheduled_ci_report.py repos.txt report.md
 
-      - name: Write report to workflow summary
+      - name: Write report to summary
         run: cat report.md >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload report as artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: cross-repo-ci-report
           path: report.md
