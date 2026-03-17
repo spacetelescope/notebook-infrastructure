@@ -1,0 +1,56 @@
+name: Cross-Repo Notebook CI Metrics v2
+
+on:
+  schedule:
+    - cron: '0 4 * * 0'
+  workflow_dispatch:
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Ensure metrics directory exists
+        run: mkdir -p metrics
+
+      - name: Generate report, history, and dashboard
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_NAME: Notebook CI - Scheduled
+        run: |
+          python .github/scripts/scheduled_ci_report.py \
+            repos.txt \
+            metrics/report.md \
+            metrics/history.json \
+            metrics/dashboard.md
+
+      - name: Write report to workflow summary
+        run: cat metrics/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload metrics artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: notebook-ci-metrics
+          path: metrics/
+          retention-days: 90
+
+      - name: Commit updated metrics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add metrics/history.json metrics/dashboard.md metrics/report.md
+          git diff --cached --quiet || git commit -m "Update notebook CI metrics"
+          git push
