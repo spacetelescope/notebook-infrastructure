@@ -1,43 +1,121 @@
-#!/usr/bin/env python3
+"""
+scheduled_ci_report.py
 
-from __future__ import annotations
+For each repository in a supplied repo list, compares the latest completed
+"Notebook CI - Scheduled" GitHub Actions workflow run with the immediately
+previous completed run, then writes a combined Markdown report.
 
-import argparse
-import datetime as dt
+Usage:
+    python scheduled_ci_report.py repos.txt [output_file.md]
+
+Repo list format:
+    One repo per line, in owner/repo form, e.g.
+        spacetelescope/hellouniverse
+        spacetelescope/mast_notebooks
+        spacetelescope/jdat_notebooks
+
+Required environment variables:
+    GITHUB_TOKEN  – optional but recommended, especially to avoid low rate limits
+Optional environment variables:
+    WORKFLOW_NAME – defaults to "Notebook CI - Scheduled"
+"""
+
 import os
 import sys
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timezone
 
 import requests
 
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+TOKEN = os.environ.get("GITHUB_TOKEN", "")
+WORKFLOW_NAME = os.environ.get("WORKFLOW_NAME", "Notebook CI - Scheduled")
+API_BASE = "https://api.github.com"
 
-API_ROOT = "https://api.github.com"
-DEFAULT_TIMEOUT = 30
-
-
-def gh_session(token: str) -> requests.Session:
-    session = requests.Session()
-    session.headers.update(
-        {
-            "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {token}",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": "cross-repo-ci-report",
-        }
-    )
-    return session
+HEADERS = {
+    "Accept": "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+}
+if TOKEN:
+    HEADERS["Authorization"] = f"Bearer {TOKEN}"
 
 
-def request_json(session: requests.Session, url: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    response = session.get(url, params=params, timeout=DEFAULT_TIMEOUT)
-    response.raise_for_status()
-    return response.json()
+# ---------------------------------------------------------------------------
+# GitHub API helpers
+# ---------------------------------------------------------------------------
+
+def gh_get(url, params=None):
+    resp = requests.get(url, headers=HEADERS, params=params, timeout=30)
+    resp.raise_for_status()
+    return resp.json(), resp.headers
 
 
-def read_repos(path: str) -> List[str]:
-    repos: List[str] = []
-    with open(path, "r", encoding="utf-8") as handle:
-        for line in handle:
+def get_workflow_id(repo, workflow_name):
+    """Return the numeric workflow ID for a given workflow name."""
+    url = f"{API_BASE}/repos/{repo}/actions/workflows"
+    data, _ = gh_get(url, params={"per_page": 100})
+    for wf in data.get("workflows", []):
+        if wf["name"] == workflow_name:
+            return wf["id"]
+    raise ValueError(f"Workflow '{workflow_name}' not found in {repo}")
+
+
+def list_workflow_runs(repo, workflow_id, per_page=20):
+    """Return completed workflow runs, most-recent first."""
+    url = f"{API_BASE}/repos/{repo}/actions/workflows/{workflow_id}/runs"
+    data, _ = gh_get(url, params={"status": "completed", "per_page": per_page})
+    return data.get("workflow_runs", [])
+
+
+def get_notebook_results(repo, run_id):
+    """Return {notebook_path: conclusion} for a given run.
+
+    Only jobs whose names contain 'process-notebooks' are considered;
+    the notebook path is extracted from the parenthesised portion of the
+    job name, e.g.
+        "execute-all / process-notebooks (notebooks/foo/bar.ipynb)"
+    """
+    results = {}
+    url = f"{API_BASE}/repos/{repo}/actions/runs/{run_id}/jobs"
+    params = {"per_page": 100, "filter": "all"}
+
+    while url:
+        resp = requests.get(url, headers=HEADERS, params=params, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+
+        for job in data.get("jobs", []):
+            name = job.get("name", "")
+            if "process-notebooks" not in name:
+                continue
+
+            if "(" in name and name.endswith(")"):
+                nb_path = name[name.index("(") + 1 : -1].strip()
+            else:
+                nb_path = name
+
+            results[nb_path] = job.get("conclusion", "unknown")
+
+        link = resp.headers.get("Link", "")
+        url = None
+        params = {}
+        for part in link.split(","):
+            part = part.strip()
+            if 'rel="next"' in part:
+                url = part.split(";")[0].strip().strip("<>")
+
+    return results
+
+
+# ---------------------------------------------------------------------------
+# Repo list helpers
+# ---------------------------------------------------------------------------
+
+def load_repositories(repo_file):
+    repos = []
+    with open(repo_file, "r", encoding="utf-8") as f:
+        for line in f:
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
@@ -45,117 +123,188 @@ def read_repos(path: str) -> List[str]:
     return repos
 
 
-def get_workflow_id(session: requests.Session, repo: str, workflow_name: str) -> Optional[int]:
-    url = f"{API_ROOT}/repos/{repo}/actions/workflows"
-    data = request_json(session, url)
-    for wf in data.get("workflows", []):
-        if wf.get("name") == workflow_name:
-            return wf["id"]
-    return None
+# ---------------------------------------------------------------------------
+# Comparison + report helpers
+# ---------------------------------------------------------------------------
 
+def compare_results(latest_results, previous_results):
+    all_notebooks = sorted(set(latest_results.keys()) | set(previous_results.keys()))
 
-def get_failed_runs(
-    session: requests.Session,
-    repo: str,
-    workflow_id: int,
-    created_since: str,
-) -> List[Dict[str, Any]]:
-    url = f"{API_ROOT}/repos/{repo}/actions/workflows/{workflow_id}/runs"
-    params = {
-        "status": "completed",
-        "per_page": 50,
-        "created": f">={created_since}",
-    }
-    data = request_json(session, url, params=params)
-    runs = data.get("workflow_runs", [])
-    return [run for run in runs if run.get("conclusion") == "failure"]
+    new_failures = []       # success before -> failure now
+    resolved_failures = []  # failure before -> success now
+    consistent_failures = []
+    consistent_successes = []
+    changed_other = []      # unknown/cancelled/etc transitions
+    only_in_latest = []
+    only_in_previous = []
 
+    for nb in all_notebooks:
+        in_latest = nb in latest_results
+        in_previous = nb in previous_results
 
-def get_jobs_for_run(session: requests.Session, repo: str, run_id: int) -> List[Dict[str, Any]]:
-    url = f"{API_ROOT}/repos/{repo}/actions/runs/{run_id}/jobs"
-    data = request_json(session, url, params={"per_page": 100})
-    return data.get("jobs", [])
-
-
-def summarize_failed_jobs(jobs: List[Dict[str, Any]]) -> List[Dict[str, str]]:
-    summaries: List[Dict[str, str]] = []
-    for job in jobs:
-        if job.get("conclusion") != "failure":
+        if in_latest and not in_previous:
+            only_in_latest.append((nb, latest_results[nb]))
+            continue
+        if in_previous and not in_latest:
+            only_in_previous.append((nb, previous_results[nb]))
             continue
 
-        failed_steps = []
-        for step in job.get("steps", []):
-            if step.get("conclusion") == "failure":
-                failed_steps.append(step.get("name", "Unnamed step"))
+        prev = previous_results[nb]
+        curr = latest_results[nb]
 
-        summaries.append(
-            {
-                "job_name": job.get("name", "Unnamed job"),
-                "failed_steps": ", ".join(failed_steps) if failed_steps else "Unknown failing step",
-                "html_url": job.get("html_url", ""),
-            }
-        )
-    return summaries
+        if prev == "success" and curr == "failure":
+            new_failures.append(nb)
+        elif prev == "failure" and curr == "success":
+            resolved_failures.append(nb)
+        elif prev == "failure" and curr == "failure":
+            consistent_failures.append(nb)
+        elif prev == "success" and curr == "success":
+            consistent_successes.append(nb)
+        elif prev != curr:
+            changed_other.append((nb, prev, curr))
+
+    summary = {
+        "total_latest": len(latest_results),
+        "fail_latest": sum(1 for c in latest_results.values() if c == "failure"),
+        "pass_latest": sum(1 for c in latest_results.values() if c == "success"),
+        "total_previous": len(previous_results),
+        "fail_previous": sum(1 for c in previous_results.values() if c == "failure"),
+        "pass_previous": sum(1 for c in previous_results.values() if c == "success"),
+        "new_failures": new_failures,
+        "resolved_failures": resolved_failures,
+        "consistent_failures": consistent_failures,
+        "consistent_successes": consistent_successes,
+        "changed_other": changed_other,
+        "only_in_latest": only_in_latest,
+        "only_in_previous": only_in_previous,
+    }
+    return summary
 
 
-def render_report(
-    workflow_name: str,
-    lookback_days: int,
-    results: List[Dict[str, Any]],
-    errors: List[str],
-) -> str:
-    lines: List[str] = []
-    now_utc = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+def build_repo_section(repo, latest_run, previous_run, latest_results, previous_results):
+    comp = compare_results(latest_results, previous_results)
 
-    lines.append(f"# Cross-Repo CI Failure Report")
+    latest_url = latest_run["html_url"]
+    latest_date = latest_run["created_at"][:10]
+    previous_url = previous_run["html_url"]
+    previous_date = previous_run["created_at"][:10]
+
+    lines = [
+        f"## `{repo}`",
+        "",
+        f"| | Run | Date | Pass | Fail | Total |",
+        f"|---|---|---|---|---|---|",
+        f"| **Latest** | [#{latest_run['run_number']}]({latest_url}) | {latest_date} | {comp['pass_latest']} | {comp['fail_latest']} | {comp['total_latest']} |",
+        f"| **Previous** | [#{previous_run['run_number']}]({previous_url}) | {previous_date} | {comp['pass_previous']} | {comp['fail_previous']} | {comp['total_previous']} |",
+        "",
+        f"- **New failures:** {len(comp['new_failures'])}",
+        f"- **Resolved failures:** {len(comp['resolved_failures'])}",
+        f"- **Consistent failures:** {len(comp['consistent_failures'])}",
+        "",
+    ]
+
+    lines.append(f"### 🔴 New Failures ({len(comp['new_failures'])})")
     lines.append("")
-    lines.append(f"- **Workflow name:** `{workflow_name}`")
-    lines.append(f"- **Lookback window:** last **{lookback_days}** day(s)")
-    lines.append(f"- **Generated:** {now_utc}")
+    if comp["new_failures"]:
+        for nb in comp["new_failures"]:
+            lines.append(f"- `{nb}`")
+    else:
+        lines.append("_No new failures_ ✅")
     lines.append("")
+
+    lines.append(f"### 🟢 Resolved Failures ({len(comp['resolved_failures'])})")
+    lines.append("")
+    if comp["resolved_failures"]:
+        for nb in comp["resolved_failures"]:
+            lines.append(f"- `{nb}`")
+    else:
+        lines.append("_No resolved failures_")
+    lines.append("")
+
+    lines.append(f"### 🟡 Consistent Failures ({len(comp['consistent_failures'])})")
+    lines.append("")
+    if comp["consistent_failures"]:
+        for nb in comp["consistent_failures"]:
+            lines.append(f"- `{nb}`")
+    else:
+        lines.append("_No consistent failures_ ✅")
+    lines.append("")
+
+    lines.append(f"### ✅ Consistent Successes ({len(comp['consistent_successes'])})")
+    lines.append("")
+    lines.append("<details>")
+    lines.append("<summary>Click to expand</summary>")
+    lines.append("")
+    if comp["consistent_successes"]:
+        for nb in comp["consistent_successes"]:
+            lines.append(f"- `{nb}`")
+    else:
+        lines.append("_None_")
+    lines.append("")
+    lines.append("</details>")
+    lines.append("")
+
+    if comp["changed_other"]:
+        lines.append(f"### ⚪ Other Status Changes ({len(comp['changed_other'])})")
+        lines.append("")
+        for nb, prev, curr in comp["changed_other"]:
+            lines.append(f"- `{nb}`: `{prev}` → `{curr}`")
+        lines.append("")
+
+    if comp["only_in_latest"]:
+        lines.append(f"### ➕ Only in Latest Run ({len(comp['only_in_latest'])})")
+        lines.append("")
+        for nb, conclusion in comp["only_in_latest"]:
+            lines.append(f"- `{nb}` ({conclusion})")
+        lines.append("")
+
+    if comp["only_in_previous"]:
+        lines.append(f"### ➖ Only in Previous Run ({len(comp['only_in_previous'])})")
+        lines.append("")
+        for nb, conclusion in comp["only_in_previous"]:
+            lines.append(f"- `{nb}` ({conclusion})")
+        lines.append("")
+
+    return "\n".join(lines), comp
+
+
+def build_report(results, errors):
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    lines = [
+        "# Notebook CI – Latest vs Previous Run Comparison",
+        "",
+        f"_Generated {now}_",
+        "",
+        f"Workflow name: `{WORKFLOW_NAME}`",
+        "",
+    ]
 
     if results:
-        lines.append("## Summary")
-        lines.append("")
-        lines.append("| Repository | Latest failed run | Branch | Failed jobs |")
-        lines.append("|---|---:|---|---:|")
-
+        lines.extend([
+            "## Summary",
+            "",
+            "| Repository | Latest Run | Previous Run | New Failures | Resolved | Consistent Failures | Latest Fail Count |",
+            "|---|---|---|---:|---:|---:|---:|",
+        ])
         for item in results:
-            if item["status"] == "failed":
-                lines.append(
-                    f"| `{item['repo']}` | "
-                    f"[#{item['run_number']}]({item['run_url']}) | "
-                    f"`{item['branch']}` | "
-                    f"{len(item['failed_jobs'])} |"
-                )
-            else:
-                lines.append(
-                    f"| `{item['repo']}` | {item['status_label']} | - | - |"
-                )
+            comp = item["comparison"]
+            lines.append(
+                f"| `{item['repo']}` | "
+                f"[#{item['latest_run']['run_number']}]({item['latest_run']['html_url']}) | "
+                f"[#{item['previous_run']['run_number']}]({item['previous_run']['html_url']}) | "
+                f"{len(comp['new_failures'])} | "
+                f"{len(comp['resolved_failures'])} | "
+                f"{len(comp['consistent_failures'])} | "
+                f"{comp['fail_latest']} |"
+            )
         lines.append("")
 
-        lines.append("## Details")
+        lines.append("## Per-Repository Details")
         lines.append("")
         for item in results:
-            lines.append(f"### `{item['repo']}`")
+            lines.append(item["section"])
             lines.append("")
-            lines.append(f"- **Status:** {item['status_label']}")
-
-            if item["status"] == "failed":
-                lines.append(f"- **Run:** [#{item['run_number']}]({item['run_url']})")
-                lines.append(f"- **Branch:** `{item['branch']}`")
-                lines.append(f"- **Created:** `{item['created_at']}`")
-                lines.append("")
-                lines.append("| Failed job | Failed step(s) |")
-                lines.append("|---|---|")
-                for job in item["failed_jobs"]:
-                    job_name = job["job_name"]
-                    if job["html_url"]:
-                        job_name = f"[{job_name}]({job['html_url']})"
-                    lines.append(f"| {job_name} | {job['failed_steps']} |")
-                lines.append("")
-            else:
-                lines.append("")
 
     if errors:
         lines.append("## Errors")
@@ -165,91 +314,79 @@ def render_report(
         lines.append("")
 
     if not results and not errors:
-        lines.append("No repositories were processed.")
+        lines.append("_No repositories processed._")
         lines.append("")
 
     return "\n".join(lines)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--repos-file", required=True)
-    parser.add_argument("--workflow-name", required=True)
-    parser.add_argument("--lookback-days", type=int, default=7)
-    parser.add_argument("--output", required=True)
-    args = parser.parse_args()
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 
-    token = os.getenv("GH_TOKEN")
-    if not token:
-        print("GH_TOKEN is required", file=sys.stderr)
-        return 1
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python scheduled_ci_report.py repos.txt [output_file.md]", file=sys.stderr)
+        sys.exit(1)
 
-    repos = read_repos(args.repos_file)
+    repo_file = sys.argv[1]
+    output_file = sys.argv[2] if len(sys.argv) > 2 else None
+
+    repos = load_repositories(repo_file)
     if not repos:
-        print("No repositories found in repos file", file=sys.stderr)
-        return 1
+        print("No repositories found in repo file.", file=sys.stderr)
+        sys.exit(1)
 
-    created_since = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=args.lookback_days)).date().isoformat()
-    session = gh_session(token)
-
-    results: List[Dict[str, Any]] = []
-    errors: List[str] = []
+    results = []
+    errors = []
 
     for repo in repos:
         try:
-            workflow_id = get_workflow_id(session, repo, args.workflow_name)
-            if workflow_id is None:
-                results.append(
-                    {
-                        "repo": repo,
-                        "status": "missing_workflow",
-                        "status_label": f"Workflow `{args.workflow_name}` not found",
-                    }
-                )
+            print(f"Fetching workflow runs for '{WORKFLOW_NAME}' in {repo}…", file=sys.stderr)
+            workflow_id = get_workflow_id(repo, WORKFLOW_NAME)
+            runs = list_workflow_runs(repo, workflow_id)
+
+            if len(runs) < 2:
+                errors.append(f"`{repo}`: fewer than 2 completed runs found")
                 continue
 
-            failed_runs = get_failed_runs(session, repo, workflow_id, created_since)
-            if not failed_runs:
-                results.append(
-                    {
-                        "repo": repo,
-                        "status": "no_failures",
-                        "status_label": "No failed runs found",
-                    }
-                )
-                continue
+            latest_run = runs[0]
+            previous_run = runs[1]
 
-            latest = failed_runs[0]
-            jobs = get_jobs_for_run(session, repo, latest["id"])
-            failed_jobs = summarize_failed_jobs(jobs)
+            print(
+                f"{repo}: latest #{latest_run['run_number']} vs previous #{previous_run['run_number']}",
+                file=sys.stderr,
+            )
+
+            latest_results = get_notebook_results(repo, latest_run["id"])
+            previous_results = get_notebook_results(repo, previous_run["id"])
+
+            section, comparison = build_repo_section(
+                repo, latest_run, previous_run, latest_results, previous_results
+            )
 
             results.append(
                 {
                     "repo": repo,
-                    "status": "failed",
-                    "status_label": "Failed runs found",
-                    "run_number": latest.get("run_number", "?"),
-                    "run_url": latest.get("html_url", ""),
-                    "branch": latest.get("head_branch", "unknown"),
-                    "created_at": latest.get("created_at", "unknown"),
-                    "failed_jobs": failed_jobs,
+                    "latest_run": latest_run,
+                    "previous_run": previous_run,
+                    "comparison": comparison,
+                    "section": section,
                 }
             )
 
-        except requests.HTTPError as exc:
-            status_code = exc.response.status_code if exc.response is not None else "unknown"
-            errors.append(f"`{repo}`: HTTP {status_code} while querying GitHub API")
         except Exception as exc:
             errors.append(f"`{repo}`: {exc}")
 
-    report = render_report(args.workflow_name, args.lookback_days, results, errors)
+    report = build_report(results, errors)
 
-    with open(args.output, "w", encoding="utf-8") as handle:
-        handle.write(report)
-
-    print(f"Wrote report to {args.output}")
-    return 0
+    if output_file:
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(report)
+        print(f"Report written to {output_file}", file=sys.stderr)
+    else:
+        print(report)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
