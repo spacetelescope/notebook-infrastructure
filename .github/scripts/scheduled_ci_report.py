@@ -329,7 +329,6 @@ def update_history(history, results):
         else:
             repo_entries.append(entry)
 
-        # Keep last 26 weekly-ish entries
         repos_hist[repo] = repo_entries[-26:]
 
     return history
@@ -354,13 +353,17 @@ def render_mermaid_bar_latest_failures(history):
     if not labels:
         return "_No data yet._"
 
+    label_str = ", ".join(f'"{x}"' for x in labels)
+    value_str = ", ".join(str(v) for v in values)
+    upper = max(5, max(values) + 1)
+
     return "\n".join([
         "```mermaid",
         "xychart-beta",
         '    title "Latest failure count by repository"',
-        f'    x-axis [{", ".join([f\'"{x}"\' for x in labels])}]',
-        '    y-axis "Failures" 0 --> 20',
-        f'    bar [{", ".join(str(v) for v in values)}]',
+        f'    x-axis [{label_str}]',
+        f'    y-axis "Failures" 0 --> {upper}',
+        f'    bar [{value_str}]',
         "```",
     ])
 
@@ -370,6 +373,8 @@ def render_mermaid_trend_for_repo(repo, entries):
     labels = [e["latest_run_created_at"][:10] for e in entries]
     values = [e["fail_latest"] for e in entries]
 
+    label_str = ", ".join(f'"{x}"' for x in labels)
+    value_str = ", ".join(str(v) for v in values)
     ymax = max(values + [1])
     upper = max(5, ymax + 1)
 
@@ -377,9 +382,9 @@ def render_mermaid_trend_for_repo(repo, entries):
         "```mermaid",
         "xychart-beta",
         f'    title "{short_name} failure trend"',
-        f'    x-axis [{", ".join([f\'"{x}"\' for x in labels])}]',
+        f'    x-axis [{label_str}]',
         f'    y-axis "Failures" 0 --> {upper}',
-        f'    line [{", ".join(str(v) for v in values)}]',
+        f'    line [{value_str}]',
         "```",
     ])
 
