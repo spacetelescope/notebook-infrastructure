@@ -63,21 +63,25 @@ jobs:
       - name: Publish only /metrics to gh-pages
         run: |
           mkdir -p gh-pages-site/metrics
-
-          rsync -a --delete site/metrics/ gh-pages-site/metrics/
-
+      
+          rsync -a \
+            --exclude history.json \
+            --exclude report.md \
+            --exclude dashboard.md \
+            metrics/ gh-pages-site/metrics/
+      
           cp metrics/history.json gh-pages-site/metrics/history.json
           cp metrics/report.md gh-pages-site/metrics/report.md
           cp metrics/dashboard.md gh-pages-site/metrics/dashboard.md
-
+      
           touch gh-pages-site/.nojekyll
-
+      
           cd gh-pages-site
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add .nojekyll metrics/index.html metrics/app.js metrics/styles.css metrics/history.json metrics/report.md metrics/dashboard.md
-
+      
+          git add .nojekyll metrics/
+      
           if git diff --cached --quiet; then
             echo "No gh-pages changes to commit"
           else
