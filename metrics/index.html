@@ -20,7 +20,12 @@
 
       <div class="sidebar-section">
         <label class="label" for="repoSearch">Filter repos</label>
-        <input id="repoSearch" class="input" type="text" placeholder="Search repositories..." />
+        <input
+          id="repoSearch"
+          class="input"
+          type="text"
+          placeholder="Search repositories..."
+        />
       </div>
 
       <div class="sidebar-section">
@@ -35,20 +40,23 @@
           <h2>Cross-Repo CI Health</h2>
           <p id="lastUpdated" class="muted">Loading…</p>
         </div>
+
         <div class="topbar-actions">
-          <a class="button ghost" href="./report.md" target="_blank">Open report</a>
-          <a class="button ghost" href="./dashboard.md" target="_blank">Open markdown dashboard</a>
-          <a class="button" href="./history.json" target="_blank">Raw history JSON</a>
+          <a class="button ghost" href="./report.md" target="_blank" rel="noopener">Open report</a>
+          <a class="button ghost" href="./dashboard.md" target="_blank" rel="noopener">Open markdown dashboard</a>
+          <a class="button" href="./history.json" target="_blank" rel="noopener">Raw history JSON</a>
         </div>
       </header>
 
-      <section class="kpis" id="kpis"></section>
+      <section id="kpis" class="kpis"></section>
 
       <section class="panel-grid">
         <section class="panel">
           <div class="panel-header">
-            <h3>Total Failures Trend</h3>
-            <p class="muted">Across all monitored repositories</p>
+            <div>
+              <h3>Total Failures Trend</h3>
+              <p class="muted">Across all monitored repositories</p>
+            </div>
           </div>
           <div class="chart-wrap compact">
             <canvas id="trendChart"></canvas>
@@ -57,8 +65,10 @@
 
         <section class="panel">
           <div class="panel-header">
-            <h3>Current Failure Count</h3>
-            <p class="muted">Latest run by repository</p>
+            <div>
+              <h3>Current Failure Count</h3>
+              <p class="muted">Latest run by repository</p>
+            </div>
           </div>
           <div class="chart-wrap compact">
             <canvas id="repoChart"></canvas>
@@ -68,9 +78,12 @@
 
       <section class="panel">
         <div class="panel-header">
-          <h3>Repository Summary</h3>
-          <p class="muted">Sortable current-state view</p>
+          <div>
+            <h3>Repository Summary</h3>
+            <p class="muted">Sortable current-state view</p>
+          </div>
         </div>
+
         <div class="table-wrap">
           <table id="repoTable">
             <thead>
@@ -102,34 +115,42 @@
           </div>
 
           <div id="detailContent" class="detail-content hidden">
-            <div class="detail-top-grid" id="detailStats"></div>
+            <div id="detailStats" class="detail-top-grid"></div>
 
-            <div class="detail-links" id="detailLinks"></div>
+            <div id="detailLinks" class="detail-links"></div>
 
-            <div class="panel inset">
+            <section class="panel inset">
               <div class="panel-header">
                 <h4>Repo Failure Trend</h4>
               </div>
               <div class="chart-wrap repo-detail-chart">
                 <canvas id="detailTrendChart"></canvas>
               </div>
-            </div>
+            </section>
 
             <div class="filters-row">
-              <input id="notebookSearch" class="input" type="text" placeholder="Filter notebook paths..." />
+              <input
+                id="notebookSearch"
+                class="input"
+                type="text"
+                placeholder="Filter notebook paths..."
+              />
             </div>
 
-            <div class="detail-sections" id="detailSections"></div>
+            <div id="detailSections" class="detail-sections"></div>
           </div>
         </section>
 
-        <section class="panel narrow-panel">
+        <aside class="panel narrow-panel">
           <div class="panel-header">
-            <h3>Run Errors</h3>
-            <p class="muted">Repo-level fetch or workflow issues</p>
+            <div>
+              <h3>Run Errors</h3>
+              <p class="muted">Repo-level fetch or workflow issues</p>
+            </div>
           </div>
+
           <div id="errorList" class="stack-list"></div>
-        </section>
+        </aside>
       </section>
     </main>
   </div>
