@@ -64,15 +64,13 @@ jobs:
         run: |
           mkdir -p gh-pages-site/metrics
       
-          rsync -a \
-            --exclude history.json \
-            --exclude report.md \
-            --exclude dashboard.md \
-            metrics/ gh-pages-site/metrics/
-      
+          cp metrics/index.html gh-pages-site/metrics/index.html
+          cp metrics/app.js gh-pages-site/metrics/app.js
+          cp metrics/styles.css gh-pages-site/metrics/styles.css
           cp metrics/history.json gh-pages-site/metrics/history.json
           cp metrics/report.md gh-pages-site/metrics/report.md
           cp metrics/dashboard.md gh-pages-site/metrics/dashboard.md
+          cp metrics/details.json gh-pages-site/metrics/details.json
       
           touch gh-pages-site/.nojekyll
       
