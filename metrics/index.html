@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notebook CI Dashboard</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <header>
+    <h1>🚀 Notebook CI Dashboard</h1>
+    <p id="last-updated"></p>
+  </header>
+
+  <section class="cards">
+    <div class="card">
+      <h3>Total Failures</h3>
+      <p id="total-failures">-</p>
+    </div>
+    <div class="card">
+      <h3>New Failures</h3>
+      <p id="new-failures">-</p>
+    </div>
+    <div class="card">
+      <h3>Resolved</h3>
+      <p id="resolved-failures">-</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>📈 Failure Trend</h2>
+    <canvas id="trendChart"></canvas>
+  </section>
+
+  <section>
+    <h2>📊 Latest Failures by Repo</h2>
+    <canvas id="repoChart"></canvas>
+  </section>
+
+  <section>
+    <h2>📋 Repository Status</h2>
+    <table id="repoTable">
+      <thead>
+        <tr>
+          <th>Repository</th>
+          <th>Failures</th>
+          <th>New</th>
+          <th>Resolved</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <script src="./app.js"></script>
+</body>
+</html>
