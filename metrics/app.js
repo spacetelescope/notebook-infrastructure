@@ -1,12 +1,19 @@
 let trendChart;
 let repoChart;
 let detailTrendChart;
-let dashboardData;
+let dashboardData = [];
+let currentRepo = null;
 
 async function loadJson(path) {
   const res = await fetch(path, { cache: "no-store" });
   if (!res.ok) throw new Error(`Failed to load ${path}`);
   return res.json();
+}
+
+function requireEl(id) {
+  const el = document.getElementById(id);
+  if (!el) throw new Error(`Missing required element: #${id}`);
+  return el;
 }
 
 function shortRepo(repo) {
@@ -41,166 +48,8 @@ function buildCombinedState(history, details) {
   });
 }
 
-function renderKpis(data, errorsCount) {
-  const latest = data.map(d => d.summary);
-  const totalFailures = latest.reduce((a, r) => a + r.fail_latest, 0);
-  const totalNew = latest.reduce((a, r) => a + r.new_failures, 0);
-  const totalResolved = latest.reduce((a, r) => a + r.resolved_failures, 0);
-  const totalConsistent = latest.reduce((a, r) => a + r.consistent_failures, 0);
-  const failingRepos = data.filter(d => d.summary.fail_latest > 0).length;
-
-  const kpis = [
-    ["Monitored Repos", data.length, `${failingRepos} currently failing`],
-    ["Total Failures", totalFailures, "Current latest-run failures"],
-    ["New Failures", totalNew, "Regressions from previous run"],
-    ["Resolved", totalResolved, "Fixed since previous run"],
-    ["Consistent Failures", totalConsistent, `${errorsCount} fetch/report error(s)`],
-  ];
-
-  const container = document.getElementById("kpis");
-  container.innerHTML = "";
-  for (const [label, value, sub] of kpis) {
-    const el = document.createElement("div");
-    el.className = "kpi";
-    el.innerHTML = `
-      <div class="kpi-label">${label}</div>
-      <div class="kpi-value">${value}</div>
-      <div class="kpi-sub">${sub}</div>
-    `;
-    container.appendChild(el);
-  }
-}
-
-function renderRepoNav(data, filter = "") {
-  const nav = document.getElementById("repoNav");
-  nav.innerHTML = "";
-
-  const filtered = data
-    .filter(d => d.repo.toLowerCase().includes(filter.toLowerCase()))
-    .sort((a, b) => b.summary.fail_latest - a.summary.fail_latest || a.repo.localeCompare(b.repo));
-
-  for (const item of filtered) {
-    const btn = document.createElement("button");
-    btn.className = "repo-nav-button";
-    btn.dataset.repo = item.repo;
-    btn.innerHTML = `
-      <div class="repo-nav-top">
-        <div class="repo-short">${shortRepo(item.repo)}</div>
-        <span class="badge ${item.summary.fail_latest > 0 ? "red" : "green"}">${item.summary.fail_latest}</span>
-      </div>
-      <div class="repo-full">${item.repo}</div>
-    `;
-    btn.addEventListener("click", () => selectRepo(item.repo));
-    nav.appendChild(btn);
-  }
-}
-
-function renderRepoTable(data) {
-  const tbody = document.querySelector("#repoTable tbody");
-  tbody.innerHTML = "";
-
-  const sorted = [...data].sort((a, b) =>
-    b.summary.fail_latest - a.summary.fail_latest ||
-    b.summary.new_failures - a.summary.new_failures
-  );
-
-  for (const item of sorted) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><a href="#" data-repo-link="${item.repo}">${item.repo}</a></td>
-      <td><span class="badge ${item.summary.fail_latest > 0 ? "red" : "green"}">${item.summary.fail_latest}</span></td>
-      <td>${item.summary.new_failures}</td>
-      <td>${item.summary.resolved_failures}</td>
-      <td>${item.summary.consistent_failures}</td>
-      <td><a href="${item.latest_run.url}" target="_blank">#${item.latest_run.number}</a></td>
-    `;
-    tbody.appendChild(tr);
-  }
-
-  tbody.querySelectorAll("[data-repo-link]").forEach(link => {
-    link.addEventListener("click", e => {
-      e.preventDefault();
-      selectRepo(e.target.dataset.repoLink);
-    });
-  });
-}
-
-function renderErrors(errors) {
-  const wrap = document.getElementById("errorList");
-  wrap.innerHTML = "";
-
-  if (!errors?.length) {
-    wrap.innerHTML = `<div class="muted">No repo-level errors in this run.</div>`;
-    return;
-  }
-
-  for (const err of errors) {
-    const div = document.createElement("div");
-    div.className = "error-item";
-    div.textContent = err;
-    wrap.appendChild(div);
-  }
-}
-
 function destroyChart(chart) {
   if (chart) chart.destroy();
-}
-
-function renderTrendChart(data) {
-  const dateSet = new Set();
-  data.forEach(repo => repo.history.forEach(entry => dateSet.add(safeDate(entry.latest_run_created_at))));
-  const labels = [...dateSet].sort();
-
-  const totals = labels.map(date => {
-    let total = 0;
-    for (const repo of data) {
-      const match = repo.history.find(h => safeDate(h.latest_run_created_at) === date);
-      if (match) total += match.fail_latest;
-    }
-    return total;
-  });
-
-  destroyChart(trendChart);
-  trendChart = new Chart(document.getElementById("trendChart"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Total Failures",
-        data: totals,
-        tension: 0.25,
-        borderWidth: 2,
-        fill: true,
-        backgroundColor: "rgba(110,168,254,0.14)",
-        borderColor: "rgba(110,168,254,1)",
-        pointRadius: 3,
-      }]
-    },
-    options: baseChartOptions("Failures")
-  });
-}
-
-function renderRepoChart(data) {
-  const sorted = [...data].sort((a, b) => b.summary.fail_latest - a.summary.fail_latest);
-
-  destroyChart(repoChart);
-  repoChart = new Chart(document.getElementById("repoChart"), {
-    type: "bar",
-    data: {
-      labels: sorted.map(x => shortRepo(x.repo)),
-      datasets: [{
-        label: "Latest Failures",
-        data: sorted.map(x => x.summary.fail_latest),
-        backgroundColor: sorted.map(x => x.summary.fail_latest > 0 ? "rgba(255,107,107,0.7)" : "rgba(77,212,172,0.65)")
-      }]
-    },
-    options: {
-      ...baseChartOptions("Failures"),
-      indexAxis: "y",
-      responsive: true,
-      maintainAspectRatio: false,
-    }
-  });
 }
 
 function baseChartOptions(yTitle) {
@@ -228,6 +77,169 @@ function baseChartOptions(yTitle) {
       }
     }
   };
+}
+
+function renderKpis(data, errorsCount) {
+  const latest = data.map(d => d.summary);
+  const totalFailures = latest.reduce((a, r) => a + r.fail_latest, 0);
+  const totalNew = latest.reduce((a, r) => a + r.new_failures, 0);
+  const totalResolved = latest.reduce((a, r) => a + r.resolved_failures, 0);
+  const totalConsistent = latest.reduce((a, r) => a + r.consistent_failures, 0);
+  const failingRepos = data.filter(d => d.summary.fail_latest > 0).length;
+
+  const kpis = [
+    ["Monitored Repos", data.length, `${failingRepos} currently failing`],
+    ["Total Failures", totalFailures, "Current latest-run failures"],
+    ["New Failures", totalNew, "Regressions from previous run"],
+    ["Resolved", totalResolved, "Fixed since previous run"],
+    ["Consistent Failures", totalConsistent, `${errorsCount} fetch/report error(s)`],
+  ];
+
+  const container = requireEl("kpis");
+  container.innerHTML = "";
+
+  for (const [label, value, sub] of kpis) {
+    const el = document.createElement("div");
+    el.className = "kpi";
+    el.innerHTML = `
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-value">${value}</div>
+      <div class="kpi-sub">${sub}</div>
+    `;
+    container.appendChild(el);
+  }
+}
+
+function renderRepoNav(data, filter = "") {
+  const nav = requireEl("repoNav");
+  nav.innerHTML = "";
+
+  const filtered = data
+    .filter(d => d.repo.toLowerCase().includes(filter.toLowerCase()))
+    .sort((a, b) => b.summary.fail_latest - a.summary.fail_latest || a.repo.localeCompare(b.repo));
+
+  for (const item of filtered) {
+    const btn = document.createElement("button");
+    btn.className = "repo-nav-button";
+    btn.dataset.repo = item.repo;
+    btn.innerHTML = `
+      <div class="repo-nav-top">
+        <div class="repo-short">${shortRepo(item.repo)}</div>
+        <span class="badge ${item.summary.fail_latest > 0 ? "red" : "green"}">${item.summary.fail_latest}</span>
+      </div>
+      <div class="repo-full">${item.repo}</div>
+    `;
+    btn.addEventListener("click", () => showRepoView(item.repo));
+    nav.appendChild(btn);
+  }
+
+  updateSidebarSelection();
+}
+
+function renderRepoTable(data) {
+  const tbody = requireEl("repoTable").querySelector("tbody");
+  tbody.innerHTML = "";
+
+  const sorted = [...data].sort((a, b) =>
+    b.summary.fail_latest - a.summary.fail_latest ||
+    b.summary.new_failures - a.summary.new_failures
+  );
+
+  for (const item of sorted) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><a href="#" data-repo-link="${item.repo}">${item.repo}</a></td>
+      <td><span class="badge ${item.summary.fail_latest > 0 ? "red" : "green"}">${item.summary.fail_latest}</span></td>
+      <td>${item.summary.new_failures}</td>
+      <td>${item.summary.resolved_failures}</td>
+      <td>${item.summary.consistent_failures}</td>
+      <td><a href="${item.latest_run.url}" target="_blank" rel="noopener">#${item.latest_run.number}</a></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  tbody.querySelectorAll("[data-repo-link]").forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      showRepoView(e.target.dataset.repoLink);
+    });
+  });
+}
+
+function renderErrors(errors) {
+  const wrap = requireEl("errorList");
+  wrap.innerHTML = "";
+
+  if (!errors?.length) {
+    wrap.innerHTML = `<div class="muted">No repo-level errors in this run.</div>`;
+    return;
+  }
+
+  for (const err of errors) {
+    const div = document.createElement("div");
+    div.className = "error-item";
+    div.textContent = err;
+    wrap.appendChild(div);
+  }
+}
+
+function renderTrendChart(data) {
+  const dateSet = new Set();
+  data.forEach(repo => repo.history.forEach(entry => dateSet.add(safeDate(entry.latest_run_created_at))));
+  const labels = [...dateSet].sort();
+
+  const totals = labels.map(date => {
+    let total = 0;
+    for (const repo of data) {
+      const match = repo.history.find(h => safeDate(h.latest_run_created_at) === date);
+      if (match) total += match.fail_latest;
+    }
+    return total;
+  });
+
+  destroyChart(trendChart);
+  trendChart = new Chart(requireEl("trendChart"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Total Failures",
+        data: totals,
+        tension: 0.25,
+        borderWidth: 2,
+        fill: true,
+        backgroundColor: "rgba(110,168,254,0.14)",
+        borderColor: "rgba(110,168,254,1)",
+        pointRadius: 3,
+      }]
+    },
+    options: baseChartOptions("Failures")
+  });
+}
+
+function renderRepoChart(data) {
+  const sorted = [...data].sort((a, b) => b.summary.fail_latest - a.summary.fail_latest);
+
+  destroyChart(repoChart);
+  repoChart = new Chart(requireEl("repoChart"), {
+    type: "bar",
+    data: {
+      labels: sorted.map(x => shortRepo(x.repo)),
+      datasets: [{
+        label: "Latest Failures",
+        data: sorted.map(x => x.summary.fail_latest),
+        backgroundColor: sorted.map(x =>
+          x.summary.fail_latest > 0 ? "rgba(255,107,107,0.7)" : "rgba(77,212,172,0.65)"
+        )
+      }]
+    },
+    options: {
+      ...baseChartOptions("Failures"),
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+    }
+  });
 }
 
 function statCard(label, value, colorClass = "blue") {
@@ -264,43 +276,12 @@ function pathList(items, badgeClass = "blue", badgeTextFn = null, searchTerm = "
   `;
 }
 
-function renderRepoDetail(repoName) {
-  const item = dashboardData.find(d => d.repo === repoName);
-  if (!item) return;
-
-  document.querySelectorAll(".repo-nav-button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.repo === repoName);
-  });
-
-  document.getElementById("detailTitle").textContent = item.repo;
-  document.getElementById("detailSubtitle").textContent =
-    `Latest run #${item.latest_run.number} vs previous run #${item.previous_run.number}`;
-
-  document.getElementById("detailEmpty").classList.add("hidden");
-  document.getElementById("detailContent").classList.remove("hidden");
-
-  document.getElementById("detailStats").innerHTML = `
-    ${statCard("Failures", item.summary.fail_latest, item.summary.fail_latest > 0 ? "red" : "green")}
-    ${statCard("New", item.summary.new_failures, item.summary.new_failures > 0 ? "red" : "blue")}
-    ${statCard("Resolved", item.summary.resolved_failures, item.summary.resolved_failures > 0 ? "green" : "blue")}
-    ${statCard("Consistent", item.summary.consistent_failures, item.summary.consistent_failures > 0 ? "yellow" : "blue")}
-  `;
-
-  document.getElementById("detailLinks").innerHTML = `
-    <a class="button ghost" href="${item.latest_run.url}" target="_blank">Latest run #${item.latest_run.number}</a>
-    <a class="button ghost" href="${item.previous_run.url}" target="_blank">Previous run #${item.previous_run.number}</a>
-  `;
-
-  renderDetailTrend(item);
-  renderDetailSections(item, document.getElementById("notebookSearch").value || "");
-}
-
 function renderDetailTrend(item) {
   const labels = item.history.map(h => safeDate(h.latest_run_created_at));
   const values = item.history.map(h => h.fail_latest);
 
   destroyChart(detailTrendChart);
-  detailTrendChart = new Chart(document.getElementById("detailTrendChart"), {
+  detailTrendChart = new Chart(requireEl("detailTrendChart"), {
     type: "line",
     data: {
       labels,
@@ -321,7 +302,7 @@ function renderDetailTrend(item) {
 
 function renderDetailSections(item, searchTerm = "") {
   const d = item.details;
-  const container = document.getElementById("detailSections");
+  const container = requireEl("detailSections");
 
   const sections = [
     {
@@ -380,8 +361,52 @@ function renderDetailSections(item, searchTerm = "") {
   `).join("");
 }
 
-function selectRepo(repoName) {
-  renderRepoDetail(repoName);
+function updateSidebarSelection() {
+  const overviewBtn = requireEl("showOverviewBtn");
+  overviewBtn.classList.toggle("active", currentRepo === null);
+
+  document.querySelectorAll(".repo-nav-button[data-repo]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.repo === currentRepo);
+  });
+}
+
+function showOverviewView() {
+  currentRepo = null;
+  requireEl("overviewView").classList.remove("hidden");
+  requireEl("repoView").classList.add("hidden");
+  requireEl("pageTitle").textContent = "Cross-Repo CI Health";
+  updateSidebarSelection();
+}
+
+function showRepoView(repoName) {
+  const item = dashboardData.find(d => d.repo === repoName);
+  if (!item) return;
+
+  currentRepo = repoName;
+
+  requireEl("overviewView").classList.add("hidden");
+  requireEl("repoView").classList.remove("hidden");
+  requireEl("pageTitle").textContent = item.repo;
+
+  requireEl("detailTitle").textContent = item.repo;
+  requireEl("detailSubtitle").textContent =
+    `Latest run #${item.latest_run.number} vs previous run #${item.previous_run.number}`;
+
+  requireEl("detailStats").innerHTML = `
+    ${statCard("Failures", item.summary.fail_latest, item.summary.fail_latest > 0 ? "red" : "green")}
+    ${statCard("New", item.summary.new_failures, item.summary.new_failures > 0 ? "red" : "blue")}
+    ${statCard("Resolved", item.summary.resolved_failures, item.summary.resolved_failures > 0 ? "green" : "blue")}
+    ${statCard("Consistent", item.summary.consistent_failures, item.summary.consistent_failures > 0 ? "yellow" : "blue")}
+  `;
+
+  requireEl("detailLinks").innerHTML = `
+    <a class="button ghost" href="${item.latest_run.url}" target="_blank" rel="noopener">Latest run #${item.latest_run.number}</a>
+    <a class="button ghost" href="${item.previous_run.url}" target="_blank" rel="noopener">Previous run #${item.previous_run.number}</a>
+  `;
+
+  renderDetailTrend(item);
+  renderDetailSections(item, requireEl("notebookSearch").value || "");
+  updateSidebarSelection();
 }
 
 async function init() {
@@ -390,7 +415,7 @@ async function init() {
     loadJson("./details.json")
   ]);
 
-  document.getElementById("lastUpdated").textContent =
+  requireEl("lastUpdated").textContent =
     `Last updated ${details.generated_at || history.generated_at || "unknown"} · Workflow: ${details.workflow_name || history.workflow_name || "unknown"}`;
 
   dashboardData = buildCombinedState(history, details);
@@ -402,19 +427,23 @@ async function init() {
   renderTrendChart(dashboardData);
   renderRepoChart(dashboardData);
 
-  if (dashboardData.length) selectRepo(dashboardData[0].repo);
+  requireEl("showOverviewBtn").addEventListener("click", showOverviewView);
 
-  document.getElementById("repoSearch").addEventListener("input", e => {
+  requireEl("repoSearch").addEventListener("input", e => {
     renderRepoNav(dashboardData, e.target.value);
   });
 
-  document.getElementById("notebookSearch").addEventListener("input", () => {
-    const active = document.querySelector(".repo-nav-button.active");
-    if (active) renderRepoDetail(active.dataset.repo);
+  requireEl("notebookSearch").addEventListener("input", () => {
+    if (currentRepo) showRepoView(currentRepo);
   });
+
+  showOverviewView();
 }
 
 init().catch(err => {
   console.error(err);
-  document.getElementById("lastUpdated").textContent = "Failed to load dashboard data.";
+  const lastUpdated = document.getElementById("lastUpdated");
+  if (lastUpdated) {
+    lastUpdated.textContent = `Failed to load dashboard data: ${err.message}`;
+  }
 });

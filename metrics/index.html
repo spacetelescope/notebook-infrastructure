@@ -19,6 +19,16 @@
       </div>
 
       <div class="sidebar-section">
+        <button id="showOverviewBtn" class="repo-nav-button active" type="button">
+          <div class="repo-nav-top">
+            <div class="repo-short">All Repositories</div>
+            <span class="badge blue">Overview</span>
+          </div>
+          <div class="repo-full">Return to cross-repo metrics</div>
+        </button>
+      </div>
+
+      <div class="sidebar-section">
         <label class="label" for="repoSearch">Filter repos</label>
         <input
           id="repoSearch"
@@ -37,7 +47,7 @@
     <main class="main">
       <header class="topbar">
         <div>
-          <h2>Cross-Repo CI Health</h2>
+          <h2 id="pageTitle">Cross-Repo CI Health</h2>
           <p id="lastUpdated" class="muted">Loading…</p>
         </div>
 
@@ -48,60 +58,74 @@
         </div>
       </header>
 
-      <section id="kpis" class="kpis"></section>
+      <!-- OVERVIEW -->
+      <div id="overviewView">
+        <section id="kpis" class="kpis"></section>
 
-      <section class="panel-grid">
+        <section class="panel-grid">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Total Failures Trend</h3>
+                <p class="muted">Across all monitored repositories</p>
+              </div>
+            </div>
+            <div class="chart-wrap compact">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Current Failure Count</h3>
+                <p class="muted">Latest run by repository</p>
+              </div>
+            </div>
+            <div class="chart-wrap compact">
+              <canvas id="repoChart"></canvas>
+            </div>
+          </section>
+        </section>
+
         <section class="panel">
           <div class="panel-header">
             <div>
-              <h3>Total Failures Trend</h3>
-              <p class="muted">Across all monitored repositories</p>
+              <h3>Repository Summary</h3>
+              <p class="muted">Current state across all monitored repositories</p>
             </div>
           </div>
-          <div class="chart-wrap compact">
-            <canvas id="trendChart"></canvas>
+
+          <div class="table-wrap">
+            <table id="repoTable">
+              <thead>
+                <tr>
+                  <th>Repository</th>
+                  <th>Failures</th>
+                  <th>New</th>
+                  <th>Resolved</th>
+                  <th>Consistent</th>
+                  <th>Latest Run</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
           </div>
         </section>
 
         <section class="panel">
           <div class="panel-header">
             <div>
-              <h3>Current Failure Count</h3>
-              <p class="muted">Latest run by repository</p>
+              <h3>Run Errors</h3>
+              <p class="muted">Repo-level fetch or workflow issues</p>
             </div>
           </div>
-          <div class="chart-wrap compact">
-            <canvas id="repoChart"></canvas>
-          </div>
+          <div id="errorList" class="stack-list"></div>
         </section>
-      </section>
+      </div>
 
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h3>Repository Summary</h3>
-            <p class="muted">Sortable current-state view</p>
-          </div>
-        </div>
-
-        <div class="table-wrap">
-          <table id="repoTable">
-            <thead>
-              <tr>
-                <th>Repository</th>
-                <th>Failures</th>
-                <th>New</th>
-                <th>Resolved</th>
-                <th>Consistent</th>
-                <th>Latest Run</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="details-layout">
+      <!-- REPO VIEW -->
+      <div id="repoView" class="hidden">
         <section class="panel repo-detail-panel">
           <div class="panel-header">
             <div>
@@ -110,11 +134,7 @@
             </div>
           </div>
 
-          <div id="detailEmpty" class="empty-state">
-            Pick a repository to inspect failures, regressions, and recent run details.
-          </div>
-
-          <div id="detailContent" class="detail-content hidden">
+          <div id="detailContent" class="detail-content">
             <div id="detailStats" class="detail-top-grid"></div>
 
             <div id="detailLinks" class="detail-links"></div>
@@ -140,18 +160,7 @@
             <div id="detailSections" class="detail-sections"></div>
           </div>
         </section>
-
-        <aside class="panel narrow-panel">
-          <div class="panel-header">
-            <div>
-              <h3>Run Errors</h3>
-              <p class="muted">Repo-level fetch or workflow issues</p>
-            </div>
-          </div>
-
-          <div id="errorList" class="stack-list"></div>
-        </aside>
-      </section>
+      </div>
     </main>
   </div>
 

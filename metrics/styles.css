@@ -466,3 +466,12 @@ tr:hover td {
   .topbar { flex-direction: column; }
   .kpis, .detail-top-grid { grid-template-columns: 1fr; }
 }
+
+#repoView.hidden,
+#overviewView.hidden {
+  display: none;
+}
+
+#repoView .repo-detail-panel {
+  min-height: auto;
+}
