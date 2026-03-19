@@ -4,11 +4,11 @@ scheduled_ci_report.py
 For each repository in a supplied repo list, compares the latest completed
 "Notebook CI - Scheduled" GitHub Actions workflow run with the immediately
 previous completed run, writes a combined Markdown report, updates a persistent
-history JSON file, and generates a dashboard Markdown file with trend tables
-and Mermaid charts.
+history JSON file, generates a dashboard Markdown file with trend tables and
+Mermaid charts, and writes a structured details JSON payload for a richer UI.
 
 Usage:
-    python scheduled_ci_report.py repos.txt report.md history.json dashboard.md
+    python scheduled_ci_report.py repos.txt report.md history.json dashboard.md details.json
 
 Repo list format:
     One repo per line, in owner/repo form.
@@ -487,10 +487,74 @@ def build_dashboard(history):
     return "\n".join(lines)
 
 
+def build_details_payload(results, errors):
+    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    payload = {
+        "generated_at": generated_at,
+        "workflow_name": WORKFLOW_NAME,
+        "repositories": [],
+        "errors": errors,
+    }
+
+    for item in results:
+        comp = item["comparison"]
+        latest_run = item["latest_run"]
+        previous_run = item["previous_run"]
+
+        payload["repositories"].append(
+            {
+                "repo": item["repo"],
+                "latest_run": {
+                    "number": latest_run["run_number"],
+                    "url": latest_run["html_url"],
+                    "created_at": latest_run["created_at"],
+                },
+                "previous_run": {
+                    "number": previous_run["run_number"],
+                    "url": previous_run["html_url"],
+                    "created_at": previous_run["created_at"],
+                },
+                "summary": {
+                    "fail_latest": comp["fail_latest"],
+                    "pass_latest": comp["pass_latest"],
+                    "total_latest": comp["total_latest"],
+                    "fail_previous": comp["fail_previous"],
+                    "pass_previous": comp["pass_previous"],
+                    "total_previous": comp["total_previous"],
+                    "new_failures": len(comp["new_failures"]),
+                    "resolved_failures": len(comp["resolved_failures"]),
+                    "consistent_failures": len(comp["consistent_failures"]),
+                    "consistent_successes": len(comp["consistent_successes"]),
+                },
+                "details": {
+                    "new_failures": comp["new_failures"],
+                    "resolved_failures": comp["resolved_failures"],
+                    "consistent_failures": comp["consistent_failures"],
+                    "consistent_successes": comp["consistent_successes"],
+                    "changed_other": [
+                        {"notebook": nb, "previous": prev, "current": curr}
+                        for nb, prev, curr in comp["changed_other"]
+                    ],
+                    "only_in_latest": [
+                        {"notebook": nb, "conclusion": conclusion}
+                        for nb, conclusion in comp["only_in_latest"]
+                    ],
+                    "only_in_previous": [
+                        {"notebook": nb, "conclusion": conclusion}
+                        for nb, conclusion in comp["only_in_previous"]
+                    ],
+                },
+            }
+        )
+
+    return payload
+
+
 def main():
-    if len(sys.argv) < 5:
+    if len(sys.argv) < 6:
         print(
-            "Usage: python scheduled_ci_report.py repos.txt report.md history.json dashboard.md",
+            "Usage: python scheduled_ci_report.py repos.txt report.md history.json dashboard.md details.json",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -499,6 +563,7 @@ def main():
     report_file = sys.argv[2]
     history_file = sys.argv[3]
     dashboard_file = sys.argv[4]
+    details_file = sys.argv[5]
 
     repos = load_repositories(repo_file)
     if not repos:
@@ -550,6 +615,7 @@ def main():
     history = load_history(history_file)
     history = update_history(history, results)
     dashboard = build_dashboard(history)
+    details = build_details_payload(results, errors)
 
     with open(report_file, "w", encoding="utf-8") as f:
         f.write(report)
@@ -560,9 +626,13 @@ def main():
     with open(dashboard_file, "w", encoding="utf-8") as f:
         f.write(dashboard)
 
+    with open(details_file, "w", encoding="utf-8") as f:
+        json.dump(details, f, indent=2)
+
     print(f"Report written to {report_file}", file=sys.stderr)
     print(f"History written to {history_file}", file=sys.stderr)
     print(f"Dashboard written to {dashboard_file}", file=sys.stderr)
+    print(f"Details written to {details_file}", file=sys.stderr)
 
 
 if __name__ == "__main__":
