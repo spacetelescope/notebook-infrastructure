@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-03-19T20:35:30Z",
+  "generated_at": "2026-03-23T04:43:36Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
       "repo": "spacetelescope/hellouniverse",
       "latest_run": {
+        "number": 31,
+        "url": "https://github.com/spacetelescope/hellouniverse/actions/runs/23394523547",
+        "created_at": "2026-03-22T03:08:52Z"
+      },
+      "previous_run": {
         "number": 30,
         "url": "https://github.com/spacetelescope/hellouniverse/actions/runs/23102195856",
         "created_at": "2026-03-15T03:09:32Z"
-      },
-      "previous_run": {
-        "number": 29,
-        "url": "https://github.com/spacetelescope/hellouniverse/actions/runs/22812661773",
-        "created_at": "2026-03-08T03:05:17Z"
       },
       "summary": {
         "fail_latest": 0,
@@ -46,33 +46,33 @@
     {
       "repo": "spacetelescope/mast_notebooks",
       "latest_run": {
+        "number": 28,
+        "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/23394571486",
+        "created_at": "2026-03-22T03:11:55Z"
+      },
+      "previous_run": {
         "number": 27,
         "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/23102252114",
         "created_at": "2026-03-15T03:12:58Z"
       },
-      "previous_run": {
-        "number": 26,
-        "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/22812714353",
-        "created_at": "2026-03-08T03:08:37Z"
-      },
       "summary": {
-        "fail_latest": 5,
-        "pass_latest": 73,
+        "fail_latest": 7,
+        "pass_latest": 71,
         "total_latest": 78,
-        "fail_previous": 7,
-        "pass_previous": 71,
+        "fail_previous": 5,
+        "pass_previous": 73,
         "total_previous": 78,
-        "new_failures": 0,
-        "resolved_failures": 2,
+        "new_failures": 2,
+        "resolved_failures": 0,
         "consistent_failures": 5,
         "consistent_successes": 71
       },
       "details": {
-        "new_failures": [],
-        "resolved_failures": [
+        "new_failures": [
           "notebooks/HSC/HSCV3_API/hscv3_api.ipynb",
           "notebooks/HSC/HSCV3_SMC_API/hscv3_smc_api.ipynb"
         ],
+        "resolved_failures": [],
         "consistent_failures": [
           "notebooks/HSC/HCV_CASJOBS/HCV_casjobs_demo.ipynb",
           "notebooks/HSC/HSC_TAP/HSC_TAP.ipynb",
@@ -161,14 +161,14 @@
     {
       "repo": "spacetelescope/jdat_notebooks",
       "latest_run": {
+        "number": 20,
+        "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/23394525556",
+        "created_at": "2026-03-22T03:08:59Z"
+      },
+      "previous_run": {
         "number": 19,
         "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/23102201298",
         "created_at": "2026-03-15T03:09:54Z"
-      },
-      "previous_run": {
-        "number": 18,
-        "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/22812671444",
-        "created_at": "2026-03-08T03:05:52Z"
       },
       "summary": {
         "fail_latest": 10,
@@ -250,33 +250,34 @@
     {
       "repo": "spacetelescope/hst_notebooks",
       "latest_run": {
+        "number": 22,
+        "url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/23394546172",
+        "created_at": "2026-03-22T03:10:17Z"
+      },
+      "previous_run": {
         "number": 21,
         "url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/23102221236",
         "created_at": "2026-03-15T03:11:06Z"
       },
-      "previous_run": {
-        "number": 20,
-        "url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/22812684472",
-        "created_at": "2026-03-08T03:06:40Z"
-      },
       "summary": {
-        "fail_latest": 3,
+        "fail_latest": 4,
         "pass_latest": 66,
-        "total_latest": 69,
+        "total_latest": 70,
         "fail_previous": 3,
         "pass_previous": 66,
         "total_previous": 69,
-        "new_failures": 1,
+        "new_failures": 2,
         "resolved_failures": 1,
         "consistent_failures": 2,
-        "consistent_successes": 65
+        "consistent_successes": 64
       },
       "details": {
         "new_failures": [
-          "notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb"
+          "notebooks/ACS/acs_exception_report/exception_report_checks.ipynb",
+          "notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb"
         ],
         "resolved_failures": [
-          "notebooks/ACS/acs_etc_cte/acs_etc_cte.ipynb"
+          "notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb"
         ],
         "consistent_failures": [
           "notebooks/COS/LSF/LSF.ipynb",
@@ -291,7 +292,7 @@
           "execute-all / process-notebooks (notebooks/WFC3/ir_scattered_light_manual_corrections/Correcting_for_Scattered_...",
           "execute-all / process-notebooks (notebooks/WFC3/uvis_pam_corrections/WFC3_UVIS_Pixel_Area_Map_Corrections_for_S...",
           "notebooks/ACS/acs_cte_forward_model/acs_cte_forward_model_example.ipynb",
-          "notebooks/ACS/acs_exception_report/exception_report_checks.ipynb",
+          "notebooks/ACS/acs_etc_cte/acs_etc_cte.ipynb",
           "notebooks/ACS/acs_findsat_mrt/acs_findsat_mrt_example.ipynb",
           "notebooks/ACS/acs_focus_diverse_epsfs/acs_focus_diverse_epsfs.ipynb",
           "notebooks/ACS/acs_pixel_area_maps/acs_pixel_area_maps.ipynb",
@@ -314,7 +315,6 @@
           "notebooks/DrizzlePac/align_multiple_visits/align_multiple_visits.ipynb",
           "notebooks/DrizzlePac/align_sparse_fields/align_sparse_fields.ipynb",
           "notebooks/DrizzlePac/drizzle_wfpc2/drizzle_wfpc2.ipynb",
-          "notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb",
           "notebooks/DrizzlePac/optimize_image_sampling/optimize_image_sampling.ipynb",
           "notebooks/DrizzlePac/sky_matching/sky_matching.ipynb",
           "notebooks/HASP/CoaddTutorial/CoaddTutorial.ipynb",
@@ -350,21 +350,26 @@
           "notebooks/WFC3/zeropoints/zeropoints.ipynb"
         ],
         "changed_other": [],
-        "only_in_latest": [],
+        "only_in_latest": [
+          {
+            "notebook": "notebooks/WFC3/slitlessutils_IR_extraction/slitlessutils_IR_extraction.ipynb",
+            "conclusion": "success"
+          }
+        ],
         "only_in_previous": []
       }
     },
     {
       "repo": "spacetelescope/roman_notebooks",
       "latest_run": {
+        "number": 18,
+        "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/23394524582",
+        "created_at": "2026-03-22T03:08:55Z"
+      },
+      "previous_run": {
         "number": 17,
         "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/23102201256",
         "created_at": "2026-03-15T03:09:53Z"
-      },
-      "previous_run": {
-        "number": 16,
-        "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/22812668184",
-        "created_at": "2026-03-08T03:05:41Z"
       },
       "summary": {
         "fail_latest": 9,
@@ -412,14 +417,14 @@
     {
       "repo": "spacetelescope/jwst-pipeline-notebooks",
       "latest_run": {
+        "number": 9,
+        "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/23394561150",
+        "created_at": "2026-03-22T03:11:15Z"
+      },
+      "previous_run": {
         "number": 8,
         "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/23102241381",
         "created_at": "2026-03-15T03:12:18Z"
-      },
-      "previous_run": {
-        "number": 7,
-        "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/22812701959",
-        "created_at": "2026-03-08T03:07:46Z"
       },
       "summary": {
         "fail_latest": 1,
