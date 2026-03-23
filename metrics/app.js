@@ -25,16 +25,6 @@ function safeDate(value) {
   return value ? value.slice(0, 10) : "";
 }
 
-function parseIso(value) {
-  return value ? new Date(value) : null;
-}
-
-function daysAgo(days) {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() - days);
-  return d;
-}
-
 function getLatestMap(history) {
   const repos = history.repos || {};
   const latest = {};
@@ -90,44 +80,26 @@ function baseChartOptions(yTitle) {
   };
 }
 
-function itemFirstSeenDate(item) {
-  if (!item.history?.length) return null;
-  const sorted = [...item.history].sort(
-    (a, b) => new Date(a.latest_run_created_at) - new Date(b.latest_run_created_at)
-  );
-  return parseIso(sorted[0].latest_run_created_at);
-}
-
-function isRecentRepo(item, days = 60) {
-  const firstSeen = itemFirstSeenDate(item);
-  if (!firstSeen) return false;
-  return firstSeen >= daysAgo(days);
-}
-
 function applyScopeToRepo(item, scope) {
   if (scope === "all") return item;
 
   if (scope === "recent60") {
-    if (!isRecentRepo(item, 60)) return null;
+    const recent = item.recent_notebooks_60d || [];
+    if (!recent.length) return null;
+
+    const failCount = recent.filter(x => x.current_status === "failure").length;
+    const passCount = recent.filter(x => x.current_status === "success").length;
 
     return {
       ...item,
-      history: item.history.filter(h => parseIso(h.latest_run_created_at) >= daysAgo(60))
-    };
-  }
-
-  if (scope === "newOnly") {
-    if (item.summary.new_failures <= 0) return null;
-
-    return {
-      ...item,
-      details: {
-        ...item.details,
-        resolved_failures: [],
-        consistent_failures: [],
-        only_in_latest: [],
-        only_in_previous: [],
-        changed_other: []
+      summary: {
+        ...item.summary,
+        fail_latest: failCount,
+        pass_latest: passCount,
+        total_latest: recent.length,
+        new_failures: 0,
+        resolved_failures: 0,
+        consistent_failures: 0
       }
     };
   }
@@ -143,11 +115,11 @@ function getScopedData(data, scope) {
 
 function renderKpis(data, errorsCount) {
   const latest = data.map(d => d.summary);
-  const totalFailures = latest.reduce((a, r) => a + r.fail_latest, 0);
-  const totalNew = latest.reduce((a, r) => a + r.new_failures, 0);
-  const totalResolved = latest.reduce((a, r) => a + r.resolved_failures, 0);
-  const totalConsistent = latest.reduce((a, r) => a + r.consistent_failures, 0);
-  const failingRepos = data.filter(d => d.summary.fail_latest > 0).length;
+  const totalFailures = latest.reduce((a, r) => a + (r.fail_latest || 0), 0);
+  const totalNew = latest.reduce((a, r) => a + (r.new_failures || 0), 0);
+  const totalResolved = latest.reduce((a, r) => a + (r.resolved_failures || 0), 0);
+  const totalConsistent = latest.reduce((a, r) => a + (r.consistent_failures || 0), 0);
+  const failingRepos = data.filter(d => (d.summary.fail_latest || 0) > 0).length;
 
   const kpis = [
     ["Monitored Repos", data.length, `${failingRepos} currently failing`],
@@ -178,7 +150,7 @@ function renderRepoNav(data, filter = "") {
 
   const filtered = data
     .filter(d => d.repo.toLowerCase().includes(filter.toLowerCase()))
-    .sort((a, b) => b.summary.fail_latest - a.summary.fail_latest || a.repo.localeCompare(b.repo));
+    .sort((a, b) => (b.summary.fail_latest || 0) - (a.summary.fail_latest || 0) || a.repo.localeCompare(b.repo));
 
   for (const item of filtered) {
     const btn = document.createElement("button");
@@ -187,7 +159,7 @@ function renderRepoNav(data, filter = "") {
     btn.innerHTML = `
       <div class="repo-nav-top">
         <div class="repo-short">${shortRepo(item.repo)}</div>
-        <span class="badge ${item.summary.fail_latest > 0 ? "red" : "green"}">${item.summary.fail_latest}</span>
+        <span class="badge ${(item.summary.fail_latest || 0) > 0 ? "red" : "green"}">${item.summary.fail_latest || 0}</span>
       </div>
       <div class="repo-full">${item.repo}</div>
     `;
@@ -203,19 +175,76 @@ function renderRepoTable(data) {
   tbody.innerHTML = "";
 
   const sorted = [...data].sort((a, b) =>
-    b.summary.fail_latest - a.summary.fail_latest ||
-    b.summary.new_failures - a.summary.new_failures
+    (b.summary.fail_latest || 0) - (a.summary.fail_latest || 0) ||
+    (b.summary.new_failures || 0) - (a.summary.new_failures || 0)
   );
 
   for (const item of sorted) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><a href="#" data-repo-link="${item.repo}">${item.repo}</a></td>
-      <td><span class="badge ${item.summary.fail_latest > 0 ? "red" : "green"}">${item.summary.fail_latest}</span></td>
-      <td>${item.summary.new_failures}</td>
-      <td>${item.summary.resolved_failures}</td>
-      <td>${item.summary.consistent_failures}</td>
+      <td><span class="badge ${(item.summary.fail_latest || 0) > 0 ? "red" : "green"}">${item.summary.fail_latest || 0}</span></td>
+      <td>${item.summary.new_failures || 0}</td>
+      <td>${item.summary.resolved_failures || 0}</td>
+      <td>${item.summary.consistent_failures || 0}</td>
       <td><a href="${item.latest_run.url}" target="_blank" rel="noopener">#${item.latest_run.number}</a></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  tbody.querySelectorAll("[data-repo-link]").forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      showRepoView(e.target.dataset.repoLink);
+    });
+  });
+}
+
+function renderRecentNotebookTable(data) {
+  const tbody = requireEl("recentNotebookTable").querySelector("tbody");
+  tbody.innerHTML = "";
+
+  const rows = [];
+
+  for (const item of data) {
+    for (const nb of (item.recent_notebooks_60d || [])) {
+      rows.push({
+        repo: item.repo,
+        notebook: nb.notebook,
+        added_at: nb.added_at,
+        current_status: nb.current_status,
+        latest_run_url: nb.latest_run_url,
+        latest_run_number: nb.latest_run_number
+      });
+    }
+  }
+
+  rows.sort((a, b) => {
+    if (a.repo !== b.repo) return a.repo.localeCompare(b.repo);
+    return a.notebook.localeCompare(b.notebook);
+  });
+
+  if (!rows.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="muted">No notebooks match this filter.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  for (const row of rows) {
+    const badgeClass =
+      row.current_status === "failure" ? "red" :
+      row.current_status === "success" ? "green" : "blue";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><a href="#" data-repo-link="${row.repo}">${row.repo}</a></td>
+      <td><code>${row.notebook}</code></td>
+      <td>${row.added_at}</td>
+      <td><span class="badge ${badgeClass}">${row.current_status}</span></td>
+      <td><a href="${row.latest_run_url}" target="_blank" rel="noopener">#${row.latest_run_number}</a></td>
     `;
     tbody.appendChild(tr);
   }
@@ -280,7 +309,7 @@ function renderTrendChart(data) {
 }
 
 function renderRepoChart(data) {
-  const sorted = [...data].sort((a, b) => b.summary.fail_latest - a.summary.fail_latest);
+  const sorted = [...data].sort((a, b) => (b.summary.fail_latest || 0) - (a.summary.fail_latest || 0));
 
   destroyChart(repoChart);
   repoChart = new Chart(requireEl("repoChart"), {
@@ -289,9 +318,9 @@ function renderRepoChart(data) {
       labels: sorted.map(x => shortRepo(x.repo)),
       datasets: [{
         label: "Latest Failures",
-        data: sorted.map(x => x.summary.fail_latest),
+        data: sorted.map(x => x.summary.fail_latest || 0),
         backgroundColor: sorted.map(x =>
-          x.summary.fail_latest > 0 ? "rgba(255,107,107,0.7)" : "rgba(77,212,172,0.65)"
+          (x.summary.fail_latest || 0) > 0 ? "rgba(255,107,107,0.7)" : "rgba(77,212,172,0.65)"
         )
       }]
     },
@@ -327,9 +356,13 @@ function pathList(items, badgeClass = "blue", badgeTextFn = null, searchTerm = "
       ${filtered.map(item => {
         const path = typeof item === "string" ? item : item.notebook;
         const badgeText = badgeTextFn ? badgeTextFn(item) : "";
+        const content = (typeof item === "object" && item.latest_run_url)
+          ? `<a href="${item.latest_run_url}" target="_blank" rel="noopener"><code>${path}</code></a>`
+          : `<code>${path}</code>`;
+
         return `
           <div class="path-item">
-            <code>${path}</code>
+            ${content}
             ${badgeText ? `<span class="badge ${badgeClass}">${badgeText}</span>` : ""}
           </div>
         `;
@@ -367,6 +400,20 @@ function renderDetailSections(item, searchTerm = "") {
   const container = requireEl("detailSections");
 
   const sections = [
+    {
+      title: "Added in Last 60 Days",
+      count: (item.recent_notebooks_60d || []).length,
+      body: pathList(
+        (item.recent_notebooks_60d || []).map(x => ({
+          notebook: x.notebook,
+          label: `${x.added_at} · ${x.current_status}`,
+          latest_run_url: x.latest_run_url
+        })),
+        "blue",
+        x => x.label,
+        searchTerm
+      )
+    },
     {
       title: "New Failures",
       count: d.new_failures.length,
@@ -436,6 +483,11 @@ function updateSidebarSelection() {
   });
 }
 
+function scopeLabel(scope) {
+  if (scope === "recent60") return "Added in Last 60 Days";
+  return "All";
+}
+
 function showOverviewView() {
   currentRepo = null;
   requireEl("overviewView").classList.remove("hidden");
@@ -460,10 +512,10 @@ function showRepoView(repoName) {
     `Latest run #${item.latest_run.number} vs previous run #${item.previous_run.number}`;
 
   requireEl("detailStats").innerHTML = `
-    ${statCard("Failures", item.summary.fail_latest, item.summary.fail_latest > 0 ? "red" : "green")}
-    ${statCard("New", item.summary.new_failures, item.summary.new_failures > 0 ? "red" : "blue")}
-    ${statCard("Resolved", item.summary.resolved_failures, item.summary.resolved_failures > 0 ? "green" : "blue")}
-    ${statCard("Consistent", item.summary.consistent_failures, item.summary.consistent_failures > 0 ? "yellow" : "blue")}
+    ${statCard("Failures", item.summary.fail_latest || 0, (item.summary.fail_latest || 0) > 0 ? "red" : "green")}
+    ${statCard("New", item.summary.new_failures || 0, (item.summary.new_failures || 0) > 0 ? "red" : "blue")}
+    ${statCard("Resolved", item.summary.resolved_failures || 0, (item.summary.resolved_failures || 0) > 0 ? "green" : "blue")}
+    ${statCard("Consistent", item.summary.consistent_failures || 0, (item.summary.consistent_failures || 0) > 0 ? "yellow" : "blue")}
   `;
 
   requireEl("detailLinks").innerHTML = `
@@ -476,12 +528,6 @@ function showRepoView(repoName) {
   updateSidebarSelection();
 }
 
-function scopeLabel(scope) {
-  if (scope === "recent60") return "Last 60 Days";
-  if (scope === "newOnly") return "New Only";
-  return "All";
-}
-
 function rerender() {
   const scoped = getScopedData(dashboardData, currentScope);
   const repoFilter = requireEl("repoSearch").value || "";
@@ -489,6 +535,7 @@ function rerender() {
   renderKpis(scoped, 0);
   renderRepoNav(scoped, repoFilter);
   renderRepoTable(scoped);
+  renderRecentNotebookTable(scoped);
   renderTrendChart(scoped);
   renderRepoChart(scoped);
 
