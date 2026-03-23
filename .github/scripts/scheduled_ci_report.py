@@ -7,6 +7,10 @@ previous completed run, writes a combined Markdown report, updates a persistent
 history JSON file, generates a dashboard Markdown file with trend tables and
 Mermaid charts, and writes a structured details JSON payload for a richer UI.
 
+It also augments each repository payload with:
+- recent_notebooks_60d: notebooks added to the repository in the last 60 days,
+  along with their current pass/fail status and a link to the latest run.
+
 Usage:
     python scheduled_ci_report.py repos.txt report.md history.json dashboard.md details.json
 
@@ -14,7 +18,7 @@ Repo list format:
     One repo per line, in owner/repo form.
 
 Required environment variables:
-    GITHUB_TOKEN  – optional but recommended
+    GITHUB_TOKEN  – optional but strongly recommended
 Optional environment variables:
     WORKFLOW_NAME – defaults to "Notebook CI - Scheduled"
 """
@@ -22,7 +26,7 @@ Optional environment variables:
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import requests
 
@@ -36,6 +40,8 @@ HEADERS = {
 }
 if TOKEN:
     HEADERS["Authorization"] = f"Bearer {TOKEN}"
+
+FILE_ADDED_CACHE = {}
 
 
 def gh_get(url, params=None):
@@ -106,6 +112,72 @@ def load_repositories(repo_file):
                 continue
             repos.append(line)
     return repos
+
+
+def get_file_added_date(repo, path):
+    """
+    Approximate the file added date by finding the earliest commit touching the file.
+    Cached for the duration of the script.
+    """
+    cache_key = f"{repo}:{path}"
+    if cache_key in FILE_ADDED_CACHE:
+        return FILE_ADDED_CACHE[cache_key]
+
+    url = f"{API_BASE}/repos/{repo}/commits"
+    page = 1
+    oldest_dt = None
+
+    while True:
+        data, _ = gh_get(
+            url,
+            params={
+                "path": path,
+                "per_page": 100,
+                "page": page,
+            },
+        )
+
+        if not data:
+            break
+
+        oldest_commit = data[-1]
+        oldest_dt = datetime.fromisoformat(
+            oldest_commit["commit"]["committer"]["date"].replace("Z", "+00:00")
+        )
+
+        if len(data) < 100:
+            break
+
+        page += 1
+
+    FILE_ADDED_CACHE[cache_key] = oldest_dt
+    return oldest_dt
+
+
+def get_recent_notebooks(repo, latest_results, latest_run, days=60):
+    """
+    Return all notebooks added in the last `days`, with current status based on latest_results.
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    items = []
+
+    for nb_path, conclusion in latest_results.items():
+        added_dt = get_file_added_date(repo, nb_path)
+        if not added_dt:
+            continue
+
+        if added_dt >= cutoff:
+            items.append(
+                {
+                    "notebook": nb_path,
+                    "added_at": added_dt.strftime("%Y-%m-%d"),
+                    "current_status": conclusion,
+                    "latest_run_url": latest_run["html_url"],
+                    "latest_run_number": latest_run["run_number"],
+                }
+            )
+
+    return sorted(items, key=lambda x: x["notebook"].lower())
 
 
 def compare_results(latest_results, previous_results):
@@ -527,6 +599,7 @@ def build_details_payload(results, errors):
                     "consistent_failures": len(comp["consistent_failures"]),
                     "consistent_successes": len(comp["consistent_successes"]),
                 },
+                "recent_notebooks_60d": item.get("recent_notebooks_60d", []),
                 "details": {
                     "new_failures": comp["new_failures"],
                     "resolved_failures": comp["resolved_failures"],
@@ -594,6 +667,13 @@ def main():
             latest_results = get_notebook_results(repo, latest_run["id"])
             previous_results = get_notebook_results(repo, previous_run["id"])
 
+            recent_notebooks_60d = get_recent_notebooks(
+                repo,
+                latest_results,
+                latest_run,
+                days=60,
+            )
+
             section, comparison = build_repo_section(
                 repo, latest_run, previous_run, latest_results, previous_results
             )
@@ -605,6 +685,7 @@ def main():
                     "previous_run": previous_run,
                     "comparison": comparison,
                     "section": section,
+                    "recent_notebooks_60d": recent_notebooks_60d,
                 }
             )
 
