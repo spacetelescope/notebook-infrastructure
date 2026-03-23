@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-23T19:59:01Z",
+  "generated_at": "2026-03-23T20:20:10Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -26,6 +26,7 @@
         "consistent_failures": 0,
         "consistent_successes": 6
       },
+      "recent_notebooks_60d": [],
       "details": {
         "new_failures": [],
         "resolved_failures": [],
@@ -67,6 +68,7 @@
         "consistent_failures": 5,
         "consistent_successes": 71
       },
+      "recent_notebooks_60d": [],
       "details": {
         "new_failures": [
           "notebooks/HSC/HSCV3_API/hscv3_api.ipynb",
@@ -182,6 +184,15 @@
         "consistent_failures": 10,
         "consistent_successes": 43
       },
+      "recent_notebooks_60d": [
+        {
+          "notebook": "notebooks/MIRI/MIRI_LRS_spectral_extraction/miri_lrs_advanced_extraction.ipynb",
+          "added_at": "2026-02-11",
+          "current_status": "success",
+          "latest_run_url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/23394525556",
+          "latest_run_number": 20
+        }
+      ],
       "details": {
         "new_failures": [],
         "resolved_failures": [],
@@ -271,6 +282,15 @@
         "consistent_failures": 2,
         "consistent_successes": 65
       },
+      "recent_notebooks_60d": [
+        {
+          "notebook": "notebooks/WFC3/slitlessutils_IR_extraction/slitlessutils_IR_extraction.ipynb",
+          "added_at": "2026-02-23",
+          "current_status": "success",
+          "latest_run_url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/23394546172",
+          "latest_run_number": 22
+        }
+      ],
       "details": {
         "new_failures": [
           "notebooks/ACS/acs_exception_report/exception_report_checks.ipynb"
@@ -383,6 +403,7 @@
         "consistent_failures": 9,
         "consistent_successes": 10
       },
+      "recent_notebooks_60d": [],
       "details": {
         "new_failures": [],
         "resolved_failures": [],
@@ -438,6 +459,7 @@
         "consistent_failures": 1,
         "consistent_successes": 15
       },
+      "recent_notebooks_60d": [],
       "details": {
         "new_failures": [],
         "resolved_failures": [],

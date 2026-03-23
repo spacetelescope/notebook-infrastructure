@@ -64,8 +64,9 @@
         <div class="view-controls">
           <div class="toggle-group" id="scopeToggle">
             <button type="button" class="toggle-btn active" data-scope="all">All</button>
-            <button type="button" class="toggle-btn" data-scope="recent60">Last 60 Days</button>
-            <button type="button" class="toggle-btn" data-scope="newOnly">New Only</button>
+            <button type="button" class="toggle-btn" data-scope="recent60">
+              Added in Last 60 Days
+            </button>
           </div>
         </div>
         <section class="panel-grid">
@@ -80,7 +81,31 @@
               <canvas id="trendChart"></canvas>
             </div>
           </section>
-
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3 id="recentNotebookPanelTitle">Recent Notebooks</h3>
+                <p class="muted" id="recentNotebookPanelSubtitle">
+                  Notebooks added to the repositories in the last 60 days and their current status
+                </p>
+              </div>
+            </div>
+          
+            <div class="table-wrap">
+              <table id="recentNotebookTable">
+                <thead>
+                  <tr>
+                    <th>Repository</th>
+                    <th>Notebook</th>
+                    <th>Added</th>
+                    <th>Current Status</th>
+                    <th>Latest Run</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
           <section class="panel">
             <div class="panel-header">
               <div>
