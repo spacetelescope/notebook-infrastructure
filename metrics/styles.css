@@ -475,3 +475,36 @@ tr:hover td {
 #repoView .repo-detail-panel {
   min-height: auto;
 }
+.view-controls {
+  margin-bottom: 18px;
+}
+
+.toggle-group {
+  display: inline-flex;
+  gap: 6px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 6px;
+}
+
+.toggle-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  padding: 9px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.15s ease;
+}
+
+.toggle-btn:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #4d6fff, #6ea8fe);
+  color: white;
+}
