@@ -61,7 +61,13 @@
       <!-- OVERVIEW -->
       <div id="overviewView">
         <section id="kpis" class="kpis"></section>
-
+        <div class="view-controls">
+          <div class="toggle-group" id="scopeToggle">
+            <button type="button" class="toggle-btn active" data-scope="all">All</button>
+            <button type="button" class="toggle-btn" data-scope="recent60">Last 60 Days</button>
+            <button type="button" class="toggle-btn" data-scope="newOnly">New Only</button>
+          </div>
+        </div>
         <section class="panel-grid">
           <section class="panel">
             <div class="panel-header">
