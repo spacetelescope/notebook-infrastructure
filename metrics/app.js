@@ -3,6 +3,7 @@ let repoChart;
 let detailTrendChart;
 let dashboardData = [];
 let currentRepo = null;
+let currentScope = "all";
 
 async function loadJson(path) {
   const res = await fetch(path, { cache: "no-store" });
@@ -22,6 +23,16 @@ function shortRepo(repo) {
 
 function safeDate(value) {
   return value ? value.slice(0, 10) : "";
+}
+
+function parseIso(value) {
+  return value ? new Date(value) : null;
+}
+
+function daysAgo(days) {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - days);
+  return d;
 }
 
 function getLatestMap(history) {
@@ -77,6 +88,57 @@ function baseChartOptions(yTitle) {
       }
     }
   };
+}
+
+function itemFirstSeenDate(item) {
+  if (!item.history?.length) return null;
+  const sorted = [...item.history].sort(
+    (a, b) => new Date(a.latest_run_created_at) - new Date(b.latest_run_created_at)
+  );
+  return parseIso(sorted[0].latest_run_created_at);
+}
+
+function isRecentRepo(item, days = 60) {
+  const firstSeen = itemFirstSeenDate(item);
+  if (!firstSeen) return false;
+  return firstSeen >= daysAgo(days);
+}
+
+function applyScopeToRepo(item, scope) {
+  if (scope === "all") return item;
+
+  if (scope === "recent60") {
+    if (!isRecentRepo(item, 60)) return null;
+
+    return {
+      ...item,
+      history: item.history.filter(h => parseIso(h.latest_run_created_at) >= daysAgo(60))
+    };
+  }
+
+  if (scope === "newOnly") {
+    if (item.summary.new_failures <= 0) return null;
+
+    return {
+      ...item,
+      details: {
+        ...item.details,
+        resolved_failures: [],
+        consistent_failures: [],
+        only_in_latest: [],
+        only_in_previous: [],
+        changed_other: []
+      }
+    };
+  }
+
+  return item;
+}
+
+function getScopedData(data, scope) {
+  return data
+    .map(item => applyScopeToRepo(item, scope))
+    .filter(Boolean);
 }
 
 function renderKpis(data, errorsCount) {
@@ -368,25 +430,30 @@ function updateSidebarSelection() {
   document.querySelectorAll(".repo-nav-button[data-repo]").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.repo === currentRepo);
   });
+
+  document.querySelectorAll(".toggle-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.scope === currentScope);
+  });
 }
 
 function showOverviewView() {
   currentRepo = null;
   requireEl("overviewView").classList.remove("hidden");
   requireEl("repoView").classList.add("hidden");
-  requireEl("pageTitle").textContent = "Cross-Repo CI Health";
+  requireEl("pageTitle").textContent = `Cross-Repo CI Health · ${scopeLabel(currentScope)}`;
   updateSidebarSelection();
 }
 
 function showRepoView(repoName) {
-  const item = dashboardData.find(d => d.repo === repoName);
+  const scoped = getScopedData(dashboardData, currentScope);
+  const item = scoped.find(d => d.repo === repoName);
   if (!item) return;
 
   currentRepo = repoName;
 
   requireEl("overviewView").classList.add("hidden");
   requireEl("repoView").classList.remove("hidden");
-  requireEl("pageTitle").textContent = item.repo;
+  requireEl("pageTitle").textContent = `${item.repo} · ${scopeLabel(currentScope)}`;
 
   requireEl("detailTitle").textContent = item.repo;
   requireEl("detailSubtitle").textContent =
@@ -409,6 +476,38 @@ function showRepoView(repoName) {
   updateSidebarSelection();
 }
 
+function scopeLabel(scope) {
+  if (scope === "recent60") return "Last 60 Days";
+  if (scope === "newOnly") return "New Only";
+  return "All";
+}
+
+function rerender() {
+  const scoped = getScopedData(dashboardData, currentScope);
+  const repoFilter = requireEl("repoSearch").value || "";
+
+  renderKpis(scoped, 0);
+  renderRepoNav(scoped, repoFilter);
+  renderRepoTable(scoped);
+  renderTrendChart(scoped);
+  renderRepoChart(scoped);
+
+  if (currentRepo && scoped.some(x => x.repo === currentRepo)) {
+    showRepoView(currentRepo);
+  } else {
+    showOverviewView();
+  }
+}
+
+function wireScopeToggle() {
+  document.querySelectorAll(".toggle-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentScope = btn.dataset.scope;
+      rerender();
+    });
+  });
+}
+
 async function init() {
   const [history, details] = await Promise.all([
     loadJson("./history.json"),
@@ -420,24 +519,20 @@ async function init() {
 
   dashboardData = buildCombinedState(history, details);
 
-  renderKpis(dashboardData, details.errors?.length || 0);
-  renderRepoNav(dashboardData);
-  renderRepoTable(dashboardData);
   renderErrors(details.errors || []);
-  renderTrendChart(dashboardData);
-  renderRepoChart(dashboardData);
+  wireScopeToggle();
 
   requireEl("showOverviewBtn").addEventListener("click", showOverviewView);
 
-  requireEl("repoSearch").addEventListener("input", e => {
-    renderRepoNav(dashboardData, e.target.value);
+  requireEl("repoSearch").addEventListener("input", () => {
+    rerender();
   });
 
   requireEl("notebookSearch").addEventListener("input", () => {
     if (currentRepo) showRepoView(currentRepo);
   });
 
-  showOverviewView();
+  rerender();
 }
 
 init().catch(err => {

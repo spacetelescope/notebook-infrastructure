@@ -1,6 +1,6 @@
 # Notebook CI Dashboard
 
-_Generated 2026-03-23 04:43 UTC_
+_Generated 2026-03-23 19:59 UTC_
 
 Workflow tracked: `Notebook CI - Scheduled`
 
@@ -9,7 +9,7 @@ Workflow tracked: `Notebook CI - Scheduled`
 | Repository | Latest Failures | New Failures | Resolved | Consistent Failures | Latest Run |
 |---|---:|---:|---:|---:|---|
 | `spacetelescope/hellouniverse` | 0 | 0 | 0 | 0 | [#31](https://github.com/spacetelescope/hellouniverse/actions/runs/23394523547) |
-| `spacetelescope/hst_notebooks` | 4 | 2 | 1 | 2 | [#22](https://github.com/spacetelescope/hst_notebooks/actions/runs/23394546172) |
+| `spacetelescope/hst_notebooks` | 3 | 1 | 1 | 2 | [#22](https://github.com/spacetelescope/hst_notebooks/actions/runs/23394546172) |
 | `spacetelescope/jdat_notebooks` | 10 | 0 | 0 | 10 | [#20](https://github.com/spacetelescope/jdat_notebooks/actions/runs/23394525556) |
 | `spacetelescope/jwst-pipeline-notebooks` | 1 | 0 | 0 | 1 | [#9](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/23394561150) |
 | `spacetelescope/mast_notebooks` | 7 | 2 | 0 | 5 | [#28](https://github.com/spacetelescope/mast_notebooks/actions/runs/23394571486) |
@@ -22,7 +22,7 @@ xychart-beta
     title "Latest failure count by repository"
     x-axis ["hellouniverse", "hst_notebooks", "jdat_notebooks", "jwst-pipeline-notebooks", "mast_notebooks", "roman_notebooks"]
     y-axis "Failures" 0 --> 11
-    bar [0, 4, 10, 1, 7, 9]
+    bar [0, 3, 10, 1, 7, 9]
 ```
 
 ## Rolling Trend Table
@@ -30,7 +30,7 @@ xychart-beta
 | Repository | 2025-09-07 | 2025-09-14 | 2025-09-21 | 2025-09-28 | 2025-10-05 | 2025-10-12 | 2025-10-19 | 2025-10-26 | 2025-11-02 | 2025-11-09 | 2025-11-16 | 2025-11-23 | 2025-11-30 | 2025-12-07 | 2025-12-14 | 2025-12-21 | 2025-12-28 | 2026-01-04 | 2026-01-11 | 2026-01-18 | 2026-01-25 | 2026-02-01 | 2026-02-08 | 2026-02-15 | 2026-02-22 | 2026-03-01 | 2026-03-08 | 2026-03-15 | 2026-03-22 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | `spacetelescope/hellouniverse` | 0 | 0 | 0 | 1 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 5 |  |  |  | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `spacetelescope/hst_notebooks` |  |  |  |  |  |  |  |  | 2 | 1 | 1 | 0 | 2 | 2 | 1 | 4 | 3 | 2 | 2 | 2 | 3 | 3 | 3 | 4 | 3 | 3 | 3 | 3 | 4 |
+| `spacetelescope/hst_notebooks` |  |  |  |  |  |  |  |  | 2 | 1 | 1 | 0 | 2 | 2 | 1 | 4 | 3 | 2 | 2 | 2 | 3 | 3 | 3 | 4 | 3 | 3 | 3 | 3 | 3 |
 | `spacetelescope/jdat_notebooks` |  |  |  |  |  |  |  |  |  |  | 7 | 9 | 10 | 7 | 9 | 11 | 11 | 11 | 6 | 4 | 6 | 6 | 6 | 10 | 10 | 10 | 10 | 10 | 10 |
 | `spacetelescope/jwst-pipeline-notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 4 | 4 | 3 | 4 | 1 | 1 | 1 | 1 |
 | `spacetelescope/mast_notebooks` |  |  |  | 4 | 5 | 2 | 5 | 22 | 19 | 21 | 21 | 23 | 21 | 11 | 4 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 3 | 7 | 7 | 7 | 5 | 7 |
@@ -84,7 +84,7 @@ xychart-beta
     title "hst_notebooks failure trend"
     x-axis ["2025-11-02", "2025-11-09", "2025-11-16", "2025-11-23", "2025-11-30", "2025-12-07", "2025-12-14", "2025-12-21", "2025-12-28", "2026-01-04", "2026-01-11", "2026-01-18", "2026-01-25", "2026-02-01", "2026-02-08", "2026-02-15", "2026-02-22", "2026-03-01", "2026-03-08", "2026-03-15", "2026-03-22"]
     y-axis "Failures" 0 --> 5
-    line [2, 1, 1, 0, 2, 2, 1, 4, 3, 2, 2, 2, 3, 3, 3, 4, 3, 3, 3, 3, 4]
+    line [2, 1, 1, 0, 2, 2, 1, 4, 3, 2, 2, 2, 3, 3, 3, 4, 3, 3, 3, 3, 3]
 ```
 
 | Date | Failures | New | Resolved | Consistent | Latest Run |
@@ -109,7 +109,7 @@ xychart-beta
 | 2026-03-01 | 3 | 0 | 0 | 3 | [#19](https://github.com/spacetelescope/hst_notebooks/actions/runs/22534757215) |
 | 2026-03-08 | 3 | 0 | 0 | 3 | [#20](https://github.com/spacetelescope/hst_notebooks/actions/runs/22812684472) |
 | 2026-03-15 | 3 | 1 | 1 | 2 | [#21](https://github.com/spacetelescope/hst_notebooks/actions/runs/23102221236) |
-| 2026-03-22 | 4 | 2 | 1 | 2 | [#22](https://github.com/spacetelescope/hst_notebooks/actions/runs/23394546172) |
+| 2026-03-22 | 3 | 1 | 1 | 2 | [#22](https://github.com/spacetelescope/hst_notebooks/actions/runs/23394546172) |
 
 ### `spacetelescope/jdat_notebooks`
 

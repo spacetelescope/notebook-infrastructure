@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-23T04:43:36Z",
+  "generated_at": "2026-03-23T19:59:01Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -260,21 +260,20 @@
         "created_at": "2026-03-15T03:11:06Z"
       },
       "summary": {
-        "fail_latest": 4,
-        "pass_latest": 66,
+        "fail_latest": 3,
+        "pass_latest": 67,
         "total_latest": 70,
         "fail_previous": 3,
         "pass_previous": 66,
         "total_previous": 69,
-        "new_failures": 2,
+        "new_failures": 1,
         "resolved_failures": 1,
         "consistent_failures": 2,
-        "consistent_successes": 64
+        "consistent_successes": 65
       },
       "details": {
         "new_failures": [
-          "notebooks/ACS/acs_exception_report/exception_report_checks.ipynb",
-          "notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb"
+          "notebooks/ACS/acs_exception_report/exception_report_checks.ipynb"
         ],
         "resolved_failures": [
           "notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb"
@@ -315,6 +314,7 @@
           "notebooks/DrizzlePac/align_multiple_visits/align_multiple_visits.ipynb",
           "notebooks/DrizzlePac/align_sparse_fields/align_sparse_fields.ipynb",
           "notebooks/DrizzlePac/drizzle_wfpc2/drizzle_wfpc2.ipynb",
+          "notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb",
           "notebooks/DrizzlePac/optimize_image_sampling/optimize_image_sampling.ipynb",
           "notebooks/DrizzlePac/sky_matching/sky_matching.ipynb",
           "notebooks/HASP/CoaddTutorial/CoaddTutorial.ipynb",
