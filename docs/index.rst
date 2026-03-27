@@ -12,7 +12,7 @@ This repository stores standards and software infrastructure for supporting Jupy
    ci_actions.md
    ci_caller_workflows.md
    ci_operators_guide.md
-   ci_bestp_practices.md
+   ci_best_practices.md
    style
    contributing_notebooks
    reviewing
