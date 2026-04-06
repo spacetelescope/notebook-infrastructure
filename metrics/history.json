@@ -1,26 +1,8 @@
 {
-  "generated_at": "2026-03-30T04:55:56Z",
+  "generated_at": "2026-04-06T04:55:48Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repos": {
     "spacetelescope/hellouniverse": [
-      {
-        "timestamp": "2026-03-19T19:38:17Z",
-        "latest_run_number": 7,
-        "latest_run_created_at": "2025-09-14T02:34:19Z",
-        "latest_run_url": "https://github.com/spacetelescope/hellouniverse/actions/runs/17705267289",
-        "previous_run_number": 6,
-        "previous_run_created_at": "2025-09-07T02:34:17Z",
-        "previous_run_url": "https://github.com/spacetelescope/hellouniverse/actions/runs/17522718453",
-        "fail_latest": 0,
-        "pass_latest": 6,
-        "total_latest": 6,
-        "fail_previous": 0,
-        "pass_previous": 6,
-        "total_previous": 6,
-        "new_failures": 0,
-        "resolved_failures": 0,
-        "consistent_failures": 0
-      },
       {
         "timestamp": "2026-03-19T19:38:18Z",
         "latest_run_number": 8,
@@ -470,27 +452,27 @@
         "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 0
+      },
+      {
+        "timestamp": "2026-04-06T04:55:48Z",
+        "latest_run_number": 33,
+        "latest_run_created_at": "2026-04-05T03:09:59Z",
+        "latest_run_url": "https://github.com/spacetelescope/hellouniverse/actions/runs/23993128483",
+        "previous_run_number": 32,
+        "previous_run_created_at": "2026-03-29T03:10:00Z",
+        "previous_run_url": "https://github.com/spacetelescope/hellouniverse/actions/runs/23700180710",
+        "fail_latest": 0,
+        "pass_latest": 6,
+        "total_latest": 6,
+        "fail_previous": 0,
+        "pass_previous": 6,
+        "total_previous": 6,
+        "new_failures": 0,
+        "resolved_failures": 0,
+        "consistent_failures": 0
       }
     ],
     "spacetelescope/mast_notebooks": [
-      {
-        "timestamp": "2026-03-19T19:38:44Z",
-        "latest_run_number": 4,
-        "latest_run_created_at": "2025-10-05T02:37:29Z",
-        "latest_run_url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/18252792930",
-        "previous_run_number": 3,
-        "previous_run_created_at": "2025-09-28T02:37:44Z",
-        "previous_run_url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/18068180323",
-        "fail_latest": 5,
-        "pass_latest": 72,
-        "total_latest": 77,
-        "fail_previous": 4,
-        "pass_previous": 70,
-        "total_previous": 77,
-        "new_failures": 3,
-        "resolved_failures": 2,
-        "consistent_failures": 2
-      },
       {
         "timestamp": "2026-03-19T19:38:46Z",
         "latest_run_number": 5,
@@ -940,6 +922,24 @@
         "new_failures": 1,
         "resolved_failures": 1,
         "consistent_failures": 6
+      },
+      {
+        "timestamp": "2026-04-06T04:55:48Z",
+        "latest_run_number": 30,
+        "latest_run_created_at": "2026-04-05T03:13:22Z",
+        "latest_run_url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/23993184144",
+        "previous_run_number": 29,
+        "previous_run_created_at": "2026-03-29T03:13:51Z",
+        "previous_run_url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/23700244517",
+        "fail_latest": 6,
+        "pass_latest": 72,
+        "total_latest": 78,
+        "fail_previous": 7,
+        "pass_previous": 71,
+        "total_previous": 78,
+        "new_failures": 1,
+        "resolved_failures": 2,
+        "consistent_failures": 5
       }
     ],
     "spacetelescope/jdat_notebooks": [
@@ -1301,6 +1301,24 @@
         "total_previous": 53,
         "new_failures": 0,
         "resolved_failures": 6,
+        "consistent_failures": 4
+      },
+      {
+        "timestamp": "2026-04-06T04:55:48Z",
+        "latest_run_number": 22,
+        "latest_run_created_at": "2026-04-05T03:10:18Z",
+        "latest_run_url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/23993134367",
+        "previous_run_number": 21,
+        "previous_run_created_at": "2026-03-29T03:10:42Z",
+        "previous_run_url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/23700192899",
+        "fail_latest": 4,
+        "pass_latest": 49,
+        "total_latest": 53,
+        "fail_previous": 4,
+        "pass_previous": 49,
+        "total_previous": 53,
+        "new_failures": 0,
+        "resolved_failures": 0,
         "consistent_failures": 4
       }
     ],
@@ -1700,6 +1718,24 @@
         "new_failures": 2,
         "resolved_failures": 0,
         "consistent_failures": 3
+      },
+      {
+        "timestamp": "2026-04-06T04:55:48Z",
+        "latest_run_number": 24,
+        "latest_run_created_at": "2026-04-05T03:11:28Z",
+        "latest_run_url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/23993153155",
+        "previous_run_number": 23,
+        "previous_run_created_at": "2026-03-29T03:11:38Z",
+        "previous_run_url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/23700208471",
+        "fail_latest": 5,
+        "pass_latest": 65,
+        "total_latest": 70,
+        "fail_previous": 5,
+        "pass_previous": 65,
+        "total_previous": 70,
+        "new_failures": 1,
+        "resolved_failures": 1,
+        "consistent_failures": 4
       }
     ],
     "spacetelescope/roman_notebooks": [
@@ -2026,6 +2062,24 @@
         "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 9
+      },
+      {
+        "timestamp": "2026-04-06T04:55:48Z",
+        "latest_run_number": 20,
+        "latest_run_created_at": "2026-04-05T03:10:12Z",
+        "latest_run_url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/23993132564",
+        "previous_run_number": 19,
+        "previous_run_created_at": "2026-03-29T03:10:40Z",
+        "previous_run_url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/23700192538",
+        "fail_latest": 9,
+        "pass_latest": 10,
+        "total_latest": 19,
+        "fail_previous": 9,
+        "pass_previous": 10,
+        "total_previous": 19,
+        "new_failures": 0,
+        "resolved_failures": 0,
+        "consistent_failures": 9
       }
     ],
     "spacetelescope/jwst-pipeline-notebooks": [
@@ -2181,6 +2235,24 @@
         "previous_run_number": 9,
         "previous_run_created_at": "2026-03-22T03:11:15Z",
         "previous_run_url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/23394561150",
+        "fail_latest": 1,
+        "pass_latest": 15,
+        "total_latest": 16,
+        "fail_previous": 1,
+        "pass_previous": 15,
+        "total_previous": 16,
+        "new_failures": 0,
+        "resolved_failures": 0,
+        "consistent_failures": 1
+      },
+      {
+        "timestamp": "2026-04-06T04:55:48Z",
+        "latest_run_number": 11,
+        "latest_run_created_at": "2026-04-05T03:12:53Z",
+        "latest_run_url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/23993175658",
+        "previous_run_number": 10,
+        "previous_run_created_at": "2026-03-29T03:12:44Z",
+        "previous_run_url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/23700226982",
         "fail_latest": 1,
         "pass_latest": 15,
         "total_latest": 16,
