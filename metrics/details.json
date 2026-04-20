@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-20T05:01:52Z",
+  "generated_at": "2026-04-20T15:29:36Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -57,16 +57,16 @@
         "created_at": "2026-04-12T03:14:36Z"
       },
       "summary": {
-        "fail_latest": 12,
-        "pass_latest": 63,
+        "fail_latest": 4,
+        "pass_latest": 75,
         "total_latest": 79,
         "fail_previous": 5,
         "pass_previous": 73,
         "total_previous": 78,
-        "new_failures": 12,
+        "new_failures": 4,
         "resolved_failures": 5,
         "consistent_failures": 0,
-        "consistent_successes": 57
+        "consistent_successes": 69
       },
       "recent_notebooks_60d": [
         {
@@ -79,17 +79,9 @@
       ],
       "details": {
         "new_failures": [
-          "execute-all / process-notebooks (notebooks/multi_mission/historic_quasar_observations/historic_quasar_observati...",
           "notebooks/HSC/HSCV3_API/hscv3_api.ipynb",
-          "notebooks/HSC/SWEEPS_HSCV3P1_API/sweeps_hscv3p1_api.ipynb",
-          "notebooks/SDSS/APOGEE_TESS_tutorial/APOGEE_TESS_tutorial.ipynb",
-          "notebooks/SDSS/SDSS_LEGACY_IMAGING_cmd/cmd_diagram.ipynb",
-          "notebooks/SDSS/SDSS_LEGACY_IMAGING_galaxy_morphology/galaxy_morphology.ipynb",
-          "notebooks/SDSS/SDSS_SEGUE_spectra/sdss_stellar_spectra.ipynb",
-          "notebooks/SDSS/eBOSS_HST_hubbles_law/hubbles_law.ipynb",
-          "notebooks/TESS/beginner_astroquery_dv/beginner_astroquery_dv.ipynb",
-          "notebooks/TESS/making_tess_cubes_and_cutouts/making_tess_cubes_and_cutouts.ipynb",
-          "notebooks/multi_mission/beginner_zcut/beginner_zcut.ipynb",
+          "notebooks/SDSS/eBOSS_JWST_tutorial/eBOSS_JWST_tutorial.ipynb",
+          "notebooks/multi_mission/beginner_search/beginner_search.ipynb",
           "notebooks/multi_mission/resolve_objects/resolve_objects.ipynb"
         ],
         "resolved_failures": [
@@ -121,8 +113,10 @@
           "execute-all / process-notebooks (notebooks/MCCM/FIMS-SPEAR/hyperspectral_healpix_maps/hyperspectral_healpix_map...",
           "execute-all / process-notebooks (notebooks/TESS/removing_scattered_light_using_regression/removing_scattered_li...",
           "execute-all / process-notebooks (notebooks/multi_mission/galex_panstarrs_bulk_download/galex_panstarrs_bulk_dow...",
+          "execute-all / process-notebooks (notebooks/multi_mission/historic_quasar_observations/historic_quasar_observati...",
           "notebooks/GALEX/mis_mosaic/mis_mosaic.ipynb",
           "notebooks/HSC/HCV_API/HCV_API_demo.ipynb",
+          "notebooks/HSC/SWEEPS_HSCV3P1_API/sweeps_hscv3p1_api.ipynb",
           "notebooks/JWST/Engineering_Database_Retreival/EDB_Retrieval.ipynb",
           "notebooks/JWST/MAST_metadata_search/MAST_metadata_search.ipynb",
           "notebooks/JWST/SI_keyword_exoplanet_search/SI_keyword_exoplanet_search.ipynb",
@@ -138,9 +132,15 @@
           "notebooks/Kepler/plotting_images_from_tpf/plotting_images_from_tpf.ipynb",
           "notebooks/Kepler/plotting_lightcurves/plotting_lightcurves.ipynb",
           "notebooks/PanSTARRS/PS1_image/PS1_image.ipynb",
+          "notebooks/SDSS/APOGEE_TESS_tutorial/APOGEE_TESS_tutorial.ipynb",
           "notebooks/SDSS/MaNGA_HST_tutorial/MaNGA_HST_tutorial.ipynb",
+          "notebooks/SDSS/SDSS_LEGACY_IMAGING_cmd/cmd_diagram.ipynb",
+          "notebooks/SDSS/SDSS_LEGACY_IMAGING_galaxy_morphology/galaxy_morphology.ipynb",
+          "notebooks/SDSS/SDSS_SEGUE_spectra/sdss_stellar_spectra.ipynb",
+          "notebooks/SDSS/eBOSS_HST_hubbles_law/hubbles_law.ipynb",
           "notebooks/TESS/asteroid_rotation/asteroid_rotation.ipynb",
           "notebooks/TESS/asteroid_rotation/asteroid_rotation_soutions.ipynb",
+          "notebooks/TESS/beginner_astroquery_dv/beginner_astroquery_dv.ipynb",
           "notebooks/TESS/beginner_how_to_use_dvt/beginner_how_to_use_dvt.ipynb",
           "notebooks/TESS/beginner_how_to_use_ffi/beginner_how_to_use_ffi.ipynb",
           "notebooks/TESS/beginner_how_to_use_lc/beginner_how_to_use_lc.ipynb",
@@ -150,37 +150,20 @@
           "notebooks/TESS/beginner_tesscut_astroquery/beginner_tesscut_astroquery.ipynb",
           "notebooks/TESS/beginner_tic_search_hd209458/beginner_tic_search_hd209458.ipynb",
           "notebooks/TESS/beginner_tour_lc_tp/beginner_tour_lc_tp.ipynb",
+          "notebooks/TESS/interm_gi_query/interm_gi_query.ipynb",
           "notebooks/TESS/interm_tasoc_lc/interm_tasoc_lc.ipynb",
           "notebooks/TESS/interm_tess_prf_retrieve/interm_tess_prf_retrieve.ipynb",
           "notebooks/TESS/interm_tesscut_dss_overlay/interm_tesscut_dss_overlay.ipynb",
           "notebooks/TESS/interm_tesscut_requests/interm_tesscut_requests.ipynb",
+          "notebooks/TESS/making_tess_cubes_and_cutouts/making_tess_cubes_and_cutouts.ipynb",
           "notebooks/Visualizations/mast_sky/mast_sky.ipynb",
+          "notebooks/multi_mission/beginner_zcut/beginner_zcut.ipynb",
           "notebooks/multi_mission/display_footprints/display_footprints.ipynb",
           "notebooks/multi_mission/large_downloads/large_downloads.ipynb",
-          "notebooks/multi_mission/missions_mast_search/missions_mast_search.ipynb"
+          "notebooks/multi_mission/missions_mast_search/missions_mast_search.ipynb",
+          "notebooks/multi_mission/wildcard_searches/wildcard_searches.ipynb"
         ],
-        "changed_other": [
-          {
-            "notebook": "notebooks/SDSS/eBOSS_JWST_tutorial/eBOSS_JWST_tutorial.ipynb",
-            "previous": "success",
-            "current": "cancelled"
-          },
-          {
-            "notebook": "notebooks/TESS/interm_gi_query/interm_gi_query.ipynb",
-            "previous": "success",
-            "current": "cancelled"
-          },
-          {
-            "notebook": "notebooks/multi_mission/beginner_search/beginner_search.ipynb",
-            "previous": "success",
-            "current": "cancelled"
-          },
-          {
-            "notebook": "notebooks/multi_mission/wildcard_searches/wildcard_searches.ipynb",
-            "previous": "success",
-            "current": "cancelled"
-          }
-        ],
+        "changed_other": [],
         "only_in_latest": [
           {
             "notebook": "notebooks/multi_mission/cloud_data_access/cloud_data_access.ipynb",
@@ -203,23 +186,22 @@
         "created_at": "2026-04-12T03:11:26Z"
       },
       "summary": {
-        "fail_latest": 15,
-        "pass_latest": 38,
+        "fail_latest": 14,
+        "pass_latest": 39,
         "total_latest": 53,
         "fail_previous": 4,
         "pass_previous": 49,
         "total_previous": 53,
-        "new_failures": 14,
+        "new_failures": 13,
         "resolved_failures": 3,
         "consistent_failures": 1,
-        "consistent_successes": 35
+        "consistent_successes": 36
       },
       "recent_notebooks_60d": [],
       "details": {
         "new_failures": [
           "execute-all / process-notebooks (notebooks/NIRCam/NIRCam_PSF-matched_photometry/NIRCam_PSF_matched_multiband_ph...",
           "execute-all / process-notebooks (notebooks/cross_instrument/background_estimation_imaging/Imaging_Sky_Backgroun...",
-          "execute-all / process-notebooks (notebooks/cross_instrument/specviz_notebookGUI_interaction/specviz_notebook_gu...",
           "notebooks/NIRCam/psf_photometry/NIRCam_PSF_Photometry_Example.ipynb",
           "notebooks/NIRSpec/NIRSpec_NSClean/BOTS_NSClean_example.ipynb",
           "notebooks/NIRSpec/NIRSpec_NSClean/FS_NSClean_example.ipynb",
@@ -246,6 +228,7 @@
           "execute-all / process-notebooks (notebooks/NIRISS/NIRISS_WFSS_postpipeline/01_Combine_and_normalize_1D_spectra....",
           "execute-all / process-notebooks (notebooks/NIRISS/NIRISS_WFSS_postpipeline/03_Spatially_resolved_emission_line_...",
           "execute-all / process-notebooks (notebooks/NIRSpec/transit_spectroscopy_notebook/Exoplanet_Transmission_Spectra...",
+          "execute-all / process-notebooks (notebooks/cross_instrument/specviz_notebookGUI_interaction/specviz_notebook_gu...",
           "execute-all / process-notebooks (notebooks/cross_instrument/update_pure_parallel_wcs/NIRISS_correct_pure_parall...",
           "notebooks/MIRI/MIRI_IFU_YSOs_in_the_LMC/isha_nayak_ysos_in_the_lmc.ipynb",
           "notebooks/MIRI/MIRI_LRS_spectral_extraction/miri_lrs_advanced_extraction.ipynb",
