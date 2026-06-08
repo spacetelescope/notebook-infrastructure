@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-08T05:33:05Z",
+  "generated_at": "2026-06-08T12:18:34Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -274,16 +274,16 @@
         "created_at": "2026-05-31T03:18:17Z"
       },
       "summary": {
-        "fail_latest": 7,
-        "pass_latest": 68,
+        "fail_latest": 5,
+        "pass_latest": 70,
         "total_latest": 75,
         "fail_previous": 5,
         "pass_previous": 70,
         "total_previous": 75,
-        "new_failures": 3,
+        "new_failures": 1,
         "resolved_failures": 1,
         "consistent_failures": 4,
-        "consistent_successes": 67
+        "consistent_successes": 69
       },
       "recent_notebooks_60d": [
         {
@@ -296,8 +296,6 @@
       ],
       "details": {
         "new_failures": [
-          "notebooks/ACS/acs_etc_cte/acs_etc_cte.ipynb",
-          "notebooks/ACS/hst_orbits_ephem/hst_orbits_ephem.ipynb",
           "notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb"
         ],
         "resolved_failures": [
@@ -322,6 +320,7 @@
           "execute-all / process-notebooks (notebooks/WFC3/slitlessutils_UVIS_subarray_extraction/slitlessutils_UVIS_subar...",
           "execute-all / process-notebooks (notebooks/WFC3/uvis_pam_corrections/WFC3_UVIS_Pixel_Area_Map_Corrections_for_S...",
           "notebooks/ACS/acs_cte_forward_model/acs_cte_forward_model_example.ipynb",
+          "notebooks/ACS/acs_etc_cte/acs_etc_cte.ipynb",
           "notebooks/ACS/acs_exception_report/exception_report_checks.ipynb",
           "notebooks/ACS/acs_findsat_mrt/acs_findsat_mrt_example.ipynb",
           "notebooks/ACS/acs_focus_diverse_epsfs/acs_focus_diverse_epsfs.ipynb",
@@ -331,6 +330,7 @@
           "notebooks/ACS/acs_saturation_trails/acs_saturation_trails.ipynb",
           "notebooks/ACS/acs_sbc_dark_analysis/acs_sbc_dark_analysis.ipynb",
           "notebooks/ACS/acs_subarrays/acs_subarrays.ipynb",
+          "notebooks/ACS/hst_orbits_ephem/hst_orbits_ephem.ipynb",
           "notebooks/COS/AsnFile/AsnFile.ipynb",
           "notebooks/COS/DataDl/DataDl.ipynb",
           "notebooks/COS/DayNight/DayNight.ipynb",
