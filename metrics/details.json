@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T05:45:41Z",
+  "generated_at": "2026-06-15T13:41:40Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -275,16 +275,16 @@
         "created_at": "2026-06-07T03:18:26Z"
       },
       "summary": {
-        "fail_latest": 6,
-        "pass_latest": 69,
+        "fail_latest": 4,
+        "pass_latest": 71,
         "total_latest": 75,
         "fail_previous": 5,
         "pass_previous": 70,
         "total_previous": 75,
-        "new_failures": 2,
+        "new_failures": 0,
         "resolved_failures": 1,
         "consistent_failures": 4,
-        "consistent_successes": 68
+        "consistent_successes": 70
       },
       "recent_notebooks_60d": [
         {
@@ -296,10 +296,7 @@
         }
       ],
       "details": {
-        "new_failures": [
-          "notebooks/ACS/hst_orbits_ephem/hst_orbits_ephem.ipynb",
-          "notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [
           "notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb"
         ],
@@ -332,6 +329,7 @@
           "notebooks/ACS/acs_saturation_trails/acs_saturation_trails.ipynb",
           "notebooks/ACS/acs_sbc_dark_analysis/acs_sbc_dark_analysis.ipynb",
           "notebooks/ACS/acs_subarrays/acs_subarrays.ipynb",
+          "notebooks/ACS/hst_orbits_ephem/hst_orbits_ephem.ipynb",
           "notebooks/COS/AsnFile/AsnFile.ipynb",
           "notebooks/COS/DataDl/DataDl.ipynb",
           "notebooks/COS/DayNight/DayNight.ipynb",
@@ -343,6 +341,7 @@
           "notebooks/DrizzlePac/align_multiple_visits/align_multiple_visits.ipynb",
           "notebooks/DrizzlePac/align_sparse_fields/align_sparse_fields.ipynb",
           "notebooks/DrizzlePac/drizzle_wfpc2/drizzle_wfpc2.ipynb",
+          "notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb",
           "notebooks/DrizzlePac/optimize_image_sampling/optimize_image_sampling.ipynb",
           "notebooks/DrizzlePac/sky_matching/sky_matching.ipynb",
           "notebooks/HASP/CoaddTutorial/CoaddTutorial.ipynb",
