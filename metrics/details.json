@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T13:41:40Z",
+  "generated_at": "2026-06-22T05:47:39Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -47,45 +47,50 @@
     {
       "repo": "spacetelescope/mast_notebooks",
       "latest_run": {
+        "number": 41,
+        "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/27892094110",
+        "created_at": "2026-06-21T03:22:04Z"
+      },
+      "previous_run": {
         "number": 40,
         "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/27486992418",
         "created_at": "2026-06-14T03:21:38Z"
       },
-      "previous_run": {
-        "number": 39,
-        "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/27081378619",
-        "created_at": "2026-06-07T03:20:47Z"
-      },
       "summary": {
-        "fail_latest": 4,
-        "pass_latest": 76,
+        "fail_latest": 9,
+        "pass_latest": 71,
         "total_latest": 80,
-        "fail_previous": 2,
-        "pass_previous": 78,
+        "fail_previous": 4,
+        "pass_previous": 76,
         "total_previous": 80,
-        "new_failures": 2,
+        "new_failures": 5,
         "resolved_failures": 0,
-        "consistent_failures": 2,
-        "consistent_successes": 76
+        "consistent_failures": 4,
+        "consistent_successes": 71
       },
       "recent_notebooks_60d": [
         {
           "notebook": "notebooks/multi_mission/subscriptions/subscriptions.ipynb",
           "added_at": "2026-05-05",
           "current_status": "success",
-          "latest_run_url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/27486992418",
-          "latest_run_number": 40
+          "latest_run_url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/27892094110",
+          "latest_run_number": 41
         }
       ],
       "details": {
         "new_failures": [
-          "notebooks/TESS/interm_tasoc_lc/interm_tasoc_lc.ipynb",
-          "notebooks/multi_mission/resolve_objects/resolve_objects.ipynb"
+          "notebooks/HSC/HSCV3_SMC_API/hscv3_smc_api.ipynb",
+          "notebooks/HSC/SWEEPS_HSCV3P1/sweeps_hscv3p1.ipynb",
+          "notebooks/PanSTARRS/PS1_image/PS1_image.ipynb",
+          "notebooks/TESS/beginner_tess_tap_search/beginner_tess_tap_search.ipynb",
+          "notebooks/TESS/making_tess_cubes_and_cutouts/making_tess_cubes_and_cutouts.ipynb"
         ],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/HSC/SWEEPS_HSCV3P1_API/sweeps_hscv3p1_api.ipynb",
-          "notebooks/multi_mission/beginner_zcut/beginner_zcut.ipynb"
+          "notebooks/TESS/interm_tasoc_lc/interm_tasoc_lc.ipynb",
+          "notebooks/multi_mission/beginner_zcut/beginner_zcut.ipynb",
+          "notebooks/multi_mission/resolve_objects/resolve_objects.ipynb"
         ],
         "consistent_successes": [
           "execute-all / process-notebooks (notebooks/IUE/exploring_UV_extinction_curves/exploring_UV_extinction_curves.ip...",
@@ -113,9 +118,7 @@
           "notebooks/HSC/HCV_API/HCV_API_demo.ipynb",
           "notebooks/HSC/HCV_CASJOBS/HCV_casjobs_demo.ipynb",
           "notebooks/HSC/HSCV3_API/hscv3_api.ipynb",
-          "notebooks/HSC/HSCV3_SMC_API/hscv3_smc_api.ipynb",
           "notebooks/HSC/HSC_TAP/HSC_TAP.ipynb",
-          "notebooks/HSC/SWEEPS_HSCV3P1/sweeps_hscv3p1.ipynb",
           "notebooks/JWST/Engineering_Database_Retreival/EDB_Retrieval.ipynb",
           "notebooks/JWST/MAST_metadata_search/MAST_metadata_search.ipynb",
           "notebooks/JWST/SI_keyword_exoplanet_search/SI_keyword_exoplanet_search.ipynb",
@@ -131,7 +134,6 @@
           "notebooks/Kepler/plotting_images_from_tpf/plotting_images_from_tpf.ipynb",
           "notebooks/Kepler/plotting_lightcurves/plotting_lightcurves.ipynb",
           "notebooks/PanSTARRS/PS1_DR2_TAP/PS1_DR2_TAP.ipynb",
-          "notebooks/PanSTARRS/PS1_image/PS1_image.ipynb",
           "notebooks/SDSS/APOGEE_TESS_tutorial/APOGEE_TESS_tutorial.ipynb",
           "notebooks/SDSS/MaNGA_HST_tutorial/MaNGA_HST_tutorial.ipynb",
           "notebooks/SDSS/SDSS_LEGACY_IMAGING_cmd/cmd_diagram.ipynb",
@@ -147,7 +149,6 @@
           "notebooks/TESS/beginner_how_to_use_lc/beginner_how_to_use_lc.ipynb",
           "notebooks/TESS/beginner_how_to_use_tp/beginner_how_to_use_tp.ipynb",
           "notebooks/TESS/beginner_tess_exomast/beginner_tess_exomast.ipynb",
-          "notebooks/TESS/beginner_tess_tap_search/beginner_tess_tap_search.ipynb",
           "notebooks/TESS/beginner_tesscut_astroquery/beginner_tesscut_astroquery.ipynb",
           "notebooks/TESS/beginner_tic_search_hd209458/beginner_tic_search_hd209458.ipynb",
           "notebooks/TESS/beginner_tour_lc_tp/beginner_tour_lc_tp.ipynb",
@@ -155,7 +156,6 @@
           "notebooks/TESS/interm_tess_prf_retrieve/interm_tess_prf_retrieve.ipynb",
           "notebooks/TESS/interm_tesscut_dss_overlay/interm_tesscut_dss_overlay.ipynb",
           "notebooks/TESS/interm_tesscut_requests/interm_tesscut_requests.ipynb",
-          "notebooks/TESS/making_tess_cubes_and_cutouts/making_tess_cubes_and_cutouts.ipynb",
           "notebooks/Visualizations/mast_sky/mast_sky.ipynb",
           "notebooks/multi_mission/beginner_search/beginner_search.ipynb",
           "notebooks/multi_mission/cloud_data_access/cloud_data_access.ipynb",
@@ -171,139 +171,52 @@
       }
     },
     {
-      "repo": "spacetelescope/jdat_notebooks",
-      "latest_run": {
-        "number": 32,
-        "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/27486919946",
-        "created_at": "2026-06-14T03:17:55Z"
-      },
-      "previous_run": {
-        "number": 31,
-        "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/27081311775",
-        "created_at": "2026-06-07T03:17:10Z"
-      },
-      "summary": {
-        "fail_latest": 4,
-        "pass_latest": 50,
-        "total_latest": 54,
-        "fail_previous": 3,
-        "pass_previous": 51,
-        "total_previous": 54,
-        "new_failures": 1,
-        "resolved_failures": 0,
-        "consistent_failures": 3,
-        "consistent_successes": 50
-      },
-      "recent_notebooks_60d": [],
-      "details": {
-        "new_failures": [
-          "notebooks/cross_instrument/stpsf_examples/stpsf_examples.ipynb"
-        ],
-        "resolved_failures": [],
-        "consistent_failures": [
-          "notebooks/NIRCam/psf_photometry/NIRCam_PSF_Photometry_Example.ipynb",
-          "notebooks/NIRISS/NIRISS_WFSS_advanced/02_niriss_wfss_spec2.ipynb",
-          "notebooks/cross_instrument/rgb_imviz/imviz_rgb_carina.ipynb"
-        ],
-        "consistent_successes": [
-          "execute-all / process-notebooks (notebooks/NIRCam/NIRCam_PSF-matched_photometry/NIRCam_PSF_matched_multiband_ph...",
-          "execute-all / process-notebooks (notebooks/NIRCam/NIRCam_WFSS_Box_extraction/BoxExtraction_using_Grismconf_CRDS...",
-          "execute-all / process-notebooks (notebooks/NIRCam/NIRCam_WFSS_simulating_spectra/Simulating_WFSS_spectra_CRDS.i...",
-          "execute-all / process-notebooks (notebooks/NIRISS/NIRISS_WFSS_postpipeline/01_Combine_and_normalize_1D_spectra....",
-          "execute-all / process-notebooks (notebooks/NIRISS/NIRISS_WFSS_postpipeline/03_Spatially_resolved_emission_line_...",
-          "execute-all / process-notebooks (notebooks/NIRSpec/extract_fixedslit_from_mos_ifu/extract_fixedslit_from_mos_if...",
-          "execute-all / process-notebooks (notebooks/NIRSpec/transit_spectroscopy_notebook/Exoplanet_Transmission_Spectra...",
-          "execute-all / process-notebooks (notebooks/cross_instrument/background_estimation_imaging/Imaging_Sky_Backgroun...",
-          "execute-all / process-notebooks (notebooks/cross_instrument/specviz_notebookGUI_interaction/specviz_notebook_gu...",
-          "execute-all / process-notebooks (notebooks/cross_instrument/update_pure_parallel_wcs/NIRISS_correct_pure_parall...",
-          "notebooks/MIRI/MIRI_IFU_YSOs_in_the_LMC/isha_nayak_ysos_in_the_lmc.ipynb",
-          "notebooks/MIRI/MIRI_LRS_spectral_extraction/miri_lrs_advanced_extraction.ipynb",
-          "notebooks/MIRI/MRS_Mstar_analysis/JWST_Mstar_dataAnalysis_analysis.ipynb",
-          "notebooks/MIRI/psf_photometry/miri_1028.ipynb",
-          "notebooks/MIRI/psf_photometry/miri_1028_photutils.ipynb",
-          "notebooks/MIRI/psf_photometry/miri_photutils.ipynb",
-          "notebooks/MIRI/psf_photometry/miri_spacephot.ipynb",
-          "notebooks/NIRCam/NIRCam_claw_detection/nircam_claw_detection.ipynb",
-          "notebooks/NIRCam/NIRCam_photometry/NIRCam_multiband_photometry.ipynb",
-          "notebooks/NIRCam/NIRCam_wisp_subtraction/nircam_wisp_subtraction.ipynb",
-          "notebooks/NIRCam/aperture_photometry/NIRCam_Aperture_Photometry_Example.ipynb",
-          "notebooks/NIRCam/psf_photometry_basics/psf_photometry_basics.ipynb",
-          "notebooks/NIRCam/psf_photometry_with_space_phot/nircam_spacephot.ipynb",
-          "notebooks/NIRISS/NIRISS_WFSS_advanced/00_niriss_mast_query_data_setup.ipynb",
-          "notebooks/NIRISS/NIRISS_WFSS_advanced/01_niriss_wfss_image2_image3.ipynb",
-          "notebooks/NIRISS/NIRISS_WFSS_advanced/extra_niriss_individual_steps.ipynb",
-          "notebooks/NIRISS/NIRISS_WFSS_postpipeline/00_Optimal_extraction.ipynb",
-          "notebooks/NIRISS/NIRISS_WFSS_postpipeline/02_Cross_correlation_template.ipynb",
-          "notebooks/NIRSpec/IFU_cube_continuum_fit/NGC4151_FeII_ContinuumFit.ipynb",
-          "notebooks/NIRSpec/NIRSpec_NSClean/BOTS_NSClean_example.ipynb",
-          "notebooks/NIRSpec/NIRSpec_NSClean/FS_NSClean_example.ipynb",
-          "notebooks/NIRSpec/NIRSpec_NSClean/IFU_NSClean_example.ipynb",
-          "notebooks/NIRSpec/NIRSpec_NSClean/MOS_NSClean_example.ipynb",
-          "notebooks/NIRSpec/cube_fitting/cube_fitting.ipynb",
-          "notebooks/NIRSpec/galaxy_redshift/redshift_fitting.ipynb",
-          "notebooks/NIRSpec/ifu_optimal/ifu_optimal.ipynb",
-          "notebooks/NIRSpec/mos_master_background/Master_Background_MOS_Demo.ipynb",
-          "notebooks/NIRSpec/mos_slits_to_sky/NIRSpec_MOS_slits_to_sky.ipynb",
-          "notebooks/NIRSpec/mos_spectroscopy_advanced/MOSspec_advanced.ipynb",
-          "notebooks/NIRSpec/msa_metafile/NIRSpec_MOS_MSA_metafile.ipynb",
-          "notebooks/NIRSpec/optimal_extraction/Spectral_Extraction-static.ipynb",
-          "notebooks/cross_instrument/asdf_example/asdf_example.ipynb",
-          "notebooks/cross_instrument/composite_model_fitting/specfit_demo_3.ipynb",
-          "notebooks/cross_instrument/photometry_extragalactic/imviz.ipynb",
-          "notebooks/cross_instrument/photometry_extragalactic/photutils_example.ipynb",
-          "notebooks/example_notebook/example_notebook.ipynb",
-          "notebooks/jdaviz_demo/notebooks/Cubeviz.ipynb",
-          "notebooks/jdaviz_demo/notebooks/Imviz.ipynb",
-          "notebooks/jdaviz_demo/notebooks/Specviz_Specviz2d.ipynb",
-          "notebooks/jdaviz_demo/notebooks/specreduce_extraction.ipynb"
-        ],
-        "changed_other": [],
-        "only_in_latest": [],
-        "only_in_previous": []
-      }
-    },
-    {
       "repo": "spacetelescope/hst_notebooks",
       "latest_run": {
+        "number": 35,
+        "url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/27892030218",
+        "created_at": "2026-06-21T03:19:11Z"
+      },
+      "previous_run": {
         "number": 34,
         "url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/27486943195",
         "created_at": "2026-06-14T03:19:08Z"
       },
-      "previous_run": {
-        "number": 33,
-        "url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/27081333893",
-        "created_at": "2026-06-07T03:18:26Z"
-      },
       "summary": {
-        "fail_latest": 4,
-        "pass_latest": 71,
+        "fail_latest": 8,
+        "pass_latest": 67,
         "total_latest": 75,
-        "fail_previous": 5,
-        "pass_previous": 70,
+        "fail_previous": 4,
+        "pass_previous": 71,
         "total_previous": 75,
-        "new_failures": 0,
+        "new_failures": 5,
         "resolved_failures": 1,
-        "consistent_failures": 4,
-        "consistent_successes": 70
+        "consistent_failures": 3,
+        "consistent_successes": 66
       },
       "recent_notebooks_60d": [
         {
           "notebook": "notebooks/STIS/time_tag/time_tag.ipynb",
           "added_at": "2026-05-08",
           "current_status": "success",
-          "latest_run_url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/27486943195",
-          "latest_run_number": 34
+          "latest_run_url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/27892030218",
+          "latest_run_number": 35
         }
       ],
       "details": {
-        "new_failures": [],
+        "new_failures": [
+          "notebooks/ACS/hst_orbits_ephem/hst_orbits_ephem.ipynb",
+          "notebooks/DrizzlePac/sky_matching/sky_matching.ipynb",
+          "notebooks/STIS/low_count_uncertainties/Low_Count_Uncertainties.ipynb",
+          "notebooks/STIS/target_acquisition/target_acquisition.ipynb",
+          "notebooks/WFC3/mast_api_psf/download_psf_cutouts.ipynb"
+        ],
         "resolved_failures": [
-          "notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb"
+          "notebooks/COS/SplitTag/SplitTag.ipynb"
         ],
         "consistent_failures": [
           "notebooks/COS/CalCOS/CalCOS.ipynb",
           "notebooks/COS/LSF/LSF.ipynb",
-          "notebooks/COS/SplitTag/SplitTag.ipynb",
           "notebooks/HASP/FluxScaleTutorial/FluxScaleTutorial.ipynb"
         ],
         "consistent_successes": [
@@ -329,7 +242,6 @@
           "notebooks/ACS/acs_saturation_trails/acs_saturation_trails.ipynb",
           "notebooks/ACS/acs_sbc_dark_analysis/acs_sbc_dark_analysis.ipynb",
           "notebooks/ACS/acs_subarrays/acs_subarrays.ipynb",
-          "notebooks/ACS/hst_orbits_ephem/hst_orbits_ephem.ipynb",
           "notebooks/COS/AsnFile/AsnFile.ipynb",
           "notebooks/COS/DataDl/DataDl.ipynb",
           "notebooks/COS/DayNight/DayNight.ipynb",
@@ -340,10 +252,10 @@
           "notebooks/DrizzlePac/align_mosaics/align_mosaics.ipynb",
           "notebooks/DrizzlePac/align_multiple_visits/align_multiple_visits.ipynb",
           "notebooks/DrizzlePac/align_sparse_fields/align_sparse_fields.ipynb",
+          "notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb",
           "notebooks/DrizzlePac/drizzle_wfpc2/drizzle_wfpc2.ipynb",
           "notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb",
           "notebooks/DrizzlePac/optimize_image_sampling/optimize_image_sampling.ipynb",
-          "notebooks/DrizzlePac/sky_matching/sky_matching.ipynb",
           "notebooks/HASP/CoaddTutorial/CoaddTutorial.ipynb",
           "notebooks/HASP/DataDiagnostic/DataDiagnostics.ipynb",
           "notebooks/HASP/Setup/Setup.ipynb",
@@ -358,8 +270,6 @@
           "notebooks/STIS/custom_ccd_darks/custom_ccd_darks.ipynb",
           "notebooks/STIS/drizpac_notebook/STIS_DrizzlePac_Tutorial.ipynb",
           "notebooks/STIS/extraction/1D_Extraction.ipynb",
-          "notebooks/STIS/low_count_uncertainties/Low_Count_Uncertainties.ipynb",
-          "notebooks/STIS/target_acquisition/target_acquisition.ipynb",
           "notebooks/STIS/time_tag/time_tag.ipynb",
           "notebooks/STIS/view_data/view_data.ipynb",
           "notebooks/WFC3/calwf3_recalibration/calwf3_recal_tvb.ipynb",
@@ -368,7 +278,6 @@
           "notebooks/WFC3/filter_transformations/filter_transformations.ipynb",
           "notebooks/WFC3/flux_conversion_tool/flux_conversion_tool.ipynb",
           "notebooks/WFC3/image_displayer_analyzer/wfc3_image_displayer_analyzer.ipynb",
-          "notebooks/WFC3/mast_api_psf/download_psf_cutouts.ipynb",
           "notebooks/WFC3/persistence/wfc3_ir_persistence.ipynb",
           "notebooks/WFC3/photometry_examples/phot_examples.ipynb",
           "notebooks/WFC3/point_spread_function/hst_point_spread_function.ipynb",
@@ -386,40 +295,41 @@
     {
       "repo": "spacetelescope/roman_notebooks",
       "latest_run": {
+        "number": 31,
+        "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/27892003579",
+        "created_at": "2026-06-21T03:17:51Z"
+      },
+      "previous_run": {
         "number": 30,
         "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/27486914364",
         "created_at": "2026-06-14T03:17:36Z"
       },
-      "previous_run": {
-        "number": 29,
-        "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/27081308794",
-        "created_at": "2026-06-07T03:17:02Z"
-      },
       "summary": {
-        "fail_latest": 2,
-        "pass_latest": 18,
+        "fail_latest": 4,
+        "pass_latest": 16,
         "total_latest": 20,
-        "fail_previous": 1,
-        "pass_previous": 19,
+        "fail_previous": 2,
+        "pass_previous": 18,
         "total_previous": 20,
-        "new_failures": 1,
+        "new_failures": 2,
         "resolved_failures": 0,
-        "consistent_failures": 1,
-        "consistent_successes": 18
+        "consistent_failures": 2,
+        "consistent_successes": 16
       },
       "recent_notebooks_60d": [],
       "details": {
         "new_failures": [
-          "notebooks/footprint_visualization/footprint_visualization.ipynb"
+          "notebooks/catalog_database_access/catalog_database_access.ipynb",
+          "notebooks/romanisim/romanisim.ipynb"
         ],
         "resolved_failures": [],
         "consistent_failures": [
-          "notebooks/data_visualization/data_visualization.ipynb"
+          "notebooks/data_visualization/data_visualization.ipynb",
+          "notebooks/footprint_visualization/footprint_visualization.ipynb"
         ],
         "consistent_successes": [
           "notebooks/aperture_photometry/aperture_photometry.ipynb",
           "notebooks/background_visualization_tool/RBVT.ipynb",
-          "notebooks/catalog_database_access/catalog_database_access.ipynb",
           "notebooks/data_discovery_and_access/data_discovery_and_access.ipynb",
           "notebooks/exposure_pipeline/exposure_pipeline.ipynb",
           "notebooks/grism_spectral_extraction/grism_spectral_extraction.ipynb",
@@ -429,7 +339,6 @@
           "notebooks/pandeia/pandeia.ipynb",
           "notebooks/rist/rist.ipynb",
           "notebooks/roman_cutouts/roman_cutouts.ipynb",
-          "notebooks/romanisim/romanisim.ipynb",
           "notebooks/stips/stips.ipynb",
           "notebooks/stpsf/stpsf.ipynb",
           "notebooks/synphot/synphot.ipynb",
@@ -444,14 +353,14 @@
     {
       "repo": "spacetelescope/jwst-pipeline-notebooks",
       "latest_run": {
+        "number": 22,
+        "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/27892067214",
+        "created_at": "2026-06-21T03:20:53Z"
+      },
+      "previous_run": {
         "number": 21,
         "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/27486973036",
         "created_at": "2026-06-14T03:20:37Z"
-      },
-      "previous_run": {
-        "number": 20,
-        "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/27081362123",
-        "created_at": "2026-06-07T03:20:00Z"
       },
       "summary": {
         "fail_latest": 0,
@@ -465,15 +374,7 @@
         "consistent_failures": 0,
         "consistent_successes": 17
       },
-      "recent_notebooks_60d": [
-        {
-          "notebook": "notebooks/NIRCAM/LW_Grism_Time_Series/JWPipeNB-NIRCam-LWGTS.ipynb",
-          "added_at": "2026-04-17",
-          "current_status": "success",
-          "latest_run_url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/27486973036",
-          "latest_run_number": 21
-        }
-      ],
+      "recent_notebooks_60d": [],
       "details": {
         "new_failures": [],
         "resolved_failures": [],
@@ -503,5 +404,7 @@
       }
     }
   ],
-  "errors": []
+  "errors": [
+    "`spacetelescope/jdat_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/jdat_notebooks/actions/runs/27486919946/jobs?per_page=100&filter=all"
+  ]
 }
