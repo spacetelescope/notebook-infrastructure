@@ -68,12 +68,12 @@ The system automatically determines what to run based on file changes:
   - `*.md` files
   - `docs/` directory
   - `README` files
+  - `_config.yml` or `_toc.yml` (Jupyter Book configuration)
 
 - **Full CI path**: Triggered by changes to:
   - `*.ipynb` notebooks
   - `requirements.txt` or `pyproject.toml`
   - Python source files (`*.py`)
-  - `_config.yml` or `_toc.yml` (Jupyter Book configuration)
   - Any other code files
 
 ## Operator Interactions

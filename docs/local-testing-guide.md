@@ -149,6 +149,9 @@ CASJOBS_PW=your_password
 PYTHON_VERSION=3.11
 ```
 
+!!! warning
+    `.env` holds real credentials - add it to your `.gitignore` so it is never committed.
+
 ### Advanced Act Usage
 
 #### Testing Specific Events
@@ -243,7 +246,7 @@ fi
 # Step 5: Security scan
 echo "🔒 Running security scan..."
 find notebooks -name "*.ipynb" -exec jupyter nbconvert --to script {} \;
-find notebooks -name "*.py" -exec bandit -r {} \; || true
+bandit -r notebooks/ || true
 
 # Step 6: Build documentation
 echo "📖 Building documentation..."
