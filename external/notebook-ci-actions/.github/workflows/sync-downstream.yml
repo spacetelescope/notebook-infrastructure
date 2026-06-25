@@ -1,0 +1,170 @@
+name: Sync downstream (template + infrastructure)
+
+# Keeps the downstream repos current with this repo at its newest release tag:
+#   * notebook-ci-template  - consumer files scientists' repos inherit
+#   * notebook-infrastructure - external/ reference snapshots on the public docs site
+# Runs on each major-version release, and can be run manually (workflow_dispatch)
+# to bootstrap.
+# Authenticates as the notebook-ci-sync GitHub App (SYNC_APP_ID / SYNC_APP_PRIVATE_KEY);
+# the App must be installed on BOTH target repos with Contents + Pull requests: write.
+
+on:
+  push:
+    # Fire once per release on the moving major tag (v1, v2, ...), not the
+    # immutable version tags - avoids running twice per release and over-matching
+    # v10*. The exact version to sync is resolved dynamically (resolve-tag job).
+    tags: ["v[0-9]"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Resolve the newest release tag once so both syncs pin to the same immutable
+  # version - and pick up a future v2 line automatically, instead of hardcoding v1.
+  resolve-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+    steps:
+      - name: Resolve latest release tag
+        id: resolve
+        run: |
+          set -euo pipefail
+          tag="$(git ls-remote --tags --refs "https://github.com/${{ github.repository }}" \
+            | awk '{print $2}' | sed 's#refs/tags/##' \
+            | grep -E '^v[0-9]+(\.[0-9]+)*$' | sort -V | tail -n1 || true)"
+          if [ -z "$tag" ]; then
+            echo "::error::No vX.Y.Z release tag found on ${{ github.repository }}"
+            exit 1
+          fi
+          echo "Resolved latest release tag: $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  # 1) Consumer files into the template (what new repos inherit).
+  sync-template:
+    needs: resolve-tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate a token from the GitHub App
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+          owner: spacetelescope
+          repositories: notebook-ci-template
+
+      - name: Check out notebook-ci-actions (source) at the latest release
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve-tag.outputs.tag }}
+          path: source
+
+      - name: Check out notebook-ci-template (target)
+        uses: actions/checkout@v5
+        with:
+          repository: spacetelescope/notebook-ci-template
+          path: template
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Mirror consumer files from the release
+        run: |
+          set -euo pipefail
+          # Directories: rsync --delete with trailing slashes so files removed
+          # upstream are removed from the template too. Single files: copy, or
+          # delete downstream if the source dropped them.
+          for d in scripts examples; do
+            if [ -d "source/$d" ]; then
+              mkdir -p "template/$d"
+              rsync -a --delete "source/$d/" "template/$d/"
+            fi
+          done
+          for f in QUICK_START.md ci_config.txt; do
+            if [ -f "source/$f" ]; then
+              cp "source/$f" "template/$f"
+            else
+              rm -f "template/$f"
+            fi
+          done
+
+      - name: Open sync PR in the template
+        uses: peter-evans/create-pull-request@v6
+        with:
+          path: template
+          token: ${{ steps.app-token.outputs.token }}
+          branch: sync/from-notebook-ci-actions
+          title: "Sync consumer files from notebook-ci-actions@${{ needs.resolve-tag.outputs.tag }}"
+          commit-message: "Sync consumer files from notebook-ci-actions@${{ needs.resolve-tag.outputs.tag }}"
+          body: |
+            Automated sync of consumer-facing files from `notebook-ci-actions@${{ needs.resolve-tag.outputs.tag }}`:
+            `scripts/`, `examples/`, `QUICK_START.md`, `ci_config.txt`.
+
+            Opened by the `notebook-ci-sync` GitHub App.
+          reviewers: |
+            bgannon2
+            mgough-970
+          delete-branch: true
+
+  # 2) Full reference snapshots into notebook-infrastructure/external/.
+  #    Safe to mirror whole repos here - vendored workflows under external/ do not run.
+  sync-infrastructure:
+    needs: resolve-tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate a token from the GitHub App
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+          owner: spacetelescope
+          repositories: |
+            notebook-ci-template
+            notebook-infrastructure
+
+      - name: Check out notebook-ci-actions (source A) at the latest release
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve-tag.outputs.tag }}
+          path: nca
+
+      - name: Check out notebook-ci-template (source B)
+        uses: actions/checkout@v5
+        with:
+          repository: spacetelescope/notebook-ci-template
+          path: nct
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Check out notebook-infrastructure (target)
+        uses: actions/checkout@v5
+        with:
+          repository: spacetelescope/notebook-infrastructure
+          path: infra
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Mirror both repos into external/
+        run: |
+          mkdir -p infra/external/notebook-ci-actions infra/external/notebook-ci-template
+          rsync -a --delete --exclude '.git' --exclude '_build' nca/ infra/external/notebook-ci-actions/
+          rsync -a --delete --exclude '.git' nct/ infra/external/notebook-ci-template/
+
+      - name: Open sync PR in notebook-infrastructure
+        uses: peter-evans/create-pull-request@v6
+        with:
+          path: infra
+          token: ${{ steps.app-token.outputs.token }}
+          branch: sync/from-notebook-ci-actions
+          title: "Sync external/ snapshots from notebook-ci-actions@${{ needs.resolve-tag.outputs.tag }} and notebook-ci-template"
+          commit-message: "Sync external/ snapshots (notebook-ci-actions@${{ needs.resolve-tag.outputs.tag }}, notebook-ci-template)"
+          body: |
+            Refreshes the reference snapshots under `external/`:
+
+            - `external/notebook-ci-actions` from `notebook-ci-actions@${{ needs.resolve-tag.outputs.tag }}`
+            - `external/notebook-ci-template` from `notebook-ci-template`
+
+            Opened by the `notebook-ci-sync` GitHub App.
+          reviewers: |
+            bgannon2
+            mgough-970
+          delete-branch: true

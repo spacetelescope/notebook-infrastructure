@@ -1,0 +1,39 @@
+name: Simple Runner Config Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-config:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Test Config Generation
+        run: |
+          echo "🔍 Checking ci_config.txt location and content"
+          
+          # Check different possible locations
+          echo "📁 Current directory:"
+          pwd
+          ls -la
+          
+          echo "📁 Looking for ci_config.txt:"
+          find . -name "ci_config.txt" -type f 2>/dev/null || echo "Not found"
+          
+          echo "📁 Checking examples directory:"
+          ls -la examples/ 2>/dev/null || echo "Examples directory not found"
+          
+          if [ -f "examples/ci_config.txt" ]; then
+            echo "✅ Found examples/ci_config.txt:"
+            cat examples/ci_config.txt
+          fi
+          
+          # Test with a known notebook path
+          TEST_NOTEBOOK="notebooks/NIRSPEC/MOS/JWPipeNB-NIRSpec-MOS.ipynb"
+          echo "🧪 Testing lookup for: $TEST_NOTEBOOK"
+          
+          if [ -f "examples/ci_config.txt" ]; then
+            RESULT=$(grep "^${TEST_NOTEBOOK}:" examples/ci_config.txt 2>/dev/null | cut -d':' -f2 | tr -d '[:space:]' || echo "NOT_FOUND")
+            echo "🎯 Lookup result: '$RESULT'"
+          fi

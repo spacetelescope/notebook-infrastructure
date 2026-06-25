@@ -1,0 +1,45 @@
+# Test Common Runner Labels
+# This tests various runner labels to see which ones work
+
+name: Test Common Runners
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ubuntu-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test ubuntu-latest
+        run: |
+          echo "✅ ubuntu-latest works"
+          echo "Runner: ${{ runner.name }}"
+
+  test-ubuntu-24-04:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Test ubuntu-24.04
+        run: |
+          echo "✅ ubuntu-24.04 works"
+          echo "Runner: ${{ runner.name }}"
+
+  # Test the larger runners - these will hang if they don't exist
+  test-larger-runner-16gb:
+    runs-on: jwst-pipeline-notebooks-16gb
+    steps:
+      - name: Test 16GB runner
+        run: |
+          echo "✅ jwst-pipeline-notebooks-16gb works"
+          echo "Runner: ${{ runner.name }}"
+          echo "CPU cores: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+
+  test-larger-runner-32gb:
+    runs-on: jwst-pipeline-notebooks-32gb
+    steps:
+      - name: Test 32GB runner
+        run: |
+          echo "✅ jwst-pipeline-notebooks-32gb works"
+          echo "Runner: ${{ runner.name }}"
+          echo "CPU cores: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"

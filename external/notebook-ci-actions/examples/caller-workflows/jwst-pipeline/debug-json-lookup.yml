@@ -1,0 +1,66 @@
+name: Debug Runner Config JSON Details
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-json-lookup:
+    runs-on: ubuntu-24.04
+    outputs:
+      test-config: ${{ steps.create-config.outputs.config }}
+    steps:
+      - name: Create test runner config
+        id: create-config
+        run: |
+          # Simulate the exact same logic as the main workflow
+          TEST_CONFIG='{"notebooks/NIRSPEC/MOS/JWPipeNB-NIRSpec-MOS.ipynb":"jwst-pipeline-notebooks-16gb","notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb":"jwst-pipeline-notebooks-32gb","default":"ubuntu-latest"}'
+          echo "config=$TEST_CONFIG" >> $GITHUB_OUTPUT
+          echo "✅ Test config created: $TEST_CONFIG"
+          
+          # Test JSON parsing
+          echo "🧪 Testing JSON parsing:"
+          echo "$TEST_CONFIG" | jq '.'
+          
+          # Test specific key lookup
+          echo "🔍 Testing key lookups:"
+          LOOKUP1=$(echo "$TEST_CONFIG" | jq -r '.["notebooks/NIRSPEC/MOS/JWPipeNB-NIRSpec-MOS.ipynb"]')
+          LOOKUP2=$(echo "$TEST_CONFIG" | jq -r '.["notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb"]')
+          LOOKUP3=$(echo "$TEST_CONFIG" | jq -r '.["nonexistent"]')
+          
+          echo "📋 Lookup results:"
+          echo "  MOS notebook: '$LOOKUP1'"
+          echo "  BOTS notebook: '$LOOKUP2'"
+          echo "  Nonexistent key: '$LOOKUP3'"
+          
+  test-matrix-lookup:
+    needs: test-json-lookup
+    runs-on: ${{ fromJson(needs.test-json-lookup.outputs.test-config)[matrix.notebook] || 'ubuntu-24.04' }}
+    strategy:
+      matrix:
+        notebook:
+          - "notebooks/NIRSPEC/MOS/JWPipeNB-NIRSpec-MOS.ipynb"
+          - "notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb"
+          - "notebooks/nonexistent/test.ipynb"
+    steps:
+      - name: Debug matrix lookup
+        run: |
+          echo "🔍 Matrix Lookup Debug:"
+          echo "  Notebook: '${{ matrix.notebook }}'"
+          echo "  Config JSON: '${{ needs.test-json-lookup.outputs.test-config }}'"
+          echo "  Lookup result: '${{ fromJson(needs.test-json-lookup.outputs.test-config)[matrix.notebook] }}'"
+          echo "  Fallback result: '${{ fromJson(needs.test-json-lookup.outputs.test-config)[matrix.notebook] || 'ubuntu-24.04' }}'"
+          echo "  Runner name: '${{ runner.name }}'"
+          echo "  Runner OS: '${{ runner.os }}'"
+          
+          # Test if the lookup actually returns a string
+          LOOKUP_RESULT="${{ fromJson(needs.test-json-lookup.outputs.test-config)[matrix.notebook] }}"
+          echo "  Type check: Length=${#LOOKUP_RESULT}"
+          echo "  Type check: First char=$(echo "$LOOKUP_RESULT" | head -c 1)"
+          
+          if [ -z "$LOOKUP_RESULT" ]; then
+            echo "  ❌ Lookup result is empty"
+          elif [ "$LOOKUP_RESULT" = "null" ]; then
+            echo "  ❌ Lookup result is null"
+          else
+            echo "  ✅ Lookup result is valid: '$LOOKUP_RESULT'"
+          fi

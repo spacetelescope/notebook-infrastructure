@@ -1,0 +1,30 @@
+name: Debug Caller Repository Config
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug-caller-config:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Use debug mode to see what's happening
+      execution-mode: 'debug'
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      custom-requirements: ''
+      single-notebook: ''
+      affected-directories: '[]'
+      
+      # Minimal features to focus on runner config
+      enable-validation: true
+      enable-security: false
+      enable-execution: false  # Don't execute, just test runner assignment
+      enable-storage: false
+      enable-html-build: false
+      
+      # The key setting
+      custom-runner-config: true
+      
+      post-processing-script: ''
+      deprecation-days: 60
+    secrets: inherit

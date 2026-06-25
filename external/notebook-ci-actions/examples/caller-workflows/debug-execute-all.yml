@@ -1,0 +1,198 @@
+name: Debug Execute-All Conditions
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_level:
+        description: 'Debug level'
+        type: choice
+        options:
+          - 'basic'
+          - 'detailed'
+        default: 'basic'
+
+jobs:
+  test-execute-all-conditions:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Debug Input Evaluation
+        run: |
+          echo "🧪 Testing execute-all conditions"
+          echo ""
+          echo "📋 Simulated inputs (matching execute-all):"
+          echo "  execution-mode: 'on-demand'"
+          echo "  trigger-event: 'execute'"
+          echo "  enable-execution: true"
+          echo "  enable-validation: false"
+          echo "  enable-security: false" 
+          echo "  enable-storage: false"
+          echo "  enable-html-build: false"
+          echo ""
+          echo "🔍 Testing process-notebooks conditional logic:"
+          echo ""
+          echo "Condition 1: needs.setup-matrix.outputs.skip-execution != 'true'"
+          echo "  Expected: true (should not skip execution for execute-all)"
+          echo ""
+          echo "Condition 2: needs.setup-matrix.outputs.matrix-notebooks != '[]'"
+          echo "  Expected: true (should have notebooks to process)"
+          echo ""
+          echo "Condition 3: inputs.execution-mode != 'merge'"
+          echo "  execution-mode='on-demand' != 'merge' = true ✅"
+          echo ""
+          echo "Condition 4: inputs.trigger-event != 'deprecate'"
+          echo "  trigger-event='execute' != 'deprecate' = true ✅"
+          echo ""
+          echo "🎯 Two conditions depend on setup-matrix outputs:"
+          echo "  - skip-execution should be 'false' or undefined"
+          echo "  - matrix-notebooks should contain actual notebooks"
+          echo ""
+          echo "💡 Next step: Check what setup-matrix actually outputs for execute-all"
+
+  simulate-setup-matrix:
+    runs-on: ubuntu-24.04 
+    outputs:
+      matrix-notebooks: ${{ steps.setup.outputs.matrix-notebooks }}
+      runner-config: ${{ steps.setup.outputs.runner-config }}
+      skip-execution: ${{ steps.setup.outputs.skip-execution }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          
+      - name: Simulate setup-matrix for execute-all
+        id: setup
+        run: |
+          echo "🎯 Simulating setup-matrix logic for execute-all scenario"
+          echo ""
+          echo "📋 Inputs (simulated):"
+          echo "  execution-mode: 'on-demand'"
+          echo "  trigger-event: 'execute'"
+          echo "  single-notebook: '' (empty)"
+          echo ""
+          
+          # Initialize variables like the real setup-matrix
+          SKIP_EXECUTION=false
+          DOCS_ONLY=false
+          MATRIX_NOTEBOOKS="[]"
+          AFFECTED_DIRS='[]'
+          
+          echo "🔄 Processing on-demand mode..."
+          
+          # Check if this is a documentation-only build
+          if [ "execute" = "html" ]; then
+            echo "📚 Documentation-only build: skipping notebook processing"
+            SKIP_EXECUTION=true
+            MATRIX_NOTEBOOKS='[]'
+            AFFECTED_DIRS='[]'
+          elif [ -n "" ]; then
+            echo "📄 Single notebook branch (should not execute - single-notebook is empty)"
+          else
+            echo "🔍 Processing all notebooks..."
+            MATRIX_NOTEBOOKS=$(find notebooks/ -name '*.ipynb' | jq -R -s -c 'split("\n")[:-1] | map(select(. != ""))')
+            AFFECTED_DIRS='["notebooks"]'
+          fi
+          
+          echo ""
+          echo "📊 Final outputs:"
+          echo "  SKIP_EXECUTION: $SKIP_EXECUTION"
+          echo "  MATRIX_NOTEBOOKS: $MATRIX_NOTEBOOKS"
+          echo "  AFFECTED_DIRS: $AFFECTED_DIRS"
+          echo ""
+          
+          # Test the conditions
+          if [ "$SKIP_EXECUTION" != "true" ]; then
+            echo "✅ Condition 1 PASS: skip-execution != 'true'"
+          else
+            echo "❌ Condition 1 FAIL: skip-execution == 'true'"
+          fi
+          
+          if [ "$MATRIX_NOTEBOOKS" != "[]" ]; then
+            echo "✅ Condition 2 PASS: matrix-notebooks != '[]'"
+          else
+            echo "❌ Condition 2 FAIL: matrix-notebooks == '[]'"
+          fi
+          
+          # Static conditions
+          echo "✅ Condition 3 PASS: execution-mode ('on-demand') != 'merge'"
+          echo "✅ Condition 4 PASS: trigger-event ('execute') != 'deprecate'"
+          echo ""
+          
+          # Overall evaluation
+          if [ "$SKIP_EXECUTION" != "true" ] && [ "$MATRIX_NOTEBOOKS" != "[]" ]; then
+            echo "🎉 ALL CONDITIONS PASS - process-notebooks should start!"
+          else
+            echo "⚠️ CONDITIONS FAIL - process-notebooks will not start"
+            echo "   This indicates the bug is in setup-matrix logic"
+          fi
+          
+          # Set outputs
+          echo "matrix-notebooks=$MATRIX_NOTEBOOKS" >> $GITHUB_OUTPUT
+          echo "skip-execution=$SKIP_EXECUTION" >> $GITHUB_OUTPUT
+          echo "runner-config={\"default\":\"ubuntu-latest\"}" >> $GITHUB_OUTPUT
+
+  test-process-notebooks-condition:
+    needs: simulate-setup-matrix
+    if: |
+      needs.simulate-setup-matrix.outputs.skip-execution != 'true' && 
+      needs.simulate-setup-matrix.outputs.matrix-notebooks != '[]' &&
+      'on-demand' != 'merge' &&
+      'execute' != 'deprecate'
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        notebook: ${{ fromJson(needs.simulate-setup-matrix.outputs.matrix-notebooks) }}
+    steps:
+      - name: Debug Process Notebooks
+        run: |
+          echo "🎉 SUCCESS: process-notebooks job started!"
+          echo "📓 Processing notebook: ${{ matrix.notebook }}"
+          echo "🖥️ Running on: ${{ runner.name }}"
+          echo ""
+          echo "📋 Verified conditions:"
+          echo "  skip-execution: '${{ needs.simulate-setup-matrix.outputs.skip-execution }}'"
+          echo "  matrix-notebooks: '${{ needs.simulate-setup-matrix.outputs.matrix-notebooks }}'"
+          echo "  execution-mode: 'on-demand'"
+          echo "  trigger-event: 'execute'"
+
+  condition-failure-analysis:
+    needs: simulate-setup-matrix
+    if: |
+      needs.simulate-setup-matrix.outputs.skip-execution == 'true' || 
+      needs.simulate-setup-matrix.outputs.matrix-notebooks == '[]' ||
+      'on-demand' == 'merge' ||
+      'execute' == 'deprecate'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Analyze Failed Conditions
+        run: |
+          echo "❌ process-notebooks conditions FAILED"
+          echo ""
+          echo "📋 Condition analysis:"
+          
+          if [ "${{ needs.simulate-setup-matrix.outputs.skip-execution }}" == "true" ]; then
+            echo "❌ FAIL: skip-execution == 'true'"
+          else
+            echo "✅ PASS: skip-execution != 'true'"
+          fi
+          
+          if [ "${{ needs.simulate-setup-matrix.outputs.matrix-notebooks }}" == "[]" ]; then
+            echo "❌ FAIL: matrix-notebooks == '[]'"
+          else
+            echo "✅ PASS: matrix-notebooks != '[]'"
+          fi
+          
+          if [ "on-demand" == "merge" ]; then
+            echo "❌ FAIL: execution-mode == 'merge'"
+          else
+            echo "✅ PASS: execution-mode != 'merge'"
+          fi
+          
+          if [ "execute" == "deprecate" ]; then
+            echo "❌ FAIL: trigger-event == 'deprecate'"
+          else
+            echo "✅ PASS: trigger-event != 'deprecate'"
+          fi
+          
+          echo ""
+          echo "🔍 This analysis will help identify which condition is blocking process-notebooks"

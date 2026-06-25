@@ -1,0 +1,45 @@
+# Pull Request workflow for jwst_pipeline_notebooks repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - Pull Request
+
+on:
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'environment.yml'
+      - '.github/workflows/**'
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2
+    with:
+      # Repository-specific configuration
+      notebook_path: 'notebooks'
+      python_version: '3.11'
+      
+      # PR-specific execution settings
+      execution_mode: 'cache_only'
+      notebook_pattern: ''
+      
+      # Environment settings (JWST pipeline requires conda)
+      environment_file: 'requirements.txt'
+      conda_environment_file: 'environment.yml'
+      
+      # Security and validation
+      security_check: true
+      notebook_validation: true
+      
+      # No documentation generation for PRs
+      generate_docs: false
+      
+      # Artifact settings
+      artifact_retention_days: 7
+      
+      # Performance settings (JWST pipeline can be resource intensive)
+      timeout_minutes: 90
+      max_parallel: 1
+      
+    secrets: inherit

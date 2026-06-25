@@ -1,0 +1,49 @@
+# Merge/Push workflow for hst_notebooks repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - Merge
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'environment.yml'
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2
+    with:
+      # Repository-specific configuration
+      notebook_path: 'notebooks'
+      python_version: '3.11'
+      
+      # Merge-specific execution settings
+      execution_mode: 'force_execute'
+      notebook_pattern: ''
+      
+      # Environment settings (HST pipelines often use conda)
+      environment_file: 'requirements.txt'
+      conda_environment_file: 'environment.yml'
+      
+      # Security and validation
+      security_check: true
+      notebook_validation: true
+      
+      # Documentation generation
+      generate_docs: true
+      docs_artifact: 'hst-notebooks-docs'
+      
+      # Artifact settings
+      artifact_retention_days: 60
+      
+      # Performance settings (HST data processing can be intensive)
+      timeout_minutes: 120
+      max_parallel: 2
+      
+      # HST-specific settings
+      collect_execution_stats: true
+      archive_execution_results: true
+      
+    secrets: inherit

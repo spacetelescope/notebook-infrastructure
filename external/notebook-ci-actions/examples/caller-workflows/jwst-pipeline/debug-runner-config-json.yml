@@ -1,0 +1,95 @@
+name: Debug Runner Config JSON
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-debug:
+    runs-on: ubuntu-24.04
+    outputs:
+      runner-config: ${{ steps.debug.outputs.runner-config }}
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Debug Runner Config Generation
+        id: debug
+        run: |
+          echo "🔍 Testing custom runner config generation"
+          
+          # Simulate matrix notebooks (use example notebooks from ci_config.txt)
+          MATRIX_NOTEBOOKS='["notebooks/NIRSPEC/MOS/JWPipeNB-NIRSpec-MOS.ipynb","notebooks/MIRI/LRS-slit/JWPipeNB-MIRI-LRS-slit.ipynb"]'
+          echo "📚 Matrix notebooks: $MATRIX_NOTEBOOKS"
+          
+          # Check if ci_config.txt exists
+          if [ -f "examples/ci_config.txt" ]; then
+            echo "✅ Found ci_config.txt"
+            cat examples/ci_config.txt
+          else
+            echo "❌ ci_config.txt not found"
+            ls -la examples/
+          fi
+          
+          # Create runner config JSON manually
+          RUNNER_CONFIG='{'
+          FIRST_ENTRY=true
+          
+          echo "$MATRIX_NOTEBOOKS" | jq -r '.[]' > /tmp/matrix_notebooks.txt 2>/dev/null
+          
+          while IFS= read -r notebook; do
+            if [ -n "$notebook" ]; then
+              # Look up runner for this notebook in ci_config.txt
+              if [ -f "examples/ci_config.txt" ]; then
+                CUSTOM_RUNNER=$(grep "^${notebook}:" examples/ci_config.txt 2>/dev/null | cut -d':' -f2 | tr -d '[:space:]' || echo "")
+              else
+                CUSTOM_RUNNER=""
+              fi
+              
+              if [ -n "$CUSTOM_RUNNER" ]; then
+                echo "🎯 Found custom runner for $notebook: '$CUSTOM_RUNNER'"
+                RUNNER="$CUSTOM_RUNNER"
+              else
+                echo "🔧 No custom runner for $notebook, using default: ubuntu-latest"
+                RUNNER="ubuntu-latest"
+              fi
+              
+              # Build JSON entry for runner config
+              if [ "$FIRST_ENTRY" = "true" ]; then
+                RUNNER_CONFIG="${RUNNER_CONFIG}\"${notebook}\":\"${RUNNER}\""
+                FIRST_ENTRY=false
+              else
+                RUNNER_CONFIG="${RUNNER_CONFIG},\"${notebook}\":\"${RUNNER}\""
+              fi
+            fi
+          done < /tmp/matrix_notebooks.txt
+          
+          # Clean up and close JSON
+          rm -f /tmp/matrix_notebooks.txt
+          RUNNER_CONFIG="${RUNNER_CONFIG},\"default\":\"ubuntu-latest\"}"
+          
+          echo "✅ Generated runner config: $RUNNER_CONFIG"
+          echo "runner-config=$RUNNER_CONFIG" >> $GITHUB_OUTPUT
+          
+          # Test JSON parsing
+          echo "$RUNNER_CONFIG" | jq '.'
+          
+  test-lookup:
+    needs: setup-debug
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        notebook: ["notebooks/NIRSPEC/MOS/JWPipeNB-NIRSpec-MOS.ipynb","notebooks/MIRI/LRS-slit/JWPipeNB-MIRI-LRS-slit.ipynb"]
+    steps:
+      - name: Test Runner Lookup
+        run: |
+          echo "🔍 Testing runner lookup for: ${{ matrix.notebook }}"
+          echo "📋 Runner config JSON: ${{ needs.setup-debug.outputs.runner-config }}"
+          
+          LOOKUP_RESULT="${{ fromJson(needs.setup-debug.outputs.runner-config)[matrix.notebook] }}"
+          echo "🎯 Lookup result: '$LOOKUP_RESULT'"
+          
+          # Test the conditional logic
+          if [ "$LOOKUP_RESULT" != "ubuntu-latest" ] && [ -n "$LOOKUP_RESULT" ]; then
+            echo "✅ Would use custom runner: $LOOKUP_RESULT"
+          else
+            echo "🔧 Would use default: ubuntu-24.04"
+          fi

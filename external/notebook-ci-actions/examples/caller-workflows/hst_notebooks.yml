@@ -1,0 +1,97 @@
+# Notebook CI/CD workflow for hst_notebooks repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - HST Notebooks
+
+on:
+  # Run on pull requests to main/master branch
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'environment.yml'
+      - '.github/workflows/**'
+
+  # Run on pushes to main/master branch
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'environment.yml'
+
+  # Run on schedule (weekly on Tuesdays at 5 AM UTC)
+  schedule:
+    - cron: '0 5 * * 2'
+
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      execution_mode:
+        description: 'Execution mode'
+        required: false
+        default: 'cache_only'
+        type: choice
+        options:
+          - cache_only
+          - force_execute
+          - collect_only
+      notebook_pattern:
+        description: 'Notebook pattern (e.g., "**/*ACS*" or "**/*WFC3*")'
+        required: false
+        default: ''
+        type: string
+      instrument_filter:
+        description: 'Instrument filter (optional)'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          - 'ACS'
+          - 'WFC3'
+          - 'WFPC2'
+          - 'STIS'
+          - 'COS'
+          - 'FGS'
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Repository-specific configuration
+      notebook_path: 'notebooks'
+      python_version: '3.11'
+      
+      # Execution settings
+      execution_mode: ${{ inputs.execution_mode || (github.event_name == 'pull_request' && 'cache_only' || 'force_execute') }}
+      notebook_pattern: ${{ inputs.notebook_pattern || (inputs.instrument_filter && format('**/*{0}*', inputs.instrument_filter) || '') }}
+      
+      # Environment settings (HST pipelines often use conda)
+      environment_file: 'requirements.txt'
+      conda_environment_file: 'environment.yml'
+      
+      # Security and validation
+      security_check: true
+      notebook_validation: true
+      
+      # Documentation generation
+      generate_docs: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
+      docs_artifact: 'hst-notebooks-docs'
+      
+      # Artifact settings
+      artifact_retention_days: 60
+      
+      # Performance settings (HST data processing can be intensive)
+      timeout_minutes: 120
+      max_parallel: 2
+      
+      # HST-specific settings
+      allow_notebook_execution_errors: false
+      collect_execution_stats: true
+      
+      # Archive settings for HST data products
+      archive_execution_results: true
+      
+    secrets: inherit

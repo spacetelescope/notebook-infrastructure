@@ -1,0 +1,99 @@
+# Example workflow for on-demand notebook testing
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - On Demand
+
+on:
+  workflow_dispatch:
+    inputs:
+      python-version:
+        description: 'Python version to use'
+        required: false
+        default: '3.11'
+        type: choice
+        options:
+          - '3.9'
+          - '3.10'
+          - '3.11'
+          - '3.12'
+      execution-mode:
+        description: 'Execution mode'
+        required: true
+        default: 'on-demand'
+        type: choice
+        options:
+          - 'pr'
+          - 'merge'
+          - 'on-demand'
+      single-notebook:
+        description: 'Path to single notebook (optional)'
+        required: false
+        type: string
+      trigger-event:
+        description: 'Trigger event type'
+        required: false
+        default: 'execute'
+        type: choice
+        options:
+          - 'execute'
+          - 'deprecate'
+          - 'validate'
+      run-security-scan:
+        description: 'Run security scan'
+        required: false
+        default: true
+        type: boolean
+      build-documentation:
+        description: 'Build HTML documentation'
+        required: false
+        default: true
+        type: boolean
+      skip-deprecated:
+        description: 'Skip deprecated notebooks'
+        required: false
+        default: true
+        type: boolean
+      post-processing:
+        description: 'Post-processing script'
+        required: false
+        default: ''
+        type: string
+      crds-server-url:
+        description: 'Optional CRDS server URL (sets CRDS_SERVER_URL)'
+        required: false
+        default: ''
+        type: string
+      crds-context:
+        description: 'Optional CRDS context (sets CRDS_CONTEXT)'
+        required: false
+        default: ''
+        type: string
+      crds-path:
+        description: 'Optional CRDS cache path (sets CRDS_PATH)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  on-demand-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@v3
+    with:
+      execution-mode: ${{ inputs.execution-mode }}
+      python-version: ${{ inputs.python-version }}
+      single-filename: ${{ inputs.single-notebook }}
+      trigger-event: ${{ inputs.trigger-event }}
+      enable-validation: true
+      enable-security: ${{ inputs.run-security-scan }}
+      enable-execution: true
+      enable-storage: true
+      enable-html-build: ${{ inputs.build-documentation }}
+      skip-deprecated: ${{ inputs.skip-deprecated }}
+      post-run-script: ${{ inputs.post-processing }}
+      # Optional CRDS configuration for JWST-style pipelines
+      crds-server-url: ${{ inputs.crds-server-url }}
+      crds-context: ${{ inputs.crds-context }}
+      crds-path: ${{ inputs.crds-path }}
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

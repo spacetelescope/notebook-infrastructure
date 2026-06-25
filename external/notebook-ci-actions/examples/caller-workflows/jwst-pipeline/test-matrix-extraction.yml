@@ -1,0 +1,26 @@
+# Test Matrix Extraction
+# This tests if the matrix.runner value is being extracted properly
+
+name: Test Matrix Extraction
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-matrix-extraction:
+    strategy:
+      matrix:
+        include:
+          - notebook: "notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb"
+            runner: "jwst-pipeline-notebooks-32gb"
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Test Matrix Extraction
+        run: |
+          echo "🔍 Matrix Extraction Test:"
+          echo "  notebook: '${{ matrix.notebook }}'"
+          echo "  runner: '${{ matrix.runner }}'"
+          echo "  runner length: $(echo '${{ matrix.runner }}' | wc -c)"
+          echo "  actual runner name: ${{ runner.name }}"
+          echo "  runner OS: ${{ runner.os }}"
+          echo "✅ Matrix extraction test completed"

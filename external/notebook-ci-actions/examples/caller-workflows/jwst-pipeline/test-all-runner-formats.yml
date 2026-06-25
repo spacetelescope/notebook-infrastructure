@@ -1,0 +1,52 @@
+# Test All Runner Formats
+# This tests different possible runner name formats and provides debugging
+
+name: Test All Runner Formats
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Ubuntu (Control)
+        run: |
+          echo "✅ Ubuntu control test works"
+          echo "Repository: ${{ github.repository }}"
+          echo "Organization: ${{ github.repository_owner }}"
+          echo "Runner: ${{ runner.name }}"
+
+  # Test if we need to use individual runner names instead of group names
+  test-individual-runner-a:
+    runs-on: jwst-pipeline-notebooks-a
+    steps:
+      - name: Test Individual Runner A
+        run: |
+          echo "✅ Individual runner A works"
+          echo "Runner: ${{ runner.name }}"
+
+  test-individual-runner-c:
+    runs-on: jwst-pipeline-notebooks-c  
+    steps:
+      - name: Test Individual Runner C (16GB group)
+        run: |
+          echo "✅ Individual runner C works"
+          echo "Runner: ${{ runner.name }}"
+
+  # Test group names with different formats
+  test-group-basic:
+    runs-on: jwst-pipeline-notebooks
+    steps:
+      - name: Test Basic Group
+        run: |
+          echo "✅ Basic group works"
+          echo "Runner: ${{ runner.name }}"
+
+  test-group-with-size:
+    runs-on: jwst-pipeline-notebooks-16gb
+    steps:
+      - name: Test Group with Size
+        run: |
+          echo "✅ Group with size works"
+          echo "Runner: ${{ runner.name }}"

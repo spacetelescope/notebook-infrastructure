@@ -1,0 +1,53 @@
+## This workflow performs accessibility checks on allJupyter notebooks in a given repository
+name: "Jupyter Notebook Accessibility Check"
+
+on:
+  workflow_call:
+
+concurrency:
+  group: notebook-a11y-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    name: Discover notebooks
+    runs-on: ubuntu-latest
+    outputs:
+      notebooks: ${{ steps.find.outputs.notebooks }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - id: find
+        name: Find tracked notebooks
+        run: |
+          # List tracked .ipynb files, exclude generated build and checkpoint dirs
+          files=$(git ls-files '*.ipynb' || true)
+          if [ -z "${files}" ]; then
+            echo "notebooks=[]" >> "$GITHUB_OUTPUT"
+            echo "No notebooks found."
+            exit 0
+          fi
+          # Filter out _build/ and .ipynb_checkpoints
+          mapfile -t arr < <(printf '%s\n' "$files" | grep -vE '^_build/|/\\.ipynb_checkpoints' || true)
+          # Produce a JSON array (use Python for robust escaping)
+          json=$(printf '%s\n' "${arr[@]}" | python3 -c "import sys,json; lines=[l.rstrip('\\n') for l in sys.stdin if l.strip()]; print(json.dumps(lines))")
+          echo "notebooks=${json}" >> "$GITHUB_OUTPUT"
+          echo "Found notebooks: ${json}"
+  a11y-scan:
+    name: "Accessibility scan: ${{ matrix.notebook }}"
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        notebook: ${{ fromJson(needs.prepare.outputs.notebooks) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Run jupyterlab accessibility checker for notebook
+        uses: berkeley-dsep-infra/jupyterlab-a11y-checker@main
+        with:
+          files: ${{ matrix.notebook }}

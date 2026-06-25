@@ -1,0 +1,38 @@
+# Debug Matrix Values
+# This tests exactly what values are in the matrix
+
+name: Debug Matrix Values
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # Test with a simple hardcoded matrix first
+  test-simple-matrix:
+    strategy:
+      matrix:
+        include:
+          - notebook: "test1.ipynb"
+            runner: "ubuntu-latest"
+          - notebook: "test2.ipynb" 
+            runner: "jwst-pipeline-notebooks-16gb"
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Debug Matrix Values
+        run: |
+          echo "🔍 Matrix Debug:"
+          echo "  notebook: ${{ matrix.notebook }}"
+          echo "  runner: ${{ matrix.runner }}"
+          echo "  runner type: $(echo '${{ matrix.runner }}' | wc -c)"
+          echo "  runner quoted: '${{ matrix.runner }}'"
+          echo "✅ Matrix test completed"
+
+  # Test with hardcoded runner
+  test-hardcoded-runner:
+    runs-on: jwst-pipeline-notebooks-16gb
+    steps:
+      - name: Test Hardcoded Runner
+        run: |
+          echo "🎯 Hardcoded runner test"
+          echo "Runner Name: ${{ runner.name }}"
+          echo "✅ Hardcoded test completed"

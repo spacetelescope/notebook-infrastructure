@@ -1,0 +1,82 @@
+# Test Custom Runner Assignment
+# This is a minimal test to verify custom runners are working
+
+name: Test Custom Runners
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Test mode'
+        required: false
+        default: 'single'
+        type: choice
+        options:
+          - single    # Test single notebook
+          - matrix    # Test full matrix
+
+jobs:
+  # First test: Direct runner assignment
+  test-direct-runner:
+    runs-on: jwst-pipeline-notebooks-32gb
+    steps:
+      - name: Test Direct Assignment
+        run: |
+          echo "🎯 Testing direct runner assignment: jwst-pipeline-notebooks-32gb"
+          echo "Runner Name: ${{ runner.name }}"
+          echo "CPU cores: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          echo "✅ Direct assignment test completed!"
+
+  # Second test: Matrix with custom runners (only if matrix mode selected)
+  test-matrix-runners:
+    if: ${{ inputs.test_mode == 'matrix' }}
+    strategy:
+      matrix:
+        include:
+          - notebook: "notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb"
+            runner: "jwst-pipeline-notebooks-32gb"
+          - notebook: "notebooks/NIRSPEC/IFU/JWPipeNB-NIRSpec-IFU.ipynb"
+            runner: "jwst-pipeline-notebooks-16gb"
+          - notebook: "notebooks/NIRCAM/Imaging/JWPipeNB-nircam-imaging.ipynb"
+            runner: "ubuntu-latest"
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Test Matrix Assignment
+        run: |
+          echo "🎯 Testing matrix runner assignment"
+          echo "Notebook: ${{ matrix.notebook }}"
+          echo "Expected Runner: ${{ matrix.runner }}"
+          echo "Actual Runner Name: ${{ runner.name }}"
+          echo "CPU cores: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          echo "✅ Matrix assignment test completed!"
+
+  # Third test: Using the unified workflow (only if single mode)
+  test-unified-workflow:
+    if: ${{ inputs.test_mode == 'single' }}
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Execution Configuration
+      execution-mode: 'on-demand'  # Use on-demand mode instead of collect_only
+      
+      # Repository Configuration
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      
+      # Notebook Selection - limit to just one notebook for testing
+      single-notebook: 'notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb'
+      
+      # Feature Configuration - minimal for testing
+      enable-validation: false
+      enable-security: false
+      enable-execution: false     # Don't execute, just test runner assignment
+      enable-storage: false
+      enable-html-build: false
+      
+      # Custom Runner Configuration - THIS IS THE KEY TEST
+      custom-runner-config: true   # Enable custom runners
+      
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}

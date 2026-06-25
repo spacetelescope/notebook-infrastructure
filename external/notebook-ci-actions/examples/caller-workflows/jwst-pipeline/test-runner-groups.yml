@@ -1,0 +1,32 @@
+# Test Runner Group Names
+# This tests the exact runner group names
+
+name: Test Runner Group Names
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-16gb-group:
+    runs-on: jwst-pipeline-notebooks-16gb
+    steps:
+      - name: Test 16GB Group
+        run: |
+          echo "🎯 Testing 16GB runner group"
+          echo "Runner name: ${{ runner.name }}"
+          echo "Runner OS: ${{ runner.os }}"
+          echo "CPU cores: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          echo "✅ 16GB group test successful!"
+
+  test-32gb-group:
+    runs-on: jwst-pipeline-notebooks-32gb
+    steps:
+      - name: Test 32GB Group
+        run: |
+          echo "🎯 Testing 32GB runner group"
+          echo "Runner name: ${{ runner.name }}"
+          echo "Runner OS: ${{ runner.os }}"
+          echo "CPU cores: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          echo "✅ 32GB group test successful!"

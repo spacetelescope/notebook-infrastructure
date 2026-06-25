@@ -1,0 +1,91 @@
+# Notebook CI/CD workflow for jdat_notebooks repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - JDAT Notebooks
+
+on:
+  # Run on pull requests to main/master branch
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'environment.yml'
+      - '.github/workflows/**'
+
+  # Run on pushes to main/master branch
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'environment.yml'
+
+  # Run on schedule (twice weekly: Wednesday and Sunday at 3 AM UTC)
+  schedule:
+    - cron: '0 3 * * 3'  # Wednesday
+    - cron: '0 3 * * 0'  # Sunday
+
+  # Allow manual triggering with advanced options
+  workflow_dispatch:
+    inputs:
+      execution_mode:
+        description: 'Execution mode'
+        required: false
+        default: 'cache_only'
+        type: choice
+        options:
+          - cache_only
+          - force_execute
+          - collect_only
+      notebook_pattern:
+        description: 'Notebook pattern (e.g., "**/imaging/**" or specific notebook)'
+        required: false
+        default: ''
+        type: string
+      python_version:
+        description: 'Python version'
+        required: false
+        default: '3.11'
+        type: choice
+        options:
+          - '3.9'
+          - '3.10'
+          - '3.11'
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Repository-specific configuration
+      notebook_path: 'notebooks'
+      python_version: ${{ inputs.python_version || '3.11' }}
+      
+      # Execution settings
+      execution_mode: ${{ inputs.execution_mode || (github.event_name == 'pull_request' && 'cache_only' || 'force_execute') }}
+      notebook_pattern: ${{ inputs.notebook_pattern || '' }}
+      
+      # Environment settings (prefer conda for JDAT)
+      environment_file: 'requirements.txt'
+      conda_environment_file: 'environment.yml'
+      
+      # Security and validation
+      security_check: true
+      notebook_validation: true
+      
+      # Documentation generation
+      generate_docs: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
+      docs_artifact: 'jdat-notebooks-docs'
+      
+      # Artifact settings
+      artifact_retention_days: 60
+      
+      # Performance settings (longer timeout for complex astronomical notebooks)
+      timeout_minutes: 90
+      max_parallel: 2
+      
+      # JDAT-specific settings
+      allow_notebook_execution_errors: false
+      collect_execution_stats: true
+      
+    secrets: inherit

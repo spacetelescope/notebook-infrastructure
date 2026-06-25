@@ -1,0 +1,220 @@
+name: Debug Runner Config Parsing
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_notebook:
+        description: 'Single notebook to debug'
+        required: false
+        type: string
+        default: 'notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb'
+
+jobs:
+  debug-parsing:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          
+      - name: Debug Runner Config Parsing
+        run: |
+          notebook="${{ inputs.debug_notebook }}"
+          echo "🔍 Debugging runner config parsing for: $notebook"
+          echo ""
+          
+          # Check if ci_config.txt exists
+          if [ -f "ci_config.txt" ]; then
+            echo "✅ ci_config.txt found"
+            echo "📁 File contents:"
+            cat ci_config.txt
+            echo ""
+          else
+            echo "❌ ci_config.txt NOT found"
+            echo "📁 Current directory contents:"
+            ls -la
+            echo ""
+            echo "🔍 Looking for ci_config.txt in subdirectories:"
+            find . -name "ci_config.txt" -type f
+            exit 1
+          fi
+          
+          echo "🔍 Testing grep pattern matching:"
+          echo "Pattern: ^${notebook}:"
+          grep_result=$(grep "^${notebook}:" ci_config.txt 2>/dev/null || echo "NO_MATCH")
+          echo "Grep result: '$grep_result'"
+          echo ""
+          
+          if [ "$grep_result" != "NO_MATCH" ]; then
+            echo "🔧 Testing cut operation:"
+            cut_result=$(echo "$grep_result" | cut -d':' -f2)
+            echo "Cut result: '$cut_result'"
+            echo ""
+            
+            echo "🧹 Testing whitespace removal:"
+            final_result=$(echo "$cut_result" | tr -d '[:space:]')
+            echo "Final result: '$final_result'"
+            echo ""
+            
+            if [ -n "$final_result" ]; then
+              echo "✅ Successfully parsed runner: '$final_result'"
+            else
+              echo "❌ Final result is empty after whitespace removal"
+            fi
+          else
+            echo "❌ No match found for pattern ^${notebook}:"
+            echo ""
+            echo "🔍 Checking for similar lines:"
+            grep "$notebook" ci_config.txt || echo "No lines containing notebook path found"
+            echo ""
+            echo "🔍 All lines in ci_config.txt:"
+            grep -n ":" ci_config.txt | head -10
+          fi
+          
+          echo ""
+          echo "🧪 Testing the complete parsing logic:"
+          CUSTOM_RUNNER=$(grep "^${notebook}:" ci_config.txt 2>/dev/null | cut -d':' -f2 | tr -d '[:space:]' || echo "")
+          
+          if [ -n "$CUSTOM_RUNNER" ]; then
+            echo "✅ Complete parsing successful: '$CUSTOM_RUNNER'"
+          else
+            echo "❌ Complete parsing failed - result is empty"
+          fi
+          
+          echo ""
+          echo "🔍 Character-by-character analysis of notebook path:"
+          echo "$notebook" | od -c
+          echo ""
+          echo "🔍 Character-by-character analysis of first matching line:"
+          if [ "$grep_result" != "NO_MATCH" ]; then
+            echo "$grep_result" | od -c
+          else
+            echo "No matching line to analyze"
+          fi
+
+  simulate-matrix-generation:
+    runs-on: ubuntu-24.04
+    outputs:
+      runner-config: ${{ steps.debug.outputs.runner-config }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          
+      - name: Simulate Matrix Runner Config Generation
+        id: debug
+        run: |
+          echo "🎯 Simulating complete runner config generation"
+          echo ""
+          
+          # Simulate finding notebooks
+          MATRIX_NOTEBOOKS='["${{ inputs.debug_notebook }}","notebooks/MIRI/LRS-slit/JWPipeNB-MIRI-LRS-slit.ipynb"]'
+          echo "📋 Matrix notebooks: $MATRIX_NOTEBOOKS"
+          echo ""
+          
+          # Create runner config JSON mapping notebooks to runners
+          RUNNER_CONFIG='{'
+          FIRST_ENTRY=true
+          
+          # Create a temporary file to store notebooks to avoid subshell issues
+          echo "$MATRIX_NOTEBOOKS" | jq -r '.[]' > /tmp/matrix_notebooks.txt 2>/dev/null
+          
+          echo "🔍 Processing each notebook:"
+          while IFS= read -r notebook; do
+            if [ -n "$notebook" ]; then
+              echo "  📓 Processing: $notebook"
+              
+              # Look up runner for this notebook in ci_config.txt
+              if [ -f "ci_config.txt" ]; then
+                echo "    🔍 Looking up in ci_config.txt..."
+                
+                # Debug the grep command step by step
+                echo "    📋 Grep pattern: ^${notebook}:"
+                GREP_RESULT=$(grep "^${notebook}:" ci_config.txt 2>/dev/null || echo "")
+                echo "    📋 Grep result: '$GREP_RESULT'"
+                
+                if [ -n "$GREP_RESULT" ]; then
+                  CUT_RESULT=$(echo "$GREP_RESULT" | cut -d':' -f2)
+                  echo "    📋 Cut result: '$CUT_RESULT'"
+                  
+                  CUSTOM_RUNNER=$(echo "$CUT_RESULT" | tr -d '[:space:]')
+                  echo "    📋 Final parsed runner: '$CUSTOM_RUNNER'"
+                else
+                  CUSTOM_RUNNER=""
+                fi
+              else
+                echo "    ❌ ci_config.txt not found"
+                CUSTOM_RUNNER=""
+              fi
+              
+              if [ -n "$CUSTOM_RUNNER" ]; then
+                echo "    ✅ Found custom runner: '$CUSTOM_RUNNER'"
+                RUNNER="$CUSTOM_RUNNER"
+              else
+                echo "    🔧 No custom runner found, using default: ubuntu-latest"
+                RUNNER="ubuntu-latest"
+              fi
+              
+              # Build JSON entry for runner config
+              if [ "$FIRST_ENTRY" = "true" ]; then
+                RUNNER_CONFIG="${RUNNER_CONFIG}\"${notebook}\":\"${RUNNER}\""
+                FIRST_ENTRY=false
+              else
+                RUNNER_CONFIG="${RUNNER_CONFIG},\"${notebook}\":\"${RUNNER}\""
+              fi
+              
+              echo "    📋 JSON entry: \"${notebook}\":\"${RUNNER}\""
+              echo ""
+            fi
+          done < /tmp/matrix_notebooks.txt
+          
+          # Clean up temporary file
+          rm -f /tmp/matrix_notebooks.txt
+          
+          # Add default runner and close JSON
+          RUNNER_CONFIG="${RUNNER_CONFIG},\"default\":\"ubuntu-latest\"}"
+          echo "✅ Final runner config JSON: $RUNNER_CONFIG"
+          
+          # Test JSON validity
+          echo "$RUNNER_CONFIG" | jq '.' >/dev/null 2>&1 && echo "✅ JSON is valid" || echo "❌ JSON is invalid"
+          
+          # Show JSON keys
+          echo "🔑 JSON keys:"
+          echo "$RUNNER_CONFIG" | jq -r 'keys[]' 2>/dev/null || echo "❌ Failed to extract keys"
+          
+          # Test specific lookup
+          echo ""
+          echo "🧪 Testing JSON lookup for '${{ inputs.debug_notebook }}':"
+          lookup_result=$(echo "$RUNNER_CONFIG" | jq -r '.["${{ inputs.debug_notebook }}"]' 2>/dev/null || echo "null")
+          echo "Lookup result: '$lookup_result'"
+          
+          # Set output
+          echo "runner-config=$RUNNER_CONFIG" >> $GITHUB_OUTPUT
+
+  test-json-lookup:
+    needs: simulate-matrix-generation
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        notebook: ["${{ inputs.debug_notebook }}"]
+    steps:
+      - name: Test JSON Lookup
+        run: |
+          echo "🧪 Testing JSON lookup in runs-on context"
+          echo ""
+          echo "📋 Matrix notebook: '${{ matrix.notebook }}'"
+          echo "📋 Runner config JSON: '${{ needs.simulate-matrix-generation.outputs.runner-config }}'"
+          echo ""
+          
+          # Test the exact lookup that runs-on uses
+          lookup_result="${{ fromJson(needs.simulate-matrix-generation.outputs.runner-config)[matrix.notebook] }}"
+          echo "🔍 fromJson lookup result: '$lookup_result'"
+          
+          # Test the complete runs-on expression
+          final_runner="${{ fromJson(needs.simulate-matrix-generation.outputs.runner-config)[matrix.notebook] || 'ubuntu-24.04' }}"
+          echo "🎯 Final runs-on result: '$final_runner'"
+          
+          echo ""
+          echo "✅ This job should be running on: $final_runner"
+          echo "🖥️ Actually running on: ${{ runner.name }}"

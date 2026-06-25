@@ -1,0 +1,54 @@
+# On-demand workflow for mast_notebooks repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - On Demand
+
+on:
+  workflow_dispatch:
+    inputs:
+      trigger-event:
+        description: 'Execution trigger'
+        required: false
+        default: 'validate'
+        type: choice
+        options:
+          - validate
+          - execute
+          - security
+          - html
+          - all
+      single-notebook:
+        description: 'Single notebook path (optional)'
+        required: false
+        default: ''
+        type: string
+      enable-storage:
+        description: 'Enable storing outputs to gh-storage'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2
+    with:
+      # Required: execution mode
+      execution-mode: 'on-demand'
+      trigger-event: ${{ inputs.trigger-event }}
+      
+      # Optional: target specific notebook
+      single-notebook: ${{ inputs.single-notebook }}
+      
+      # Environment Configuration  
+      python-version: '3.11'
+      custom-requirements: 'requirements.txt'
+      conda-environment: 'environment.yml'
+      
+      # Feature flags
+      enable-validation: true
+      enable-security: true
+      enable-execution: ${{ inputs.trigger-event == 'execute' || inputs.trigger-event == 'all' }}
+      enable-storage: ${{ inputs.enable-storage && (inputs.trigger-event == 'execute' || inputs.trigger-event == 'all') }}
+      enable-html-build: ${{ inputs.trigger-event == 'html' || inputs.trigger-event == 'all' }}
+      
+    secrets: inherit

@@ -1,0 +1,44 @@
+# Notebook CI - Main Branch (Merge) Workflow  
+# Copy this file to your repository's .github/workflows/ directory
+# This workflow handles post-merge processing by building documentation from executed notebooks
+# Updated: July 2025 for merge-specific workflow handling
+
+name: Notebook CI - Main Branch (Merge Documentation Build)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force rebuild documentation'
+        required: false
+        type: boolean
+        default: false
+      post_processing_script:
+        description: 'Optional post-processing script path'
+        required: false
+        type: string
+
+jobs:
+  build-and-deploy-documentation:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'merge'
+      trigger-event: 'html'
+      python-version: '3.11'
+      enable-validation: false      # Skip validation on merge - already done in PR
+      enable-security: false        # Skip security on merge - already done in PR
+      enable-execution: false       # Skip execution - use notebooks from gh-storage
+      enable-storage: false         # Skip storage - already have executed notebooks
+      enable-html-build: true       # Build HTML documentation from executed notebooks
+      post-processing-script: ${{ inputs.post_processing_script }}
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+      enable-storage: true                          # Store outputs to gh-storage
+      enable-html-build: true                       # Build and deploy HTML docs
+      post-processing-script: 'scripts/jdaviz_image_replacement.sh'  # Adjust path as needed
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}

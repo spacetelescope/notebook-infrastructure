@@ -1,0 +1,32 @@
+# Merge/Push workflow for hellouniverse repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - Merge
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2
+    with:
+      # Required: execution mode
+      execution-mode: 'merge'
+      trigger-event: 'all'
+      
+      # Environment Configuration  
+      python-version: '3.11'
+      custom-requirements: 'requirements.txt'
+      
+      # Feature flags (merge does everything)
+      enable-validation: true
+      enable-security: true
+      enable-execution: true
+      enable-storage: true
+      enable-html-build: true
+      
+    secrets: inherit

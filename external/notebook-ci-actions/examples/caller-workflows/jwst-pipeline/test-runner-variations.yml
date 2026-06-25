@@ -1,0 +1,37 @@
+# Test Runner Name Variations
+# This tests different possible formats of the runner name
+
+name: Test Runner Name Variations
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner_to_test:
+        description: 'Runner to test'
+        required: false
+        default: 'jwst-pipeline-notebooks-32gb'
+        type: choice
+        options:
+          - ubuntu-latest
+          - ubuntu-24.04
+          - jwst-pipeline-notebooks-32gb
+          - jwst-pipeline-notebooks-16gb
+          - jwst-pipline-notebooks-32gb
+          - jwst-pipline-notebooks-16gb
+          - org-jwst-pipeline-notebooks-32gb
+          - spacetelescope-jwst-pipeline-notebooks-32gb
+
+jobs:
+  test-runner-name:
+    runs-on: ${{ inputs.runner_to_test }}
+    steps:
+      - name: Test Runner Name
+        run: |
+          echo "🎯 Testing runner: ${{ inputs.runner_to_test }}"
+          echo "Actual runner name: ${{ runner.name }}"
+          echo "Runner OS: ${{ runner.os }}"
+          echo "Runner arch: ${{ runner.arch }}"
+          echo "Hostname: $(hostname)"
+          echo "CPU cores: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          echo "✅ Runner test successful!"

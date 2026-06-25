@@ -1,0 +1,109 @@
+name: Debug Runner Parsing - Detailed Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Test mode'
+        type: choice
+        options:
+          - 'debug-all'
+          - 'string-only'
+          - 'quoted-string'
+        default: 'debug-all'
+
+jobs:
+  debug-setup:
+    runs-on: ubuntu-24.04
+    outputs:
+      runner-config: ${{ steps.setup.outputs.runner-config }}
+      test-notebook: ${{ steps.setup.outputs.test-notebook }}
+      lookup-result: ${{ steps.setup.outputs.lookup-result }}
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Setup test data
+        id: setup
+        run: |
+          # Create the exact same runner config structure
+          RUNNER_CONFIG='{"notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb":"jwst-pipeline-notebooks-32gb","default":"ubuntu-24.04"}'
+          TEST_NOTEBOOK="notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb"
+          
+          echo "runner-config=$RUNNER_CONFIG" >> $GITHUB_OUTPUT
+          echo "test-notebook=$TEST_NOTEBOOK" >> $GITHUB_OUTPUT
+          
+          # Test the lookup
+          LOOKUP_RESULT=$(echo "$RUNNER_CONFIG" | jq -r --arg key "$TEST_NOTEBOOK" '.[$key] // .default')
+          echo "lookup-result=$LOOKUP_RESULT" >> $GITHUB_OUTPUT
+          
+          echo "🔧 Runner config: $RUNNER_CONFIG"
+          echo "📖 Test notebook: $TEST_NOTEBOOK" 
+          echo "🎯 Lookup result: $LOOKUP_RESULT"
+
+  # Test 1: Direct string in runs-on (this should work)
+  test-direct-string:
+    needs: debug-setup
+    runs-on: jwst-pipeline-notebooks-32gb
+    steps:
+      - name: Test direct string
+        run: |
+          echo "✅ Direct string assignment works!"
+          echo "Runner: $(hostname)"
+
+  # Test 2: Variable substitution without quotes
+  test-variable-unquoted:
+    needs: debug-setup  
+    runs-on: ${{ needs.debug-setup.outputs.lookup-result }}
+    steps:
+      - name: Test variable unquoted
+        run: |
+          echo "✅ Variable substitution (unquoted) works!"
+          echo "Runner: $(hostname)"
+          echo "Lookup result was: ${{ needs.debug-setup.outputs.lookup-result }}"
+
+  # Test 3: JSON lookup directly in runs-on
+  test-json-lookup:
+    needs: debug-setup
+    runs-on: ${{ fromJson(needs.debug-setup.outputs.runner-config)[needs.debug-setup.outputs.test-notebook] || 'ubuntu-24.04' }}
+    steps:
+      - name: Test JSON lookup
+        run: |
+          echo "✅ JSON lookup works!"
+          echo "Runner: $(hostname)"
+          echo "Config: ${{ needs.debug-setup.outputs.runner-config }}"
+          echo "Notebook: ${{ needs.debug-setup.outputs.test-notebook }}"
+
+  # Test 4: Verify exactly what we get from JSON parsing
+  debug-json-parsing:
+    needs: debug-setup
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Debug JSON parsing details
+        run: |
+          echo "=== JSON PARSING DEBUG ==="
+          CONFIG='${{ needs.debug-setup.outputs.runner-config }}'
+          NOTEBOOK='${{ needs.debug-setup.outputs.test-notebook }}'
+          
+          echo "Raw config: $CONFIG"
+          echo "Raw notebook: $NOTEBOOK"
+          
+          # Test jq parsing
+          RESULT1=$(echo "$CONFIG" | jq -r --arg key "$NOTEBOOK" '.[$key]')
+          RESULT2=$(echo "$CONFIG" | jq -r --arg key "$NOTEBOOK" '.[$key] // .default')
+          
+          echo "JQ Result 1 (direct): '$RESULT1'"
+          echo "JQ Result 2 (with fallback): '$RESULT2'"
+          
+          # Test fromJson equivalent  
+          echo "=== GitHub Expression Test ==="
+          echo "Direct expression: \${{ fromJson(needs.debug-setup.outputs.runner-config)[needs.debug-setup.outputs.test-notebook] }}"
+          echo "With fallback: \${{ fromJson(needs.debug-setup.outputs.runner-config)[needs.debug-setup.outputs.test-notebook] || 'ubuntu-24.04' }}"
+          
+          # Character analysis
+          echo "=== CHARACTER ANALYSIS ==="
+          echo -n "Result length: "
+          echo -n "$RESULT2" | wc -c
+          echo ""
+          echo -n "Result hex: "
+          echo -n "$RESULT2" | xxd -p
+          echo ""

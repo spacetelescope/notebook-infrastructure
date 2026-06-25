@@ -1,0 +1,99 @@
+# Notebook Merge and Deploy for JWST Pipeline Notebooks
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook Merge - JWST Pipeline
+
+on:
+  # Run on pushes to main branch
+  push:
+    branches: [ main ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'ci_config.txt'
+      - 'docs/**'
+      - '_config.yml'
+      - '_toc.yml'
+
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      rebuild_all:
+        description: 'Rebuild all notebooks'
+        required: false
+        default: false
+        type: boolean
+      enable_performance_tests:
+        description: 'Run performance benchmarks'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build-and-deploy:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Execution Configuration
+      execution-mode: 'merge'
+      
+      # Repository Configuration
+      python-version: '3.11'
+      conda-environment: 'stenv'  # STScI environment for JWST pipeline
+      custom-requirements: ''
+      
+      # Notebook Selection
+      single-notebook: ''
+      affected-directories: ${{ inputs.rebuild_all && '["notebooks"]' || '[]' }}
+      
+      # Feature Configuration - Full processing for production
+      enable-validation: true      # Validate all notebooks
+      enable-security: true        # Security scanning for production
+      enable-execution: false      # Skip execution (use pre-executed from gh-storage)
+      enable-storage: false        # Don't re-store (merge mode uses existing)
+      enable-html-build: true      # Build and deploy documentation
+      
+      # Custom Runner Configuration
+      custom-runner-config: true   # Use ci_config.txt for any needed processing
+      
+      
+      # Post-processing
+      post-processing-script: 'scripts/post-build-jwst.sh'  # Optional JWST-specific processing
+      
+      # Deprecation
+      deprecation-days: 60
+      
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Optional performance testing on merge
+  performance-benchmarks:
+    if: inputs.enable_performance_tests == true
+    needs: build-and-deploy
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Execution Configuration  
+      execution-mode: 'on-demand'
+      trigger-event: 'execute'
+      
+      # Target performance notebooks specifically
+      affected-directories: '["notebooks/performance"]'
+      
+      # Repository Configuration
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      
+      # Feature Configuration - Execution only for benchmarks
+      enable-validation: false
+      enable-security: false
+      enable-execution: true       # Execute performance benchmarks
+      enable-storage: true         # Store benchmark results
+      enable-html-build: false
+      
+      # Custom Runner Configuration - Force high-performance runners
+      custom-runner-config: true
+      
+      
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
