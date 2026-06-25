@@ -1,0 +1,38 @@
+# Notebook CI - Scheduled Maintenance
+# Copy this file to your repository's .github/workflows/ directory  
+# This workflow handles weekly validation and deprecation management
+
+name: Notebook CI - Scheduled Maintenance
+
+on:
+  schedule:
+    # Run every Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  weekly-validation:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'scheduled'
+      python-version: '3.11'                    # Adjust as needed
+      # conda-environment: 'hstcal'             # Uncomment and adjust for custom conda env
+      enable-validation: true
+      enable-security: true
+      enable-execution: true
+      enable-storage: false                     # Don't store outputs for scheduled runs
+      enable-html-build: false                  # Don't build HTML for scheduled runs
+      trigger-event: 'all'                      # Validate, execute, and security test
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  deprecation-check:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline  
+    with:
+      execution-mode: 'scheduled'
+      trigger-event: 'deprecate'                # Check for expired deprecations
+      python-version: '3.11'
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}

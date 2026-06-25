@@ -1,0 +1,25 @@
+name: Debug Runner Config JSON Output
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug-config:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Use debug mode
+      execution-mode: 'debug'
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      
+      # Minimal features - just test the config generation
+      enable-validation: true
+      enable-security: false
+      enable-execution: false  # Don't execute to avoid hanging
+      enable-storage: false
+      enable-html-build: false
+      
+      # Key setting
+      custom-runner-config: true
+      
+    secrets: inherit

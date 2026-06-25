@@ -1,0 +1,6 @@
+--container-architecture linux/amd64
+--platform ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest
+--artifact-server-path /tmp/act-artifacts
+--env GITHUB_ACTIONS=true
+--env CI=true
+--reuse

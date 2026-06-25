@@ -1,0 +1,80 @@
+name: Test Runner Assignment
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Test mode'
+        type: choice
+        options:
+          - 'simple-static'
+          - 'json-lookup'
+          - 'full-expression'
+        default: 'simple-static'
+
+jobs:
+  test-static-runner:
+    if: inputs.test_mode == 'simple-static'
+    runs-on: jwst-pipeline-notebooks-32gb
+    steps:
+      - name: Test Static Runner Assignment
+        run: |
+          echo "✅ Successfully assigned to static custom runner"
+          echo "🖥️ Runner: ${{ runner.name }}"
+          echo "💾 Memory: $(free -h | grep '^Mem:' | awk '{print $2}' || echo 'N/A')"
+
+  generate-config:
+    if: inputs.test_mode == 'json-lookup' || inputs.test_mode == 'full-expression'
+    runs-on: ubuntu-24.04
+    outputs:
+      runner-config: ${{ steps.config.outputs.runner-config }}
+      test-notebook: ${{ steps.config.outputs.test-notebook }}
+    steps:
+      - name: Generate Simple Runner Config
+        id: config
+        run: |
+          # Create simple test config
+          TEST_NOTEBOOK="notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb"
+          RUNNER_CONFIG='{"notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb":"jwst-pipeline-notebooks-32gb","default":"ubuntu-24.04"}'
+          
+          echo "📋 Test notebook: $TEST_NOTEBOOK"
+          echo "🔧 Runner config: $RUNNER_CONFIG"
+          
+          # Test JSON validity
+          echo "$RUNNER_CONFIG" | jq '.' || exit 1
+          
+          # Test lookup
+          LOOKUP_RESULT=$(echo "$RUNNER_CONFIG" | jq -r '.["notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb"]')
+          echo "🎯 Lookup result: $LOOKUP_RESULT"
+          
+          echo "runner-config=$RUNNER_CONFIG" >> $GITHUB_OUTPUT
+          echo "test-notebook=$TEST_NOTEBOOK" >> $GITHUB_OUTPUT
+
+  test-json-lookup:
+    if: inputs.test_mode == 'json-lookup'
+    needs: generate-config
+    runs-on: ${{ fromJson(needs.generate-config.outputs.runner-config)['notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb'] }}
+    steps:
+      - name: Test JSON Lookup Runner Assignment  
+        run: |
+          echo "✅ Successfully assigned via JSON lookup"
+          echo "🖥️ Runner: ${{ runner.name }}"
+          echo "💾 Memory: $(free -h | grep '^Mem:' | awk '{print $2}' || echo 'N/A')"
+          echo "📋 Config: ${{ needs.generate-config.outputs.runner-config }}"
+
+  test-matrix-lookup:
+    if: inputs.test_mode == 'full-expression'
+    needs: generate-config
+    runs-on: ${{ fromJson(needs.generate-config.outputs.runner-config)[matrix.notebook] || 'ubuntu-24.04' }}
+    strategy:
+      matrix:
+        notebook: ["notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb"]
+    steps:
+      - name: Test Full Matrix Expression
+        run: |
+          echo "✅ Successfully assigned via matrix lookup"
+          echo "🖥️ Runner: ${{ runner.name }}"
+          echo "💾 Memory: $(free -h | grep '^Mem:' | awk '{print $2}' || echo 'N/A')"
+          echo "📋 Matrix notebook: ${{ matrix.notebook }}"
+          echo "📋 Config: ${{ needs.generate-config.outputs.runner-config }}"
+          echo "🔍 Lookup result: ${{ fromJson(needs.generate-config.outputs.runner-config)[matrix.notebook] }}"

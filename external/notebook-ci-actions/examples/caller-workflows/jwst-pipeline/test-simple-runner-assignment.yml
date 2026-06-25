@@ -1,0 +1,47 @@
+# Test Simple Runner Assignment
+# This tests if the runner assignment works with a direct hardcoded value
+
+name: Test Simple Runner Assignment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-hardcoded-32gb:
+    runs-on: jwst-pipeline-notebooks-32gb
+    steps:
+      - name: Test Hardcoded 32GB
+        run: |
+          echo "🎯 Testing hardcoded jwst-pipeline-notebooks-32gb"
+          echo "Runner: ${{ runner.name }}"
+          echo "CPU: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          echo "✅ Hardcoded test completed!"
+
+  test-matrix-simple:
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, jwst-pipeline-notebooks-32gb]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Test Matrix Runner
+        run: |
+          echo "🎯 Testing matrix runner: ${{ matrix.runner }}"
+          echo "Runner: ${{ runner.name }}"
+          echo "CPU: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          echo "✅ Matrix test completed!"
+
+  test-lookup-simple:
+    strategy:
+      matrix:
+        notebook: ["test1.ipynb", "test2.ipynb"]
+    runs-on: ${{ fromJson('{"test1.ipynb":"ubuntu-latest","test2.ipynb":"jwst-pipeline-notebooks-32gb"}')[matrix.notebook] }}
+    steps:
+      - name: Test Lookup
+        run: |
+          echo "🎯 Testing lookup for: ${{ matrix.notebook }}"
+          echo "Runner: ${{ runner.name }}"
+          echo "CPU: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          echo "✅ Lookup test completed!"

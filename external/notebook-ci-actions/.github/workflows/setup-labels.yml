@@ -1,0 +1,121 @@
+name: Setup Repository Labels
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/setup-labels.yml'
+    branches: [main]
+
+jobs:
+  setup-labels:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+    - name: Create Version Labels
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const labels = [
+            // Version bump labels
+            {
+              name: 'version:major',
+              color: 'ff0000',
+              description: 'Breaking changes - requires major version bump'
+            },
+            {
+              name: 'version:minor', 
+              color: 'ffaa00',
+              description: 'New features - requires minor version bump'
+            },
+            {
+              name: 'version:patch',
+              color: '00ff00', 
+              description: 'Bug fixes - requires patch version bump'
+            },
+            
+            // Alias labels
+            {
+              name: 'breaking-change',
+              color: 'ff0000',
+              description: 'Breaking change - alias for version:major'
+            },
+            {
+              name: 'feature',
+              color: 'ffaa00',
+              description: 'New feature - alias for version:minor'  
+            },
+            {
+              name: 'bugfix',
+              color: '00ff00',
+              description: 'Bug fix - alias for version:patch'
+            },
+            
+            // Workflow-specific labels
+            {
+              name: 'workflow:ci-pipeline',
+              color: '0066cc',
+              description: 'Changes to CI pipeline workflow'
+            },
+            {
+              name: 'workflow:html-builder', 
+              color: '0066cc',
+              description: 'Changes to HTML builder workflow'
+            },
+            {
+              name: 'workflow:deprecation',
+              color: '0066cc', 
+              description: 'Changes to deprecation manager workflow'
+            },
+            
+            // Additional useful labels
+            {
+              name: 'documentation',
+              color: '0052cc',
+              description: 'Documentation changes'
+            },
+            {
+              name: 'security',
+              color: 'ff6600',
+              description: 'Security-related changes'
+            },
+            {
+              name: 'performance',
+              color: '00ccff',
+              description: 'Performance improvements'
+            }
+          ];
+          
+          for (const label of labels) {
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: label.name,
+                color: label.color,
+                description: label.description
+              });
+              console.log(`✅ Created label: ${label.name}`);
+            } catch (error) {
+              if (error.status === 422) {
+                // Label already exists, update it
+                try {
+                  await github.rest.issues.updateLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description
+                  });
+                  console.log(`🔄 Updated label: ${label.name}`);
+                } catch (updateError) {
+                  console.log(`❌ Failed to update label ${label.name}:`, updateError.message);
+                }
+              } else {
+                console.log(`❌ Failed to create label ${label.name}:`, error.message);
+              }
+            }
+          }
+          
+          console.log('🎉 Label setup complete!');

@@ -1,0 +1,50 @@
+name: Test Runner Names
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner_test:
+        description: 'Runner to test'
+        type: choice
+        options:
+          - 'exact-name'
+          - 'with-labels'
+          - 'ubuntu-latest'
+        default: 'exact-name'
+
+jobs:
+  # Test exact runner name
+  test-exact-name:
+    if: inputs.runner_test == 'exact-name'
+    runs-on: jwst-pipeline-notebooks-32gb
+    steps:
+      - name: Test exact name
+        run: |
+          echo "✅ Running on exact name: jwst-pipeline-notebooks-32gb"
+          echo "🖥️ Hostname: $(hostname)"
+          echo "💾 Memory info:"
+          free -h || echo "free command not available"
+
+  # Test with labels array syntax (for self-hosted runners)
+  test-with-labels:
+    if: inputs.runner_test == 'with-labels'
+    runs-on: [self-hosted, jwst-pipeline-notebooks-32gb]
+    steps:
+      - name: Test with labels
+        run: |
+          echo "✅ Running with labels: [self-hosted, jwst-pipeline-notebooks-32gb]"
+          echo "🖥️ Hostname: $(hostname)"
+          echo "💾 Memory info:"
+          free -h || echo "free command not available"
+
+  # Control test with ubuntu-latest
+  test-ubuntu:
+    if: inputs.runner_test == 'ubuntu-latest'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test ubuntu-latest
+        run: |
+          echo "✅ Running on ubuntu-latest"
+          echo "🖥️ Hostname: $(hostname)"
+          echo "💾 Memory info:"
+          free -h

@@ -1,0 +1,365 @@
+# Smart Main Branch Workflow - Selective CI Based on Directory Changes
+# Copy this file to your repository's .github/workflows/ directory
+# This workflow provides intelligent CI for main branch pushes with directory-specific execution
+
+name: Smart Notebook CI - Main Branch (Selective)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'notebooks/**'
+      - '*.yml'
+      - '*.yaml'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - '_config.yml'
+      - '_toc.yml'
+      - 'scripts/**'
+
+jobs:
+  # Detect what files changed and determine affected directories
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs-only: ${{ steps.changes.outputs.docs-only }}
+      notebooks-changed: ${{ steps.changes.outputs.notebooks-changed }}
+      deploy-needed: ${{ steps.changes.outputs.deploy-needed }}
+      affected-directories: ${{ steps.changes.outputs.affected-directories }}
+      changed-notebooks: ${{ steps.changes.outputs.changed-notebooks }}
+      execution-strategy: ${{ steps.changes.outputs.execution-strategy }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install jq for JSON processing
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Detect file changes and affected directories
+        id: changes
+        run: |
+          # Get the list of changed files from the last commit
+          echo "Getting changed files from last commit..."
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Initialize flags and arrays
+          NOTEBOOKS_CHANGED=false
+          DOCS_CONFIG_CHANGED=false
+          REQUIREMENTS_CHANGED=false
+          DEPLOY_NEEDED=false
+          declare -a AFFECTED_DIRECTORIES
+          declare -a CHANGED_NOTEBOOKS
+          
+          # Check each changed file
+          while IFS= read -r file; do
+            [[ -z "$file" ]] && continue
+            echo "Checking file: $file"
+            
+            case "$file" in
+              notebooks/*.ipynb)
+                echo "  → Notebook file changed: $file"
+                NOTEBOOKS_CHANGED=true
+                DEPLOY_NEEDED=true
+                CHANGED_NOTEBOOKS+=("$file")
+                
+                # Extract directory from notebook path
+                dir=$(dirname "$file")
+                if [[ ! " ${AFFECTED_DIRECTORIES[*]} " =~ " $dir " ]]; then
+                  AFFECTED_DIRECTORIES+=("$dir")
+                  echo "  → Added affected directory: $dir"
+                fi
+                ;;
+              notebooks/*/requirements.txt)
+                echo "  → Directory-specific requirements file changed: $file"
+                REQUIREMENTS_CHANGED=true
+                DEPLOY_NEEDED=true
+                
+                # Extract directory from requirements path
+                dir=$(dirname "$file")
+                echo "  → Requirements changed in directory: $dir"
+                if [[ ! " ${AFFECTED_DIRECTORIES[*]} " =~ " $dir " ]]; then
+                  AFFECTED_DIRECTORIES+=("$dir")
+                  echo "  → Added affected directory: $dir"
+                fi
+                ;;
+              notebooks/*.py|notebooks/*.R)
+                echo "  → Notebook code file changed: $file"
+                NOTEBOOKS_CHANGED=true
+                DEPLOY_NEEDED=true
+                
+                # Extract directory from code file path
+                dir=$(dirname "$file")
+                if [[ ! " ${AFFECTED_DIRECTORIES[*]} " =~ " $dir " ]]; then
+                  AFFECTED_DIRECTORIES+=("$dir")
+                  echo "  → Added affected directory: $dir"
+                fi
+                ;;
+              pyproject.toml|setup.py)
+                echo "  → Root project file changed: $file"
+                REQUIREMENTS_CHANGED=true
+                DEPLOY_NEEDED=true
+                # Root project files affect all notebooks
+                AFFECTED_DIRECTORIES=("notebooks")
+                echo "  → Root project file change affects all notebooks"
+                ;;
+              _config.yml|_toc.yml)
+                echo "  → Documentation config changed"
+                DOCS_CONFIG_CHANGED=true
+                DEPLOY_NEEDED=true
+                ;;
+              *.yml|*.yaml)
+                # Only workflow or simple config files
+                if [[ "$file" == .github/workflows/* ]]; then
+                  echo "  → Workflow file changed (may need deployment)"
+                  DEPLOY_NEEDED=true
+                else
+                  echo "  → Config file changed"
+                  DOCS_CONFIG_CHANGED=true
+                  DEPLOY_NEEDED=true
+                fi
+                ;;
+              scripts/*)
+                echo "  → Script file changed"
+                DOCS_CONFIG_CHANGED=true
+                DEPLOY_NEEDED=true
+                ;;
+              *.html|*.css|*.js)
+                echo "  → Static web file changed"
+                DOCS_CONFIG_CHANGED=true
+                DEPLOY_NEEDED=true
+                ;;
+              *.md|*.rst)
+                echo "  → Documentation file changed"
+                DOCS_CONFIG_CHANGED=true
+                DEPLOY_NEEDED=true
+                ;;
+              *)
+                echo "  → Other file type"
+                ;;
+            esac
+          done <<< "$CHANGED_FILES"
+          
+          # Convert arrays to JSON for output
+          if [ ${#AFFECTED_DIRECTORIES[@]} -eq 0 ]; then
+            affected_dirs_json="[]"
+          else
+            affected_dirs_json=$(printf '%s\n' "${AFFECTED_DIRECTORIES[@]}" | jq -R . | jq -s -c .)
+          fi
+          
+          if [ ${#CHANGED_NOTEBOOKS[@]} -eq 0 ]; then
+            changed_notebooks_json="[]"
+          else
+            changed_notebooks_json=$(printf '%s\n' "${CHANGED_NOTEBOOKS[@]}" | jq -R . | jq -s -c .)
+          fi
+          
+          echo "Affected directories: $affected_dirs_json"
+          echo "Changed notebooks: $changed_notebooks_json"
+          
+          # Determine execution strategy
+          if [ ${#AFFECTED_DIRECTORIES[@]} -eq 1 ] && [ "${AFFECTED_DIRECTORIES[0]}" = "notebooks" ]; then
+            execution_strategy="full-repository"
+            echo "📔 Root requirements changed - Full repository execution"
+          elif [ ${#AFFECTED_DIRECTORIES[@]} -gt 0 ]; then
+            execution_strategy="selective-directories"
+            echo "📂 Selective execution for ${#AFFECTED_DIRECTORIES[@]} directories"
+          else
+            execution_strategy="none"
+          fi
+          
+          # Determine workflow path
+          if [ "$NOTEBOOKS_CHANGED" = "true" ] || [ "$REQUIREMENTS_CHANGED" = "true" ]; then
+            echo "📔 Notebooks or requirements changed - CI needed ($execution_strategy)"
+            echo "notebooks-changed=true" >> $GITHUB_OUTPUT
+            echo "docs-only=false" >> $GITHUB_OUTPUT
+          elif [ "$DOCS_CONFIG_CHANGED" = "true" ]; then
+            echo "📚 Only documentation/config files changed - Docs rebuild only"  
+            echo "notebooks-changed=false" >> $GITHUB_OUTPUT
+            echo "docs-only=true" >> $GITHUB_OUTPUT
+          else
+            echo "📝 No significant changes detected - Skip CI"
+            echo "notebooks-changed=false" >> $GITHUB_OUTPUT
+            echo "docs-only=false" >> $GITHUB_OUTPUT
+            DEPLOY_NEEDED=false
+          fi
+          
+          echo "deploy-needed=$DEPLOY_NEEDED" >> $GITHUB_OUTPUT
+          echo "affected-directories=$affected_dirs_json" >> $GITHUB_OUTPUT
+          echo "changed-notebooks=$changed_notebooks_json" >> $GITHUB_OUTPUT
+          echo "execution-strategy=$execution_strategy" >> $GITHUB_OUTPUT
+
+  # Selective notebook CI with directory-specific execution
+  selective-notebook-ci:
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.notebooks-changed == 'true' && 
+      needs.detect-changes.outputs.execution-strategy == 'selective-directories'
+    strategy:
+      matrix:
+        directory: ${{ fromJson(needs.detect-changes.outputs.affected-directories) }}
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install directory-specific requirements
+        run: |
+          echo "Installing requirements for directory: ${{ matrix.directory }}"
+          
+          # Check if directory has its own requirements.txt
+          if [ -f "${{ matrix.directory }}/requirements.txt" ]; then
+            echo "Using directory-specific requirements: ${{ matrix.directory }}/requirements.txt"
+            uv pip install -r "${{ matrix.directory }}/requirements.txt"
+          else
+            echo "No requirements.txt found in ${{ matrix.directory }} - using base environment only"
+            uv pip install jupyter nbval pytest
+          fi
+
+      - name: Execute notebooks in directory
+        run: |
+          echo "Executing notebooks in: ${{ matrix.directory }}"
+          
+          # Find and execute notebooks in the specific directory
+          notebooks=$(find "${{ matrix.directory }}" -name "*.ipynb" -type f)
+          
+          if [ -z "$notebooks" ]; then
+            echo "No notebooks found in ${{ matrix.directory }}"
+            exit 0
+          fi
+          
+          echo "Found notebooks:"
+          echo "$notebooks"
+          
+          # Execute each notebook
+          for notebook in $notebooks; do
+            echo "Executing: $notebook"
+            uv run jupyter nbconvert --to notebook --execute --inplace "$notebook"
+          done
+
+      - name: Validate notebooks in directory
+        run: |
+          echo "Validating notebooks in: ${{ matrix.directory }}"
+          uv pip install pytest nbval
+          uv run python -m pytest --nbval "${{ matrix.directory }}" -v
+
+  # Full repository CI (when root requirements change)
+  full-repository-ci:
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.notebooks-changed == 'true' && 
+      needs.detect-changes.outputs.execution-strategy == 'full-repository'
+    uses: mgrough-970/dev-actions/.github/workflows/ci_pipeline.yml@dev-actions-v2
+    with:
+      python-version: "3.11"
+      execution-mode: "full"
+      build-html: false
+      security-scan: true
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Documentation-only rebuild (when only docs/config files change)
+  docs-only-rebuild:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.docs-only == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docs-only rebuild summary
+        run: |
+          echo "## 📚 Documentation-Only Rebuild" >> $GITHUB_STEP_SUMMARY
+          echo "Only documentation or configuration files changed." >> $GITHUB_STEP_SUMMARY
+          echo "Skipping notebook execution for faster deployment." >> $GITHUB_STEP_SUMMARY
+
+  # Build and deploy documentation (runs after CI success or for docs-only changes)
+  build-and-deploy-docs:
+    needs: [detect-changes, selective-notebook-ci, full-repository-ci, docs-only-rebuild]
+    if: |
+      always() && 
+      needs.detect-changes.outputs.deploy-needed == 'true' && 
+      (needs.selective-notebook-ci.result == 'success' || 
+       needs.selective-notebook-ci.result == 'skipped' ||
+       needs.full-repository-ci.result == 'success' || 
+       needs.full-repository-ci.result == 'skipped' || 
+       needs.docs-only-rebuild.result == 'success')
+    uses: mgrough-970/dev-actions/.github/workflows/ci_html_builder.yml@dev-actions-v2
+    with:
+      python-version: "3.11"
+      post-run-script: "scripts/jdaviz_image_replacement.sh"  # Optional, adjust per repo
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Enhanced summary job with selective execution details
+  deployment-summary:
+    needs: [detect-changes, selective-notebook-ci, full-repository-ci, docs-only-rebuild, build-and-deploy-docs]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          execution_strategy="${{ needs.detect-changes.outputs.execution-strategy }}"
+          affected_dirs='${{ needs.detect-changes.outputs.affected-directories }}'
+          
+          if [ "${{ needs.detect-changes.outputs.notebooks-changed }}" = "true" ]; then
+            if [ "$execution_strategy" = "selective-directories" ]; then
+              echo "### 📂 Selective Directory Execution" >> $GITHUB_STEP_SUMMARY
+              echo "- **Strategy**: Directory-specific CI execution" >> $GITHUB_STEP_SUMMARY
+              echo "- **Affected Directories**: $affected_dirs" >> $GITHUB_STEP_SUMMARY
+              echo "- **CI Status**: ${{ needs.selective-notebook-ci.result }}" >> $GITHUB_STEP_SUMMARY
+              echo "- **Deployment Status**: ${{ needs.build-and-deploy-docs.result }}" >> $GITHUB_STEP_SUMMARY
+              echo "- **Benefit**: ⚡ Faster execution (only affected directories)" >> $GITHUB_STEP_SUMMARY
+            elif [ "$execution_strategy" = "full-repository" ]; then
+              echo "### 📔 Full Repository Execution" >> $GITHUB_STEP_SUMMARY
+              echo "- **Reason**: Root requirements or global changes detected" >> $GITHUB_STEP_SUMMARY
+              echo "- **CI Status**: ${{ needs.full-repository-ci.result }}" >> $GITHUB_STEP_SUMMARY
+              echo "- **Deployment Status**: ${{ needs.build-and-deploy-docs.result }}" >> $GITHUB_STEP_SUMMARY
+              echo "- **Execution**: All notebooks validated and tested" >> $GITHUB_STEP_SUMMARY
+            fi
+          elif [ "${{ needs.detect-changes.outputs.docs-only }}" = "true" ]; then
+            echo "### 📚 Documentation-Only Deployment" >> $GITHUB_STEP_SUMMARY
+            echo "- **Reason**: Only documentation/config files changed" >> $GITHUB_STEP_SUMMARY
+            echo "- **Deployment Status**: ${{ needs.build-and-deploy-docs.result }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Benefit**: ⚡ Fastest deployment (no notebook execution)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ No Deployment Needed" >> $GITHUB_STEP_SUMMARY
+            echo "- **Reason**: No significant files changed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Add performance metrics
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Performance Metrics" >> $GITHUB_STEP_SUMMARY
+          if [ "$execution_strategy" = "selective-directories" ]; then
+            echo "- ⚡ **Optimization**: Selective directory execution" >> $GITHUB_STEP_SUMMARY
+            echo "- 🎯 **Scope**: Only affected directories processed" >> $GITHUB_STEP_SUMMARY
+            echo "- 🕒 **Time Saved**: Significant reduction vs full repository scan" >> $GITHUB_STEP_SUMMARY
+            echo "- 💰 **Cost Saved**: Reduced compute usage for unchanged directories" >> $GITHUB_STEP_SUMMARY
+          elif [ "$execution_strategy" = "full-repository" ]; then
+            echo "- 🔄 **Full Repository**: Complete validation performed" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ **Quality**: All notebooks validated and tested" >> $GITHUB_STEP_SUMMARY
+            echo "- 🛡️ **Safety**: Root changes require comprehensive testing" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.detect-changes.outputs.docs-only }}" = "true" ]; then
+            echo "- ⚡ **Documentation Only**: Fastest possible deployment" >> $GITHUB_STEP_SUMMARY
+            echo "- 🕒 **Time Saved**: ~20-40 minutes (notebook execution skipped)" >> $GITHUB_STEP_SUMMARY
+            echo "- 💰 **Cost Saved**: Maximum GitHub Actions minutes savings" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Useful Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [Workflow Documentation](https://github.com/mgrough-970/dev-actions)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Repository Documentation](https://spacetelescope.github.io/${{ github.event.repository.name }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Selective Execution Guide](https://github.com/mgrough-970/dev-actions/blob/main/docs/selective-execution.md)" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,277 @@
+# On-demand workflow for JWST Pipeline Notebooks
+# Copy this file to your repository's .github/workflows/ directory
+# This workflow provides specialized on-demand execution options for JWST pipeline processing
+
+name: >
+  JWST Pipeline - On-Demand Actions
+  ${{ github.event_name == 'workflow_dispatch' && format('[{0}]', inputs.action_type) || '' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      action_type:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - 'validate-stage1'
+          - 'validate-stage2'
+          - 'validate-stage3'
+          - 'execute-stage1'
+          - 'execute-stage2'
+          - 'execute-stage3'
+          - 'execute-single-notebook'
+          - 'full-pipeline-validation'
+          - 'performance-benchmark'
+          - 'build-docs-only'
+          - 'deprecate-notebook'
+        default: 'validate-stage1'
+      
+      instrument:
+        description: 'Instrument filter (optional)'
+        required: false
+        type: choice
+        options:
+          - 'all'
+          - 'nircam'
+          - 'nirspec'
+          - 'miri'
+          - 'niriss'
+          - 'fgs'
+        default: 'all'
+      
+      single_notebook:
+        description: 'Single notebook path (for single-notebook actions)'
+        required: false
+        type: string
+        
+      runner_override:
+        description: 'Override runner selection (optional)'
+        required: false
+        type: choice
+        options:
+          - 'auto'
+          - 'ubuntu-latest'
+          - 'jwst-pipeline-notebooks-16gb'
+          - 'jwst-pipeline-notebooks-32gb'
+          - 'jwst-pipeline-notebooks-64gb'
+        default: 'auto'
+        
+      enable_debug:
+        description: 'Enable debug logging'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  # Stage 1 Processing Jobs
+  validate-stage1:
+    if: inputs.action_type == 'validate-stage1'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'validate'
+      affected-directories: ${{ inputs.instrument != 'all' && format('["notebooks/{0}/stage1"]', inputs.instrument) || '["notebooks/NIRCam/stage1", "notebooks/NIRSpec/stage1", "notebooks/MIRI/stage1", "notebooks/NIRISS/stage1", "notebooks/FGS/stage1"]' }}
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      custom-runner-config: ${{ inputs.runner_override == 'auto' }}
+      enable-validation: true
+      enable-security: false
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: false
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  execute-stage1:
+    if: inputs.action_type == 'execute-stage1'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'execute'
+      affected-directories: ${{ inputs.instrument != 'all' && format('["notebooks/{0}/stage1"]', inputs.instrument) || '["notebooks/NIRCam/stage1", "notebooks/NIRSpec/stage1", "notebooks/MIRI/stage1", "notebooks/NIRISS/stage1", "notebooks/FGS/stage1"]' }}
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      custom-runner-config: ${{ inputs.runner_override == 'auto' }}
+      enable-validation: false
+      enable-security: false
+      enable-execution: true
+      enable-storage: true
+      enable-html-build: false
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Stage 2 Processing Jobs
+  validate-stage2:
+    if: inputs.action_type == 'validate-stage2'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'validate'
+      affected-directories: ${{ inputs.instrument != 'all' && format('["notebooks/{0}/stage2"]', inputs.instrument) || '["notebooks/NIRCam/stage2", "notebooks/NIRSpec/stage2", "notebooks/MIRI/stage2", "notebooks/NIRISS/stage2"]' }}
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      custom-runner-config: ${{ inputs.runner_override == 'auto' }}
+      enable-validation: true
+      enable-security: false
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: false
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  execute-stage2:
+    if: inputs.action_type == 'execute-stage2'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'execute'
+      affected-directories: ${{ inputs.instrument != 'all' && format('["notebooks/{0}/stage2"]', inputs.instrument) || '["notebooks/NIRCam/stage2", "notebooks/NIRSpec/stage2", "notebooks/MIRI/stage2", "notebooks/NIRISS/stage2"]' }}
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      custom-runner-config: ${{ inputs.runner_override == 'auto' }}
+      enable-validation: false
+      enable-security: false
+      enable-execution: true
+      enable-storage: true
+      enable-html-build: false
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Stage 3 Processing Jobs
+  validate-stage3:
+    if: inputs.action_type == 'validate-stage3'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'validate'
+      affected-directories: ${{ inputs.instrument != 'all' && format('["notebooks/{0}/stage3"]', inputs.instrument) || '["notebooks/NIRCam/stage3", "notebooks/NIRSpec/stage3", "notebooks/MIRI/stage3"]' }}
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      custom-runner-config: ${{ inputs.runner_override == 'auto' }}
+      enable-validation: true
+      enable-security: false
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: false
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  execute-stage3:
+    if: inputs.action_type == 'execute-stage3'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'execute'
+      affected-directories: ${{ inputs.instrument != 'all' && format('["notebooks/{0}/stage3"]', inputs.instrument) || '["notebooks/NIRCam/stage3", "notebooks/NIRSpec/stage3", "notebooks/MIRI/stage3"]' }}
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      custom-runner-config: ${{ inputs.runner_override == 'auto' }}
+      enable-validation: false
+      enable-security: false
+      enable-execution: true
+      enable-storage: true
+      enable-html-build: false
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Single Notebook Processing
+  execute-single-notebook:
+    if: inputs.action_type == 'execute-single-notebook'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'execute'
+      single-notebook: ${{ inputs.single_notebook }}
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      custom-runner-config: ${{ inputs.runner_override == 'auto' }}
+      enable-validation: false
+      enable-security: false
+      enable-execution: true
+      enable-storage: true
+      enable-html-build: false
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Full Pipeline Validation
+  full-pipeline-validation:
+    if: inputs.action_type == 'full-pipeline-validation'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'all'
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      custom-runner-config: true
+      enable-validation: true
+      enable-security: true
+      enable-execution: true
+      enable-storage: true
+      enable-html-build: false
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Performance Benchmarking
+  performance-benchmark:
+    if: inputs.action_type == 'performance-benchmark'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'execute'
+      affected-directories: '["notebooks/performance"]'
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      custom-runner-config: true  # Force use of 64GB runners for benchmarks
+      enable-validation: false
+      enable-security: false
+      enable-execution: true
+      enable-storage: true
+      enable-html-build: false
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Documentation Build Only
+  build-docs-only:
+    if: inputs.action_type == 'build-docs-only'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'html'
+      python-version: '3.11'
+      enable-validation: false
+      enable-security: false
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: true
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Notebook Deprecation
+  deprecate-notebook:
+    if: inputs.action_type == 'deprecate-notebook'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'deprecate'
+      single-notebook: ${{ inputs.single_notebook }}
+      python-version: '3.11'
+      deprecation-days: 60  # 60 days for JWST pipeline notebooks
+      enable-validation: false
+      enable-security: false
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: true  # Rebuild docs with deprecation warnings
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}

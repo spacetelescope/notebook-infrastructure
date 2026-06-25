@@ -12,11 +12,11 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     ## routine to gather only the changed notebook files and supply them to the matrix
     - name: changed-files
       id: get-changed-files
-      uses: tj-actions/changed-files@v45.0.1
+      uses: tj-actions/changed-files@v47.0.1
       with:
         separator: ","
         files: |
@@ -38,7 +38,7 @@ jobs:
         matrix:
             notebooks: ${{ fromJson(needs.gather-notebooks.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python 3.8.12
         uses: actions/setup-python@v5 ## needed for caching
         with:
@@ -54,7 +54,7 @@ jobs:
           pip install numpy
           pip install pytz
       - name: Check-out notebook-ci-actions repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: spacetelescope/notebook-ci-actions
           path: temp_pep8checker

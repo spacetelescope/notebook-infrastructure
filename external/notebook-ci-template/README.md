@@ -15,9 +15,23 @@ The `notebook-ci-template` repository serves as a foundational template for crea
 To set up your own repository using this template, follow these steps:
 
 ### 1. Create a New Repository
-
-- Navigate to the [notebook-ci-template repository](https://github.com/spacetelescope/notebook-ci-template).
-- Click the **"Use this template"** button to generate a new repository under your GitHub account.
+ **For internal users:** 
+    To create a new repository under the spacetelescope GitHub organization, follow the steps below:  
+      In the Slack channel #github_administration, the notebook curator should send the following command:  
+      `!CreateRepoFromTemplate spacetelescope <NewRepoName> notebook-ci-template`  
+      example:  
+      `!CreateRepoFromTemplate spacetelescope test notebook-ci-template`  
+      This command creates a repository named `test` using the notebook-ci-template.  
+      The new repository will be private by default.  
+      Notebook curators can change the repository name or visibility later from the Settings.  
+    **Note**  
+      -Internal users must first be members of the spacetelescope GitHub organization in order to create private repositories.  
+      -Access can be requested from ITDS.  
+      -To view other available commands in the #github_administration channel, use: `!help`  
+     
+ **For external users:**       
+    - Navigate to the [notebook-ci-template repository](https://github.com/spacetelescope/notebook-ci-template).  
+    - Click the **"Use this template"** button to generate a new repository under your GitHub account.  
 
 ### 2. Clone Your Repository
 

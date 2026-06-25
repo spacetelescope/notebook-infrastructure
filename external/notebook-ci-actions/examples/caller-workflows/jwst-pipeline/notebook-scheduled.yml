@@ -1,0 +1,146 @@
+# Scheduled Maintenance for JWST Pipeline Notebooks
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook Scheduled - JWST Pipeline
+
+on:
+  # Run weekly on Sundays at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * 0'
+
+  # Allow manual triggering for immediate maintenance
+  workflow_dispatch:
+    inputs:
+      maintenance_type:
+        description: 'Type of maintenance to run'
+        required: false
+        default: 'full-validation'
+        type: choice
+        options:
+          - 'full-validation'
+          - 'security-audit'
+          - 'performance-check'
+          - 'deprecation-check'
+          - 'environment-test'
+      
+      include_performance:
+        description: 'Include performance benchmarks'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  # Main scheduled validation
+  scheduled-validation:
+    if: inputs.maintenance_type == 'full-validation' || github.event_name == 'schedule'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Execution Configuration
+      execution-mode: 'scheduled'
+      
+      # Repository Configuration
+      python-version: '3.11'
+      conda-environment: 'stenv'  # STScI environment
+      custom-requirements: ''
+      
+      # Notebook Selection - All notebooks
+      single-notebook: ''
+      affected-directories: '["notebooks"]'
+      
+      # Feature Configuration - Comprehensive validation
+      enable-validation: true      # Validate all notebooks
+      enable-security: true        # Full security audit
+      enable-execution: false      # Validation only (no execution to save resources)
+      enable-storage: false        # Don't store (validation focused)
+      enable-html-build: false     # Don't rebuild docs (merge handles this)
+      
+      # Custom Runner Configuration
+      custom-runner-config: true   # Use appropriate runners for validation
+      
+      
+      # Deprecation Management
+      deprecation-days: 60
+      
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Security-focused audit
+  security-audit:
+    if: inputs.maintenance_type == 'security-audit'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'security'
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      affected-directories: '["notebooks"]'
+      enable-validation: false
+      enable-security: true        # Focus on security scanning
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: false
+      custom-runner-config: false  # Use standard runners for security scans
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Performance benchmarking
+  performance-check:
+    if: inputs.maintenance_type == 'performance-check' || inputs.include_performance == true
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'execute'
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      affected-directories: '["notebooks/performance", "notebooks/validation"]'
+      enable-validation: false
+      enable-security: false
+      enable-execution: true       # Execute performance notebooks
+      enable-storage: true         # Store benchmark results
+      enable-html-build: false
+      custom-runner-config: true   # Use high-performance runners
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Deprecation management
+  deprecation-check:
+    if: inputs.maintenance_type == 'deprecation-check' || github.event_name == 'schedule'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'scheduled'
+      trigger-event: 'deprecate'
+      python-version: '3.11'
+      affected-directories: '["notebooks"]'
+      enable-validation: false
+      enable-security: false
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: true      # Rebuild docs if deprecations are processed
+      custom-runner-config: false  # Standard runners for deprecation management
+      deprecation-days: 60        # Check for notebooks deprecated 60+ days ago
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+
+  # Environment compatibility testing
+  environment-test:
+    if: inputs.maintenance_type == 'environment-test'
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'validate'
+      python-version: '3.11'
+      conda-environment: 'stenv'  # Test current STScI environment
+      affected-directories: '["notebooks/tutorials"]'  # Test with representative sample
+      enable-validation: true
+      enable-security: false
+      enable-execution: true       # Execute to test environment compatibility
+      enable-storage: false
+      enable-html-build: false
+      custom-runner-config: true
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}

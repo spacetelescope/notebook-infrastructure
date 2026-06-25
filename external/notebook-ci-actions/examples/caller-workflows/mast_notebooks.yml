@@ -1,0 +1,84 @@
+# Notebook CI/CD workflow for mast_notebooks repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - MAST Notebooks
+
+on:
+  # Run on pull requests to main branch
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'environment.yml'
+      - '.github/workflows/**'
+
+  # Run on pushes to main branch
+  push:
+    branches: [ main ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'environment.yml'
+
+  # Run on schedule (weekly on Mondays at 4 AM UTC)
+  schedule:
+    - cron: '0 4 * * 1'
+
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      execution_mode:
+        description: 'Execution mode'
+        required: false
+        default: 'cache_only'
+        type: choice
+        options:
+          - cache_only
+          - force_execute
+          - collect_only
+      notebook_pattern:
+        description: 'Notebook pattern (e.g., "HST/**" or "JWST/**")'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Repository-specific configuration
+      notebook_path: 'notebooks'
+      python_version: '3.11'
+      
+      # Execution settings
+      execution_mode: ${{ inputs.execution_mode || (github.event_name == 'pull_request' && 'cache_only' || 'force_execute') }}
+      notebook_pattern: ${{ inputs.notebook_pattern || '' }}
+      
+      # Environment settings
+      environment_file: 'requirements.txt'
+      conda_environment_file: 'environment.yml'
+      
+      # Security and validation
+      security_check: true
+      notebook_validation: true
+      
+      # Documentation generation
+      generate_docs: ${{ github.ref == 'refs/heads/main' }}
+      docs_artifact: 'mast-notebooks-docs'
+      
+      # Artifact settings
+      artifact_retention_days: 45
+      
+      # Performance settings
+      timeout_minutes: 75
+      max_parallel: 3
+      
+      # MAST-specific settings
+      allow_notebook_execution_errors: false
+      collect_execution_stats: true
+      
+      # Archive settings for MAST data products
+      archive_execution_results: true
+      
+    secrets: inherit

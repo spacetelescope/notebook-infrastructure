@@ -1,0 +1,48 @@
+# Merge/Push workflow for jdat_notebooks repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - Merge
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'environment.yml'
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2
+    with:
+      # Repository-specific configuration
+      notebook_path: 'notebooks'
+      python_version: '3.11'
+      
+      # Merge-specific execution settings
+      execution_mode: 'force_execute'
+      notebook_pattern: ''
+      
+      # Environment settings (prefer conda for JDAT)
+      environment_file: 'requirements.txt'
+      conda_environment_file: 'environment.yml'
+      
+      # Security and validation
+      security_check: true
+      notebook_validation: true
+      
+      # Documentation generation
+      generate_docs: true
+      docs_artifact: 'jdat-notebooks-docs'
+      
+      # Artifact settings
+      artifact_retention_days: 60
+      
+      # Performance settings (longer timeout for complex astronomical notebooks)
+      timeout_minutes: 90
+      max_parallel: 2
+      
+      # JDAT-specific settings
+      collect_execution_stats: true
+      
+    secrets: inherit

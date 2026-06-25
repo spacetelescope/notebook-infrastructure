@@ -1,0 +1,41 @@
+# Debug Matrix Construction
+# This workflow shows exactly what the matrix looks like
+
+name: Debug Matrix
+
+on:
+  workflow_dispatch:
+    inputs:
+      enable_custom_runners:
+        description: 'Enable custom runners'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  debug-matrix:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Execution Configuration
+      execution-mode: 'on-demand'  # Use on-demand mode instead of collect_only
+      
+      # Repository Configuration
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      
+      # Notebook Selection - limit to just one notebook for testing
+      single-notebook: 'notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb'
+      
+      # Feature Configuration - minimal for testing
+      enable-validation: false
+      enable-security: false
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: false
+      
+      # Custom Runner Configuration
+      custom-runner-config: ${{ inputs.enable_custom_runners }}
+      
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}

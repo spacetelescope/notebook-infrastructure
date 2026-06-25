@@ -1,0 +1,37 @@
+# Example workflow for notebook deprecation management
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook Deprecation Management
+
+on:
+  # Manual deprecation trigger
+  workflow_dispatch:
+    inputs:
+      notebook-path:
+        description: 'Path to notebook to deprecate (e.g., notebooks/example.ipynb)'
+        required: true
+        type: string
+      removal-date:
+        description: 'Date when notebook should be removed (YYYY-MM-DD)'
+        required: true
+        type: string
+
+  # Scheduled cleanup (runs daily at 3 AM UTC)
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  deprecation-management:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@v3
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'deprecate'
+      single-filename: ${{ github.event.inputs.notebook-path }}
+      removal-date: ${{ github.event.inputs.removal-date }}
+      enable-validation: false
+      enable-security: false
+      enable-execution: false
+      enable-storage: true
+      enable-html-build: true
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

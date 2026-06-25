@@ -1,0 +1,19 @@
+# Test 16GB Runners
+# Test the 16GB runners specifically
+
+name: Test 16GB Runners
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-16gb-direct:
+    runs-on: jwst-pipeline-notebooks-16gb
+    steps:
+      - name: Test 16GB Direct
+        run: |
+          echo "🎯 Testing jwst-pipeline-notebooks-16gb directly"
+          echo "Runner: ${{ runner.name }}"
+          echo "CPU: $(nproc)"
+          echo "Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
+          echo "✅ 16GB test completed!"

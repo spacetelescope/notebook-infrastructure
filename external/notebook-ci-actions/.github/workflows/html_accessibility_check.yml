@@ -24,7 +24,7 @@ jobs:
   a11yWatchRun:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python 3.8.12
         uses: actions/setup-python@v5 ## needed for caching
         with:
@@ -38,7 +38,7 @@ jobs:
         run: |
           pip install json_repair
       - name: Check-out notebook-ci-actions repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: spacetelescope/notebook-ci-actions
           path: temp_jsonparser

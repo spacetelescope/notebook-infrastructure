@@ -1,0 +1,134 @@
+# CI Configuration for JWST Pipeline Notebooks Custom Runners
+# Format: notebook_path:runner_name
+#
+# Available runners for STScI JWST pipeline processing:
+# - ubuntu-latest (standard 2-core, 7GB RAM) - for tutorials and light processing
+# - jwst-pipeline-notebooks-16gb (4-core, 16GB RAM) - for moderate pipeline stages
+# - jwst-pipeline-notebooks-32gb (8-core, 32GB RAM) - for heavy processing and imaging
+# - jwst-pipeline-notebooks-64gb (16-core, 64GB RAM) - for extreme cases and full mosaics
+
+# =============================================================================
+# STAGE 1 PROCESSING (Detector-level calibration)
+# =============================================================================
+
+# NIRCam Stage 1 - moderate memory requirements
+notebooks/NIRCam/stage1/nircam_stage1_detector1.ipynb:jwst-pipeline-notebooks-16gb
+notebooks/NIRCam/stage1/nircam_stage1_imaging.ipynb:jwst-pipeline-notebooks-16gb
+notebooks/NIRCam/stage1/nircam_stage1_tso.ipynb:jwst-pipeline-notebooks-32gb
+
+# NIRSpec Stage 1 - moderate to high memory
+notebooks/NIRSpec/stage1/nirspec_stage1_mos.ipynb:jwst-pipeline-notebooks-16gb
+notebooks/NIRSpec/stage1/nirspec_stage1_ifu.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/NIRSpec/stage1/nirspec_stage1_bots.ipynb:jwst-pipeline-notebooks-16gb
+
+# MIRI Stage 1 - high memory requirements due to data volume
+notebooks/MIRI/stage1/miri_stage1_imaging.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/MIRI/stage1/miri_stage1_lrs.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/MIRI/stage1/miri_stage1_mrs.ipynb:jwst-pipeline-notebooks-64gb
+
+# NIRISS Stage 1 - moderate requirements
+notebooks/NIRISS/stage1/niriss_stage1_soss.ipynb:jwst-pipeline-notebooks-16gb
+notebooks/NIRISS/stage1/niriss_stage1_ami.ipynb:jwst-pipeline-notebooks-16gb
+
+# FGS Stage 1 - light processing
+notebooks/FGS/stage1/fgs_stage1_guiding.ipynb:jwst-pipeline-notebooks-16gb
+
+# =============================================================================
+# STAGE 2 PROCESSING (Spectroscopic and photometric calibration)
+# =============================================================================
+
+# NIRCam Stage 2 - memory intensive for imaging
+notebooks/NIRCam/stage2/nircam_stage2_imaging.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/NIRCam/stage2/nircam_stage2_wfss.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/NIRCam/stage2/nircam_stage2_tso_photometry.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/NIRCam/stage2/nircam_stage2_coronagraphy.ipynb:jwst-pipeline-notebooks-64gb
+
+# NIRSpec Stage 2 - high memory for spectroscopy
+notebooks/NIRSpec/stage2/nirspec_stage2_mos.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/NIRSpec/stage2/nirspec_stage2_ifu.ipynb:jwst-pipeline-notebooks-64gb
+notebooks/NIRSpec/stage2/nirspec_stage2_fixed_slit.ipynb:jwst-pipeline-notebooks-32gb
+
+# MIRI Stage 2 - very high memory requirements
+notebooks/MIRI/stage2/miri_stage2_imaging.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/MIRI/stage2/miri_stage2_lrs.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/MIRI/stage2/miri_stage2_mrs.ipynb:jwst-pipeline-notebooks-64gb
+notebooks/MIRI/stage2/miri_stage2_coronagraphy.ipynb:jwst-pipeline-notebooks-64gb
+
+# NIRISS Stage 2 - moderate to high memory
+notebooks/NIRISS/stage2/niriss_stage2_wfss.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/NIRISS/stage2/niriss_stage2_soss.ipynb:jwst-pipeline-notebooks-32gb
+
+# =============================================================================
+# STAGE 3 PROCESSING (Association and combination)
+# =============================================================================
+
+# NIRCam Stage 3 - very high memory for mosaics
+notebooks/NIRCam/stage3/nircam_stage3_imaging_mosaic.ipynb:jwst-pipeline-notebooks-64gb
+notebooks/NIRCam/stage3/nircam_stage3_spectroscopy.ipynb:jwst-pipeline-notebooks-32gb
+
+# NIRSpec Stage 3 - high memory for combined spectra
+notebooks/NIRSpec/stage3/nirspec_stage3_mos_combined.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/NIRSpec/stage3/nirspec_stage3_ifu_cube.ipynb:jwst-pipeline-notebooks-64gb
+
+# MIRI Stage 3 - extreme memory requirements
+notebooks/MIRI/stage3/miri_stage3_imaging_mosaic.ipynb:jwst-pipeline-notebooks-64gb
+notebooks/MIRI/stage3/miri_stage3_mrs_cube.ipynb:jwst-pipeline-notebooks-64gb
+
+# =============================================================================
+# TUTORIALS AND EXAMPLES (Light processing)
+# =============================================================================
+
+# Getting started tutorials - can use standard runners
+notebooks/tutorials/jwst_pipeline_overview.ipynb:ubuntu-latest
+notebooks/tutorials/data_access_tutorial.ipynb:ubuntu-latest
+notebooks/tutorials/quick_start_guide.ipynb:ubuntu-latest
+
+# Basic examples - light processing
+notebooks/examples/basic_imaging_example.ipynb:ubuntu-latest
+notebooks/examples/simple_spectroscopy.ipynb:jwst-pipeline-notebooks-16gb
+notebooks/examples/data_exploration.ipynb:ubuntu-latest
+
+# =============================================================================
+# SPECIALIZED PROCESSING
+# =============================================================================
+
+# Background subtraction and optimization
+notebooks/background/nircam_background_subtraction.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/background/nirspec_background_optimization.ipynb:jwst-pipeline-notebooks-32gb
+
+# Astrometry and world coordinate systems
+notebooks/astrometry/astrometric_correction.ipynb:jwst-pipeline-notebooks-16gb
+notebooks/astrometry/wcs_validation.ipynb:jwst-pipeline-notebooks-16gb
+
+# Outlier detection and cosmic ray rejection
+notebooks/outliers/outlier_detection_imaging.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/outliers/cosmic_ray_rejection.ipynb:jwst-pipeline-notebooks-16gb
+
+# =============================================================================
+# PERFORMANCE AND VALIDATION
+# =============================================================================
+
+# Performance benchmarking - require maximum resources
+notebooks/performance/full_pipeline_benchmark.ipynb:jwst-pipeline-notebooks-64gb
+notebooks/performance/memory_optimization_test.ipynb:jwst-pipeline-notebooks-64gb
+notebooks/performance/parallel_processing_test.ipynb:jwst-pipeline-notebooks-64gb
+
+# Validation and regression testing
+notebooks/validation/pipeline_regression_test.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/validation/output_comparison.ipynb:jwst-pipeline-notebooks-16gb
+
+# =============================================================================
+# ADVANCED TOPICS
+# =============================================================================
+
+# Custom reference files and calibration
+notebooks/advanced/custom_reference_files.ipynb:jwst-pipeline-notebooks-32gb
+notebooks/advanced/calibration_database_access.ipynb:ubuntu-latest
+
+# Multi-instrument combinations
+notebooks/advanced/multi_instrument_mosaic.ipynb:jwst-pipeline-notebooks-64gb
+notebooks/advanced/cross_instrument_validation.ipynb:jwst-pipeline-notebooks-32gb
+
+# Machine learning and advanced analysis
+notebooks/ml/deep_learning_classification.ipynb:jwst-pipeline-notebooks-64gb
+notebooks/ml/automated_source_detection.ipynb:jwst-pipeline-notebooks-32gb

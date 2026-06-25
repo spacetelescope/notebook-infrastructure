@@ -1,0 +1,91 @@
+# Git attributes for release management
+
+# Exclude development files from release archives
+dev/ export-ignore
+archive/ export-ignore
+_build/ export-ignore
+
+# Exclude JupyterBook development files
+_config.yml export-ignore
+_toc.yml export-ignore
+
+# Exclude Python virtual environments
+venv/ export-ignore
+.venv/ export-ignore
+env/ export-ignore
+.env export-ignore
+
+# Exclude development tool configurations
+.actrc export-ignore
+
+# Exclude project management files
+*.csv export-ignore
+
+# Exclude backup and old files
+*-old.* export-ignore
+*-backup.* export-ignore
+*.bak export-ignore
+
+# Exclude editor and IDE files
+.vscode/ export-ignore
+.idea/ export-ignore
+*.log export-ignore
+
+# Exclude testing and temporary files
+test_*.* export-ignore
+tmp/ export-ignore
+temp/ export-ignore
+
+# Exclude development scripts (keep essential user scripts)
+scripts/test-*-fix.sh export-ignore
+scripts/test-*-deprecation*.sh export-ignore
+scripts/test-*-storage*.sh export-ignore
+scripts/test-*-summary*.sh export-ignore
+scripts/test-end-to-end*.sh export-ignore
+scripts/test-failure*.sh export-ignore
+scripts/test-json*.sh export-ignore
+scripts/test-jupyter*.sh export-ignore
+scripts/test-on-demand-modes.sh export-ignore
+scripts/test-ondemand-*.sh export-ignore
+scripts/test-pr-*.sh export-ignore
+scripts/test-requirements*.sh export-ignore
+scripts/test-simple*.sh export-ignore
+scripts/test-static*.sh export-ignore
+scripts/test-unified*.sh export-ignore
+scripts/test-workflow*.sh export-ignore
+scripts/diagnose-*.sh export-ignore
+scripts/validate-*-fix.sh export-ignore
+scripts/validate-backup*.sh export-ignore
+scripts/validate-pr*.sh export-ignore
+scripts/validate-repository.sh export-ignore
+scripts/cleanup-*.sh export-ignore
+scripts/deploy-to-*.sh export-ignore
+scripts/*.backup export-ignore
+scripts/.actrc export-ignore
+scripts/.env export-ignore
+scripts/.github/ export-ignore
+
+# Exclude Python cache and artifacts
+__pycache__/ export-ignore
+*.pyc export-ignore
+*.pyo export-ignore
+*.pyd export-ignore
+.pytest_cache/ export-ignore
+.coverage export-ignore
+htmlcov/ export-ignore
+
+# Exclude Jupyter notebook checkpoints
+.ipynb_checkpoints/ export-ignore
+
+# Exclude OS-specific files
+.DS_Store export-ignore
+Thumbs.db export-ignore
+
+# Ensure important files are always included  
+README.md export
+LICENSE export
+.github/workflows/notebook-ci-unified.yml export
+.github/workflows/notebook-on-demand.yml export
+examples/ export
+docs/ export
+scripts/ export

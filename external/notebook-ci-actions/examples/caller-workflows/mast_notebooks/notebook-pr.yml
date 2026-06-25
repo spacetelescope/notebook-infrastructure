@@ -1,0 +1,35 @@
+# Pull Request workflow for mast_notebooks repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - Pull Request
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'environment.yml'
+      - '.github/workflows/**'
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2
+    with:
+      # Required: execution mode
+      execution-mode: 'pr'
+      trigger-event: 'validate'
+      
+      # Environment Configuration  
+      python-version: '3.11'
+      custom-requirements: 'requirements.txt'
+      conda-environment: 'environment.yml'
+      
+      # Feature flags (PRs typically only validate)
+      enable-validation: true
+      enable-security: true
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: false
+      
+    secrets: inherit

@@ -1,0 +1,191 @@
+name: Version Label Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, unlabeled]
+
+jobs:
+  check-version-label:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check for Version Label
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const labelNames = labels.map(label => label.name);
+          
+          const versionLabels = labelNames.filter(label => 
+            label.startsWith('version:') || 
+            ['breaking-change', 'feature', 'bugfix'].includes(label)
+          );
+          
+          console.log('Found labels:', labelNames);
+          console.log('Version labels:', versionLabels);
+          
+          if (versionLabels.length === 0) {
+            const comment = await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `⚠️ **Version Label Required**
+              
+              This PR needs a version label to indicate the type of change:
+              
+              ## 🏷️ Available Labels:
+              
+              ### Major Version (Breaking Changes)
+              - \`version:major\` - Breaking changes requiring caller updates
+              - \`breaking-change\` - Alias for version:major
+              
+              ### Minor Version (New Features) 
+              - \`version:minor\` - New backwards-compatible features
+              - \`feature\` - Alias for version:minor
+              
+              ### Patch Version (Bug Fixes)
+              - \`version:patch\` - Backwards-compatible bug fixes  
+              - \`bugfix\` - Alias for version:patch
+              
+              ## 🔍 Examples of Each Type:
+              
+              **Major (Breaking):**
+              - Removing or renaming workflow inputs
+              - Changing input types or requirements
+              - Removing workflow outputs
+              - Changing default behavior significantly
+              
+              **Minor (Feature):**
+              - Adding new optional inputs
+              - Adding new workflow outputs  
+              - Adding new optional features
+              - Performance improvements
+              
+              **Patch (Bugfix):**
+              - Fixing bugs without changing interface
+              - Security updates
+              - Documentation improvements
+              - Internal refactoring
+              
+              Please add the appropriate label to proceed.`
+            });
+            
+            core.setFailed('PR must have a version bump label');
+          } else if (versionLabels.length > 1) {
+            // Check for conflicting version labels
+            const versionTypes = versionLabels.map(label => {
+              if (label.includes('major') || label === 'breaking-change') return 'major';
+              if (label.includes('minor') || label === 'feature') return 'minor';  
+              if (label.includes('patch') || label === 'bugfix') return 'patch';
+              return 'unknown';
+            });
+            
+            const uniqueTypes = [...new Set(versionTypes)];
+            
+            if (uniqueTypes.length > 1) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `⚠️ **Conflicting Version Labels**
+                
+                This PR has conflicting version labels: \`${versionLabels.join('`, `')}\`
+                
+                Please keep only one version label that represents the highest level of change:
+                - **Major** takes precedence over Minor and Patch
+                - **Minor** takes precedence over Patch
+                
+                Current labels suggest: ${uniqueTypes.join(', ')} version bumps.`
+              });
+              
+              core.setFailed('PR has conflicting version labels');
+            } else {
+              core.info(`✅ Valid version label found: ${versionLabels.join(', ')}`);
+              core.info(`Will trigger ${uniqueTypes[0]} version bump`);
+            }
+          } else {
+            core.info(`✅ Version label found: ${versionLabels.join(', ')}`);
+          }
+
+  analyze-changes:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - name: Analyze Breaking Changes
+      uses: actions/github-script@v7
+      with:
+        script: |
+          // Get the diff of workflow files
+          const { execSync } = require('child_process');
+          
+          try {
+            const diff = execSync('git diff origin/main -- .github/workflows/', { encoding: 'utf8' });
+            
+            if (!diff) {
+              console.log('No workflow changes detected');
+              return;
+            }
+            
+            console.log('Workflow changes detected, analyzing...');
+            
+            // Check for potential breaking changes in the diff
+            const breakingPatterns = [
+              /^-\s+.*required:\s*true/m,          // Removing required input
+              /^\+\s+.*required:\s*true/m,          // Adding required input  
+              /^-\s+.*type:\s*string/m,             // Changing input type
+              /^\+\s+.*type:\s*boolean/m,           // Changing input type
+              /^-\s+.*default:/m,                   // Removing default value
+              /^-\s+.*description:/m,               // Major description changes
+            ];
+            
+            const potentialBreaking = breakingPatterns.some(pattern => pattern.test(diff));
+            
+            if (potentialBreaking) {
+              const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+              
+              const hasVersionMajor = labels.some(label => 
+                label.name === 'version:major' || label.name === 'breaking-change'
+              );
+              
+              if (!hasVersionMajor) {
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `🚨 **Potential Breaking Changes Detected**
+                  
+                  The automated analysis detected potential breaking changes in workflow files:
+                  
+                  \`\`\`diff
+                  ${diff.split('\n').slice(0, 20).join('\n')}
+                  ${diff.split('\n').length > 20 ? '... (truncated)' : ''}
+                  \`\`\`
+                  
+                  **Potential Issues Found:**
+                  - Changes to required inputs
+                  - Input type modifications  
+                  - Default value changes
+                  - Interface modifications
+                  
+                  If these are truly breaking changes, please add the \`version:major\` or \`breaking-change\` label.
+                  
+                  If these changes are backwards compatible, you can ignore this warning.`
+                });
+              }
+            }
+            
+          } catch (error) {
+            console.log('Error analyzing changes:', error.message);
+          }

@@ -1,0 +1,50 @@
+# Example workflow for documentation-only deployment
+# Copy this file to your repository's .github/workflows/ directory
+# This is useful when you want to rebuild docs without running full CI
+
+name: Documentation Deployment Only
+
+on:
+  # Manual trigger for documentation deployment
+  workflow_dispatch:
+    inputs:
+      python-version:
+        description: 'Python version for building'
+        required: false
+        default: '3.11'
+        type: choice
+        options:
+          - '3.9'
+          - '3.10'
+          - '3.11'
+          - '3.12'
+      post-processing-script:
+        description: 'Optional post-processing script path'
+        required: false
+        type: string
+        default: ''
+
+  # Trigger on documentation-related file changes
+  push:
+    branches: [ main ]
+    paths:
+      - '_config.yml'
+      - '_toc.yml'
+      - 'notebooks/**/*.md'
+      - 'scripts/**'
+
+jobs:
+  deploy-documentation:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@v3
+    with:
+      execution-mode: 'on-demand'
+      trigger-event: 'html'
+      python-version: ${{ github.event.inputs.python-version || '3.11' }}
+      enable-validation: false
+      enable-security: false
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: true
+      post-run-script: ${{ github.event.inputs.post-processing-script }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

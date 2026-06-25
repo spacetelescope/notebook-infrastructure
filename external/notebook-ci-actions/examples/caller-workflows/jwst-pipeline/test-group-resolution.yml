@@ -1,0 +1,36 @@
+name: Test Group Name Resolution
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # Test 1: Hardcoded group name (we know this fails)
+  test-hardcoded-group:
+    runs-on: jwst-pipeline-notebooks-16gb
+    steps:
+      - name: Test hardcoded group
+        run: echo "✅ Hardcoded group name works!"
+        
+  # Test 2: Use a simpler runs-on expression
+  setup-simple:
+    runs-on: ubuntu-24.04
+    outputs:
+      test-config: '{"notebooks/NIRSPEC/MOS/JWPipeNB-NIRSpec-MOS.ipynb":"jwst-pipeline-notebooks-16gb","notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb":"jwst-pipeline-notebooks-32gb","default":"ubuntu-latest"}'
+    steps:
+      - name: Setup test config
+        run: echo "Setting up test config"
+        
+  test-simple-lookup:
+    needs: setup-simple
+    runs-on: ${{ fromJson(needs.setup-simple.outputs.test-config)[matrix.notebook] || 'ubuntu-24.04' }}
+    strategy:
+      matrix:
+        notebook: 
+          - "notebooks/NIRSPEC/MOS/JWPipeNB-NIRSpec-MOS.ipynb"
+          - "notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb"
+    steps:
+      - name: Test simple lookup
+        run: |
+          echo "✅ Notebook: ${{ matrix.notebook }}"
+          echo "✅ Runner: ${{ fromJson(needs.setup-simple.outputs.test-config)[matrix.notebook] }}"
+          echo "✅ Current runner: ${{ runner.name }}"

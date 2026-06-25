@@ -1,0 +1,2480 @@
+name: Unified Notebook CI/CD Pipeline
+
+run-name: |
+  ${{
+    inputs.execution-mode == 'pr' && '🔄 PR Workflow' ||
+    inputs.execution-mode == 'merge' && '🚀 Merge Workflow' ||
+    inputs.execution-mode == 'scheduled' && '⏰ Scheduled Validation' ||
+    inputs.execution-mode == 'on-demand' && (
+      inputs.trigger-event == 'validate' && '🔍 On-Demand Validation' ||
+      inputs.trigger-event == 'execute' && '▶️ On-Demand Execution' ||
+      inputs.trigger-event == 'security' && '🛡️ Security Scan' ||
+      inputs.trigger-event == 'html' && '📖 Documentation Build' ||
+      inputs.trigger-event == 'deprecate' && '🏷️ Notebook Deprecation' ||
+      inputs.trigger-event == 'all' && '🎯 Full Pipeline' ||
+      '🎯 On-Demand Workflow'
+    ) ||
+    'Notebook CI/CD'
+  }}${{ inputs.single-notebook != '' && format(' - {0}', inputs.single-notebook) || '' }}
+
+on:
+  workflow_call:
+    inputs:
+      # Execution Configuration
+      execution-mode:
+        description: 'Execution mode: pr, merge, scheduled, on-demand'
+        required: true
+        type: string
+      trigger-event:
+        description: 'Specific trigger: validate, execute, security, html, deprecate'
+        required: false
+        type: string
+        default: 'all'
+      
+      # Environment Configuration
+      python-version:
+        description: 'Python version to use'
+        required: false
+        type: string
+        default: '3.11'
+      conda-environment:
+        description: 'Custom conda environment (hstcal, stenv, etc.)'
+        required: false
+        type: string
+      custom-requirements:
+        description: 'Path to custom requirements file'
+        required: false
+        type: string
+
+      # Optional CRDS Configuration (for JWST-style pipelines)
+      crds-server-url:
+        description: 'Optional CRDS server URL (sets CRDS_SERVER_URL)'
+        required: false
+        type: string
+        default: ''
+      crds-context:
+        description: 'Optional CRDS context (sets CRDS_CONTEXT)'
+        required: false
+        type: string
+        default: ''
+      crds-path:
+        description: 'Optional CRDS cache path (sets CRDS_PATH)'
+        required: false
+        type: string
+        default: ''
+      
+      # Notebook Selection
+      single-notebook:
+        description: 'Single notebook path for targeted execution'
+        required: false
+        type: string
+      affected-directories:
+        description: 'JSON array of affected directories (auto-detected or manual)'
+        required: false
+        type: string
+        default: '[]'
+      
+      # Feature Flags
+      enable-validation:
+        description: 'Enable pytest nbval validation'
+        required: false
+        type: boolean
+        default: true
+      enable-security:
+        description: 'Enable bandit security testing'
+        required: false
+        type: boolean
+        default: true
+      enable-execution:
+        description: 'Enable notebook execution'
+        required: false
+        type: boolean
+        default: true
+      enable-storage:
+        description: 'Enable storing outputs to gh-storage'
+        required: false
+        type: boolean
+        default: true
+      enable-html-build:
+        description: 'Enable HTML documentation build'
+        required: false
+        type: boolean
+        default: false
+      
+      # Post-processing
+      post-processing-script:
+        description: 'Optional post-processing script path'
+        required: false
+        type: string
+
+      # Pre-processing
+      pre-processing-script:
+        description: 'Optional pre-processing script path (runs before validation/execution)'
+        required: false
+        type: string
+      
+      # Deprecation
+      deprecation-days:
+        description: 'Days until deprecation (default: 60)'
+        required: false
+        type: number
+        default: 60
+      
+      # Custom Runner Configuration
+      custom-runner-config:
+        description: 'Enable custom runner selection based on ci_config.txt'
+        required: false
+        type: boolean
+        default: false
+
+    secrets:
+      CASJOBS_USERID:
+        required: false
+      CASJOBS_PW:
+        required: false
+
+env:
+  # Optional CRDS configuration exposed to all jobs. These are typically used by
+  # JWST-style pipelines; callers can omit them entirely if not needed.
+  CRDS_SERVER_URL: ${{ inputs.crds-server-url }}
+  CRDS_CONTEXT: ${{ inputs.crds-context }}
+  CRDS_PATH: ${{ inputs.crds-path }}
+
+jobs:
+  # Change Detection and Matrix Setup
+  setup-matrix:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix-notebooks: ${{ steps.setup.outputs.matrix-notebooks }}
+      runner-config: ${{ steps.setup.outputs.runner-config }}
+      affected-dirs: ${{ steps.setup.outputs.affected-dirs }}
+      skip-execution: ${{ steps.setup.outputs.skip-execution }}
+      docs-only: ${{ steps.setup.outputs.docs-only }}
+      non-notebook-files: ${{ steps.setup.outputs.non-notebook-files }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          
+      - name: Setup matrix and detect changes
+        id: setup
+        run: |
+          # Initialize variables
+          SKIP_EXECUTION=false
+          DOCS_ONLY=false
+          MATRIX_NOTEBOOKS="[]"
+          AFFECTED_DIRS="${{ inputs.affected-directories }}"
+          
+          case "${{ inputs.execution-mode }}" in
+            "pr")
+              echo "🔄 PR Mode: Detecting changed files"
+              if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+                BASE_REF=$(jq -r .pull_request.base.ref < "$GITHUB_EVENT_PATH")
+                git fetch origin "$BASE_REF"
+                CHANGED_FILES=$(git diff --name-only origin/$BASE_REF...HEAD)
+              else
+                CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+              fi
+              
+              # Detect docs-only changes
+              DOCS_ONLY=true
+              NOTEBOOKS_CHANGED=false
+              declare -a CHANGED_NOTEBOOKS
+              declare -a AFFECTED_DIRECTORIES
+              
+              while IFS= read -r file; do
+                [[ -z "$file" ]] && continue
+                case "$file" in
+                  notebooks/*.ipynb)
+                    NOTEBOOKS_CHANGED=true
+                    DOCS_ONLY=false
+                    CHANGED_NOTEBOOKS+=("$file")
+                    dir=$(dirname "$file")
+                    if [[ ! " ${AFFECTED_DIRECTORIES[*]} " =~ " $dir " ]]; then
+                      AFFECTED_DIRECTORIES+=("$dir")
+                    fi
+                    ;;
+                  notebooks/*/requirements.txt|requirements.txt|pyproject.toml)
+                    echo "📦 Requirements file changed: $file"
+                    NOTEBOOKS_CHANGED=true
+                    DOCS_ONLY=false
+                    dir=$(dirname "$file")
+                    if [[ "$file" == "requirements.txt" || "$file" == "pyproject.toml" ]]; then
+                      # Root requirements file affects all notebooks
+                      echo "🌐 Root requirements file changed - affecting all notebooks"
+                      AFFECTED_DIRECTORIES=("notebooks")
+                    else
+                      # Directory-specific requirements file
+                      echo "📁 Directory requirements file changed: $dir"
+                      if [[ ! " ${AFFECTED_DIRECTORIES[*]} " =~ " $dir " ]]; then
+                        AFFECTED_DIRECTORIES+=("$dir")
+                      fi
+                    fi
+                    ;;
+                  *.md|*.html|*.css|*.js|_config.yml|_toc.yml)
+                    # Keep DOCS_ONLY=true, but enable HTML build
+                    ;;
+                  *)
+                    DOCS_ONLY=false
+                    ;;
+                esac
+              done <<< "$CHANGED_FILES"
+              
+              # After processing all changed files, find notebooks in affected directories
+              if [ ${#AFFECTED_DIRECTORIES[@]} -gt 0 ]; then
+                echo "📁 Finding notebooks in affected directories: ${AFFECTED_DIRECTORIES[*]}"
+                declare -a ALL_AFFECTED_NOTEBOOKS
+                
+                for dir in "${AFFECTED_DIRECTORIES[@]}"; do
+                  echo "🔍 Searching for notebooks in: $dir"
+                  while IFS= read -r notebook; do
+                    [[ -z "$notebook" ]] && continue
+                    echo "📓 Found notebook: $notebook"
+                    ALL_AFFECTED_NOTEBOOKS+=("$notebook")
+                  done < <(find "$dir" -name '*.ipynb' -type f 2>/dev/null)
+                done
+                
+                # Combine explicitly changed notebooks with those in affected directories
+                # Remove duplicates by using associative array
+                declare -A UNIQUE_NOTEBOOKS
+                for notebook in "${CHANGED_NOTEBOOKS[@]}" "${ALL_AFFECTED_NOTEBOOKS[@]}"; do
+                  [[ -n "$notebook" ]] && UNIQUE_NOTEBOOKS["$notebook"]=1
+                done
+                
+                # Convert back to regular array
+                CHANGED_NOTEBOOKS=()
+                for notebook in "${!UNIQUE_NOTEBOOKS[@]}"; do
+                  CHANGED_NOTEBOOKS+=("$notebook")
+                done
+                
+                echo "📋 Total unique notebooks to process: ${#CHANGED_NOTEBOOKS[@]}"
+                for notebook in "${CHANGED_NOTEBOOKS[@]}"; do
+                  echo "  - $notebook"
+                done
+              fi
+              
+              if [ "$DOCS_ONLY" = "true" ]; then
+                echo "📚 Docs-only changes detected"
+                SKIP_EXECUTION=true
+              elif [ ${#CHANGED_NOTEBOOKS[@]} -gt 0 ]; then
+                MATRIX_NOTEBOOKS=$(printf '%s\n' "${CHANGED_NOTEBOOKS[@]}" | jq -R . | jq -s -c .)
+                AFFECTED_DIRS=$(printf '%s\n' "${AFFECTED_DIRECTORIES[@]}" | jq -R . | jq -s -c .)
+                echo "✅ Matrix populated with ${#CHANGED_NOTEBOOKS[@]} notebooks"
+              else
+                echo "⚠️ No notebooks found to process"
+                MATRIX_NOTEBOOKS="[]"
+                AFFECTED_DIRS="[]"
+              fi
+              # No non-notebook files collected in PR mode
+              NON_NOTEBOOK_FILES_JSON="[]"
+              ;;
+              
+            "merge")
+              echo "🚀 Merge Mode: Processing merged notebooks only"
+              # Get the list of files changed in the merge commit
+              # For merge commits, we compare with the first parent (previous commit on target branch)
+              MERGE_SHA=$(git rev-parse HEAD)
+              PARENT_SHA=$(git rev-parse HEAD^1)
+              echo "Merge commit: $MERGE_SHA, Parent commit: $PARENT_SHA"
+              
+              # Get changed files between parent commit and merge commit
+              CHANGED_FILES=$(git diff --name-only $PARENT_SHA $MERGE_SHA)
+              
+              # Process changed files to find notebooks, affected directories, and non-notebook files
+              declare -a CHANGED_NOTEBOOKS
+              declare -a AFFECTED_DIRECTORIES
+              declare -a NON_NOTEBOOK_FILES
+              
+              while IFS= read -r file; do
+                [[ -z "$file" ]] && continue
+                case "$file" in
+                  notebooks/*.ipynb)
+                    CHANGED_NOTEBOOKS+=("$file")
+                    dir=$(dirname "$file")
+                    if [[ ! " ${AFFECTED_DIRECTORIES[*]} " =~ " $dir " ]]; then
+                      AFFECTED_DIRECTORIES+=("$dir")
+                    fi
+                    ;;
+                  notebooks/*/requirements.txt|requirements.txt|pyproject.toml)
+                    echo "📦 Requirements file changed: $file"
+                    dir=$(dirname "$file")
+                    if [[ "$file" == "requirements.txt" || "$file" == "pyproject.toml" ]]; then
+                      # Root requirements file affects all notebooks
+                      echo "🌐 Root requirements file changed - affecting all notebooks"
+                      AFFECTED_DIRECTORIES=("notebooks")
+                    else
+                      # Directory-specific requirements file
+                      echo "📁 Directory requirements file changed: $dir"
+                      if [[ ! " ${AFFECTED_DIRECTORIES[*]} " =~ " $dir " ]]; then
+                        AFFECTED_DIRECTORIES+=("$dir")
+                      fi
+                    fi
+                    ;;
+                  *.md|*.html|*.css|*.js|_config.yml|_toc.yml|notebooks/*.md|notebooks/*.html|notebooks/*.css|notebooks/*.js)
+                    # Documentation files - collect for gh-storage in merge mode
+                    echo "📄 Documentation file changed: $file"
+                    NON_NOTEBOOK_FILES+=("$file")
+                    ;;
+                esac
+              done <<< "$CHANGED_FILES"
+              
+              # For merge mode, process only explicitly changed notebooks and notebooks affected by requirements changes
+              if [ ${#AFFECTED_DIRECTORIES[@]} -gt 0 ] && [[ " ${AFFECTED_DIRECTORIES[*]} " =~ " notebooks " ]]; then
+                # If root requirements file changed, we need to process all notebooks
+                echo "🌐 Root requirements file changed - affecting all notebooks in merge"
+                declare -a ALL_AFFECTED_NOTEBOOKS
+                while IFS= read -r notebook; do
+                  [[ -z "$notebook" ]] && continue
+                  echo "📓 Found notebook affected by root requirements: $notebook"
+                  ALL_AFFECTED_NOTEBOOKS+=("$notebook")
+                done < <(find notebooks/ -name '*.ipynb' -type f 2>/dev/null)
+                
+                # Combine explicitly changed notebooks with those affected by root requirements
+                declare -A UNIQUE_NOTEBOOKS
+                for notebook in "${CHANGED_NOTEBOOKS[@]}" "${ALL_AFFECTED_NOTEBOOKS[@]}"; do
+                  [[ -n "$notebook" ]] && UNIQUE_NOTEBOOKS["$notebook"]=1
+                done
+                
+                # Convert back to regular array
+                CHANGED_NOTEBOOKS=()
+                for notebook in "${!UNIQUE_NOTEBOOKS[@]}"; do
+                  CHANGED_NOTEBOOKS+=("$notebook")
+                done
+              elif [ ${#AFFECTED_DIRECTORIES[@]} -gt 0 ]; then
+                # Directory-specific requirements files changed - find notebooks in those specific directories
+                echo "📁 Directory-specific requirements changed: ${AFFECTED_DIRECTORIES[*]}"
+                declare -a ALL_AFFECTED_NOTEBOOKS
+                
+                for dir in "${AFFECTED_DIRECTORIES[@]}"; do
+                  if [ "$dir" != "notebooks" ]; then  # Skip if already handled above
+                    echo "🔍 Searching for notebooks affected by requirements in: $dir"
+                    while IFS= read -r notebook; do
+                      [[ -z "$notebook" ]] && continue
+                      echo "📓 Found notebook affected by directory requirements: $notebook"
+                      ALL_AFFECTED_NOTEBOOKS+=("$notebook")
+                    done < <(find "$dir" -name '*.ipynb' -type f 2>/dev/null)
+                  fi
+                done
+                
+                # Combine explicitly changed notebooks with those affected by directory requirements
+                declare -A UNIQUE_NOTEBOOKS
+                for notebook in "${CHANGED_NOTEBOOKS[@]}" "${ALL_AFFECTED_NOTEBOOKS[@]}"; do
+                  [[ -n "$notebook" ]] && UNIQUE_NOTEBOOKS["$notebook"]=1
+                done
+                
+                # Convert back to regular array
+                CHANGED_NOTEBOOKS=()
+                for notebook in "${!UNIQUE_NOTEBOOKS[@]}"; do
+                  CHANGED_NOTEBOOKS+=("$notebook")
+                done
+              fi
+              
+              echo "📋 Total notebooks to process in merge: ${#CHANGED_NOTEBOOKS[@]}"
+              for notebook in "${CHANGED_NOTEBOOKS[@]}"; do
+                echo "  - $notebook"
+              done
+              
+              # Create JSON array of changed notebooks
+              if [ ${#CHANGED_NOTEBOOKS[@]} -gt 0 ]; then
+                MATRIX_NOTEBOOKS=$(printf '%s\n' "${CHANGED_NOTEBOOKS[@]}" | jq -R . | jq -s -c .)
+                AFFECTED_DIRS=$(printf '%s\n' "${AFFECTED_DIRECTORIES[@]}" | jq -R . | jq -s -c .)
+                echo "✅ Matrix populated with ${#CHANGED_NOTEBOOKS[@]} notebooks"
+              else
+                echo "⚠️ No changed notebooks found to process"
+                MATRIX_NOTEBOOKS="[]"
+                AFFECTED_DIRS='["notebooks"]'
+              fi
+              
+              # Handle non-notebook files for merge mode
+              if [ ${#NON_NOTEBOOK_FILES[@]} -gt 0 ]; then
+                echo "📄 Non-notebook files to store: ${NON_NOTEBOOK_FILES[*]}"
+                NON_NOTEBOOK_FILES_JSON=$(printf '%s\n' "${NON_NOTEBOOK_FILES[@]}" | jq -R . | jq -s -c .)
+                echo "✅ Found ${#NON_NOTEBOOK_FILES[@]} non-notebook files to store"
+              else
+                NON_NOTEBOOK_FILES_JSON="[]"
+              fi
+              ;;
+              
+            "scheduled")
+              echo "⏰ Scheduled Mode: All notebooks validation"
+              MATRIX_NOTEBOOKS=$(find notebooks/ -name '*.ipynb' | jq -R -s -c 'split("\n")[:-1] | map(select(. != ""))')
+              AFFECTED_DIRS='["notebooks"]'
+              NON_NOTEBOOK_FILES_JSON="[]"
+              ;;
+              
+            "on-demand")
+              echo "🎯 On-demand Mode"
+              # Check if this is a documentation-only build
+              if [ "${{ inputs.trigger-event }}" = "html" ]; then
+                echo "📚 Documentation-only build: skipping notebook processing"
+                SKIP_EXECUTION=true
+                MATRIX_NOTEBOOKS='[]'
+                AFFECTED_DIRS='[]'
+              elif [ -n "${{ inputs.single-notebook }}" ]; then
+                echo "📄 Single notebook specified: ${{ inputs.single-notebook }}"
+                
+                # Check if it's a full path or just a filename
+                if [[ "${{ inputs.single-notebook }}" == *"/"* ]]; then
+                  # Full path provided
+                  NOTEBOOK_PATH="${{ inputs.single-notebook }}"
+                  echo "📁 Full path provided: $NOTEBOOK_PATH"
+                else
+                  # Just filename provided - find the full path
+                  echo "🔍 Filename only provided, searching for: ${{ inputs.single-notebook }}"
+                  NOTEBOOK_PATH=$(find notebooks/ -name "${{ inputs.single-notebook }}" -type f | head -1)
+                  if [ -z "$NOTEBOOK_PATH" ]; then
+                    echo "❌ Notebook not found: ${{ inputs.single-notebook }}"
+                    echo "Available notebooks:"
+                    find notebooks/ -name '*.ipynb' | head -10
+                    exit 1
+                  fi
+                  echo "✅ Found notebook at: $NOTEBOOK_PATH"
+                fi
+                
+                MATRIX_NOTEBOOKS=$(echo "$NOTEBOOK_PATH" | jq -R -s -c 'split("\n")[:-1]')
+                # Calculate the directory for the single notebook
+                SINGLE_NOTEBOOK_DIR=$(dirname "$NOTEBOOK_PATH")
+                AFFECTED_DIRS=$(echo "$SINGLE_NOTEBOOK_DIR" | jq -R -s -c 'split("\n")[:-1]')
+                echo "📁 Calculated directory: $SINGLE_NOTEBOOK_DIR"
+              else
+                MATRIX_NOTEBOOKS=$(find notebooks/ -name '*.ipynb' | jq -R -s -c 'split("\n")[:-1] | map(select(. != ""))')
+                AFFECTED_DIRS='["notebooks"]'
+              fi
+              NON_NOTEBOOK_FILES_JSON="[]"
+              ;;
+          esac
+          
+          # Filter out deprecated notebooks during merge workflows
+          if [ "${{ inputs.execution-mode }}" = "merge" ] && [ "$MATRIX_NOTEBOOKS" != "[]" ]; then
+            echo "🔍 Checking for deprecated notebooks to skip execution..."
+            
+            # Create a temporary file with the current notebook list
+            echo "$MATRIX_NOTEBOOKS" | jq -r '.[]' > /tmp/notebooks_to_check.txt
+            
+            # Filter out deprecated notebooks
+            FILTERED_NOTEBOOKS=""
+            while IFS= read -r notebook; do
+              if [ -f "$notebook" ]; then
+                # Check if notebook has deprecation metadata - use output instead of exit code
+                # Create a temporary Python script to check deprecation
+                cat > /tmp/check_deprecation.py << 'EOF'
+          import json, sys, os
+          notebook_path = os.environ["NOTEBOOK_PATH"]
+          try:
+              with open(notebook_path, "r", encoding="utf-8") as f:
+                  nb = json.load(f)
+              
+              # Check for deprecation using only the structured metadata field
+              is_deprecated = False
+              
+              # Only check notebook metadata for the 'deprecated' field
+              # This is the field set by the workflow's manual deprecation process
+              if "metadata" in nb and "deprecated" in nb.get("metadata", {}):
+                  is_deprecated = True
+              
+              # Output result - do not use exit codes
+              if is_deprecated:
+                  print("DEPRECATED")
+              else:
+                  print("ACTIVE")
+                  
+          except Exception as e:
+              print("ERROR")
+          EOF
+                
+                DEPRECATION_CHECK=$(NOTEBOOK_PATH="$notebook" python3 /tmp/check_deprecation.py 2>/dev/null)
+                rm -f /tmp/check_deprecation.py
+                
+                # Add to filtered list if not deprecated
+                if [ "$DEPRECATION_CHECK" = "ACTIVE" ]; then
+                  if [ -z "$FILTERED_NOTEBOOKS" ]; then
+                    FILTERED_NOTEBOOKS="\"$notebook\""
+                  else
+                    FILTERED_NOTEBOOKS="$FILTERED_NOTEBOOKS,\"$notebook\""
+                  fi
+                elif [ "$DEPRECATION_CHECK" = "DEPRECATED" ]; then
+                  echo "⚠️ Skipping deprecated notebook: $notebook"
+                else
+                  echo "⚠️ Error checking deprecation status for $notebook - including in execution"
+                  if [ -z "$FILTERED_NOTEBOOKS" ]; then
+                    FILTERED_NOTEBOOKS="\"$notebook\""
+                  else
+                    FILTERED_NOTEBOOKS="$FILTERED_NOTEBOOKS,\"$notebook\""
+                  fi
+                fi
+              fi
+            done < /tmp/notebooks_to_check.txt
+            
+            # Clean up temp files
+            rm -f /tmp/notebooks_to_check.txt
+            
+            # Update the matrix with filtered notebooks
+            if [ -n "$FILTERED_NOTEBOOKS" ]; then
+              MATRIX_NOTEBOOKS="[$FILTERED_NOTEBOOKS]"
+              echo "✅ Filtered notebook matrix (deprecated notebooks skipped): $MATRIX_NOTEBOOKS"
+            else
+              MATRIX_NOTEBOOKS="[]"
+              echo "ℹ️ All notebooks are deprecated - no execution needed"
+            fi
+          fi
+          
+          # Custom Runner Configuration
+          if [ "${{ inputs.custom-runner-config }}" = "true" ] && [ "$MATRIX_NOTEBOOKS" != "[]" ]; then
+            echo "🖥️ Custom runner configuration enabled"
+            
+            # Create runner config JSON mapping notebooks to runners
+            RUNNER_CONFIG='{'
+            FIRST_ENTRY=true
+            
+            # Create a temporary file to store notebooks to avoid subshell issues
+            echo "$MATRIX_NOTEBOOKS" | jq -r '.[]' > /tmp/matrix_notebooks.txt 2>/dev/null
+            
+            while IFS= read -r notebook; do
+              if [ -n "$notebook" ]; then
+                # Look up runner for this notebook in ci_config.txt
+                if [ -f "ci_config.txt" ]; then
+                  CUSTOM_RUNNER=$(grep "^${notebook}:" ci_config.txt 2>/dev/null | cut -d':' -f2 | tr -d '[:space:]' || echo "")
+                else
+                  CUSTOM_RUNNER=""
+                fi
+                
+                if [ -n "$CUSTOM_RUNNER" ]; then
+                  echo "🎯 Found custom runner for $notebook: '$CUSTOM_RUNNER'"
+                  # For GitHub-hosted larger runners (runner groups), use group format
+                  if [[ "$CUSTOM_RUNNER" == jwst-pipeline-notebooks-* ]]; then
+                    RUNNER_VALUE="{\"group\":\"${CUSTOM_RUNNER}\"}"
+                  else
+                    # For regular runners, use simple string format
+                    RUNNER_VALUE="\"${CUSTOM_RUNNER}\""
+                  fi
+                else
+                  echo "🔧 No custom runner for $notebook, using default: ubuntu-latest"
+                  # ubuntu-latest uses simple string format
+                  RUNNER_VALUE="\"ubuntu-latest\""
+                fi
+                
+                # Build JSON entry for runner config
+                if [ "$FIRST_ENTRY" = "true" ]; then
+                  RUNNER_CONFIG="${RUNNER_CONFIG}\"${notebook}\":${RUNNER_VALUE}"
+                  FIRST_ENTRY=false
+                else
+                  RUNNER_CONFIG="${RUNNER_CONFIG},\"${notebook}\":${RUNNER_VALUE}"
+                fi
+              fi
+            done < /tmp/matrix_notebooks.txt
+            
+            # Clean up temporary file
+            rm -f /tmp/matrix_notebooks.txt
+            
+            # Add default runner and close JSON
+            RUNNER_CONFIG="${RUNNER_CONFIG},\"default\":\"ubuntu-latest\"}"
+            echo "✅ Runner config: $RUNNER_CONFIG"
+            
+            if [ ! -f "ci_config.txt" ]; then
+              echo "⚠️ Custom runner config enabled but ci_config.txt not found - using default runners"
+            fi
+          elif [ "${{ inputs.custom-runner-config }}" = "true" ] && [ "$MATRIX_NOTEBOOKS" = "[]" ]; then
+            echo "ℹ️ Custom runner config enabled but no notebooks to process"
+            RUNNER_CONFIG='{"default":"ubuntu-latest"}'
+          else
+            # No custom runners - use default for all
+            RUNNER_CONFIG='{"default":"ubuntu-latest"}'
+          fi
+          
+          echo "matrix-notebooks=$MATRIX_NOTEBOOKS" >> $GITHUB_OUTPUT
+          echo "runner-config=$RUNNER_CONFIG" >> $GITHUB_OUTPUT
+          echo "affected-dirs=$AFFECTED_DIRS" >> $GITHUB_OUTPUT  
+          echo "skip-execution=$SKIP_EXECUTION" >> $GITHUB_OUTPUT
+          echo "docs-only=$DOCS_ONLY" >> $GITHUB_OUTPUT
+          echo "non-notebook-files=${NON_NOTEBOOK_FILES_JSON:-[]}" >> $GITHUB_OUTPUT
+          
+          echo "📊 Matrix Setup Complete:"
+          echo "  Notebooks: $MATRIX_NOTEBOOKS"
+          echo "  Runner Config: $RUNNER_CONFIG"
+          echo "  Affected Dirs: $AFFECTED_DIRS"
+          echo "  Skip Execution: $SKIP_EXECUTION"
+          echo "  Docs Only: $DOCS_ONLY"
+          
+          # Debug: Test JSON validity
+          echo "🧪 Testing JSON validity:"
+          echo "$RUNNER_CONFIG" | jq '.' >/dev/null 2>&1 && echo "✅ Runner config JSON is valid" || echo "❌ Runner config JSON is invalid"
+          
+          # Debug: Show JSON keys
+          echo "🔑 Runner config keys:"
+          echo "$RUNNER_CONFIG" | jq -r 'keys[]' 2>/dev/null || echo "❌ Failed to extract keys"
+
+  # Store Non-Notebook Files (for documentation files in merge mode)
+  store-non-notebook-files:
+    needs: setup-matrix
+    if: |
+      inputs.execution-mode == 'merge' && 
+      needs.setup-matrix.outputs.non-notebook-files != '[]' &&
+      inputs.enable-storage == true
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          
+      - name: Store non-notebook files to gh-storage
+        run: |
+          echo "📄 Storing merged non-notebook files to gh-storage for HTML build actions"
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          
+          # Get the list of non-notebook files to store
+          NON_NOTEBOOK_FILES='${{ needs.setup-matrix.outputs.non-notebook-files }}'
+          echo "📋 Files to store: $NON_NOTEBOOK_FILES"
+          
+          # Store current state
+          current_branch=$(git branch --show-current)
+          echo "📍 Current branch: $current_branch"
+          
+          # Switch to gh-storage branch (create if doesn't exist)
+          if git ls-remote --exit-code origin gh-storage >/dev/null 2>&1; then
+            echo "📦 Using existing gh-storage branch"
+            git fetch origin gh-storage
+            git checkout gh-storage
+          else
+            echo "🆕 Creating new gh-storage branch"
+            git checkout --orphan gh-storage
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+          
+          # Return to original branch to get the files
+          if [ -n "$current_branch" ]; then
+            git checkout "$current_branch"
+            echo "🔄 Switched back to: $current_branch"
+          else
+            git checkout "${{ github.ref_name }}" || git checkout main || git checkout master
+            echo "🔄 Switched back to default branch"
+          fi
+          
+          # Create backup copies of the files
+          declare -a TEMP_FILES
+          echo "$NON_NOTEBOOK_FILES" | jq -r '.[]' | while read -r file; do
+            if [ -f "$file" ]; then
+              temp_file="/tmp/$(basename "$file")_$(echo "$file" | tr '/' '_')"
+              cp "$file" "$temp_file"
+              echo "📋 Backed up: $file -> $temp_file"
+              echo "$file:$temp_file" >> /tmp/file_mapping.txt
+            else
+              echo "⚠️ File not found: $file"
+            fi
+          done
+          
+          # Switch back to gh-storage branch
+          if git ls-remote --exit-code origin gh-storage >/dev/null 2>&1; then
+            git checkout gh-storage
+          else
+            git checkout --orphan gh-storage
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+          
+          # Restore files from backup to gh-storage branch
+          if [ -f "/tmp/file_mapping.txt" ]; then
+            while IFS=: read -r original_file temp_file; do
+              if [ -f "$temp_file" ]; then
+                echo "📁 Setting up directory: $(dirname "$original_file")"
+                mkdir -p "$(dirname "$original_file")"
+                cp "$temp_file" "$original_file"
+                echo "✅ Restored: $original_file"
+                git add "$original_file"
+                rm -f "$temp_file"
+              fi
+            done < /tmp/file_mapping.txt
+            rm -f /tmp/file_mapping.txt
+          fi
+          
+          # Commit the changes if any
+          if git diff --cached --quiet; then
+            echo "ℹ️ No changes detected in non-notebook files"
+          else
+            echo "✅ Changes detected, committing non-notebook files"
+            git commit -m "Update merged non-notebook files for HTML build [skip ci]"
+            
+            # Try regular push first, then pull-rebase-push if conflicts
+            if git push origin gh-storage; then
+              echo "🚀 Successfully pushed non-notebook files to gh-storage"
+            else
+              echo "⚠️ Push failed due to conflicts, attempting rebase..."
+              git pull --rebase origin gh-storage
+              git push origin gh-storage
+              echo "🚀 Successfully pushed non-notebook files to gh-storage after rebase"
+            fi
+          fi
+          
+          # Return to original branch
+          if [ -n "$current_branch" ]; then
+            git checkout "$current_branch"
+            echo "🔄 Returned to original branch: $current_branch"
+          else
+            git checkout "${{ github.ref_name }}" || git checkout main || git checkout master
+            echo "🔄 Returned to default branch"
+          fi
+
+  # Jupyter Book Validation
+  validate-jupyter-book:
+    needs: setup-matrix
+    if: |
+      needs.setup-matrix.outputs.matrix-notebooks != '[]' &&
+      inputs.execution-mode == 'pr' &&
+      (inputs.enable-validation == true || inputs.trigger-event == 'all' || inputs.trigger-event == 'validate')
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        notebook: ${{ fromJson(needs.setup-matrix.outputs.matrix-notebooks) }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          
+      - name: Set up Python environment with micromamba
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-name: notebooks
+          create-args: >-
+            python=${{ inputs.python-version }}
+            jupyter-book
+          cache-environment: true
+          
+      - name: Validate notebook with Jupyter Book (errors only)
+        env:
+          NOTEBOOK: ${{ matrix.notebook }}
+        run: |
+          set -euo pipefail
+
+          annotate() {
+            awk -F: '
+              /^[^:]+:[0-9]+: (WARNING|ERROR):/ {
+                file=$1; line=$2; level=$3; sub(/^ /,"",level); msg=$0;
+                sub(/^[^:]+:[0-9]+: (WARNING|ERROR): /,"",msg);
+                if (level ~ /ERROR/) {
+                  print "::error file=",file,",line=",line,"::",msg
+                } else {
+                  print "::warning file=",file,",line=",line,"::",msg
+                }
+              }
+            '
+          }
+
+          echo "::group::Jupyter Book validation: $NOTEBOOK"
+          
+          if [ ! -f "$NOTEBOOK" ]; then
+            echo "::error::Notebook file not found: $NOTEBOOK"
+            exit 1
+          fi
+          
+          WORKDIR="$(mktemp -d)"
+          ext="${NOTEBOOK##*.}"
+          cp "$NOTEBOOK" "$WORKDIR/page.$ext"
+
+          cat > "$WORKDIR/_toc.yml" <<'YAML'
+          format: jb-book
+          root: page
+          YAML
+
+          cat > "$WORKDIR/_config.yml" <<'YAML'
+          execution:
+            execute_notebooks: "off"
+          sphinx:
+            config:
+              nb_execution_show_tb: true
+          YAML
+
+          set +e
+          OUTPUT_LOG="$WORKDIR/build.log"
+          jupyter-book build --keep-going "$WORKDIR" 2>&1 | tee "$OUTPUT_LOG"
+          jb_rc=${PIPESTATUS[0]}
+          set -e
+
+          cat "$OUTPUT_LOG" | annotate
+
+          if grep -q "ERROR:" "$OUTPUT_LOG"; then
+            echo "::error::Jupyter Book validation failed for $NOTEBOOK"
+            exit 1
+          fi
+          
+          echo "✅ Jupyter Book validation passed for $NOTEBOOK"
+          echo "::endgroup::"
+
+  # Main Notebook Processing
+  process-notebooks:
+    needs: setup-matrix
+    # environment: ci_env  # Temporarily removed to test runner assignment
+    if: |
+      needs.setup-matrix.outputs.skip-execution != 'true' && 
+      needs.setup-matrix.outputs.matrix-notebooks != '[]' &&
+      inputs.trigger-event != 'deprecate'
+    runs-on: ${{ fromJson(needs.setup-matrix.outputs.runner-config)[matrix.notebook] || 'ubuntu-latest' }}
+    outputs:
+      execution-results: ${{ steps.collect-results.outputs.results }}
+      total-notebooks: ${{ steps.collect-results.outputs.total }}
+      successful-notebooks: ${{ steps.collect-results.outputs.successful }}
+      failed-notebooks: ${{ steps.collect-results.outputs.failed }}
+    strategy:
+      fail-fast: false
+      matrix:
+        notebook: ${{ fromJson(needs.setup-matrix.outputs.matrix-notebooks) }}
+    env:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          
+      - name: Debug Runner Information
+        run: |
+          echo "🖥️ Runner Debug Information:"
+          echo "  Matrix Notebook: '${{ matrix.notebook }}'"
+          echo "  Runner Config JSON: '${{ needs.setup-matrix.outputs.runner-config }}'"
+          echo "  JSON Lookup Result: '${{ fromJson(needs.setup-matrix.outputs.runner-config)[matrix.notebook] }}'"
+          echo "  Runner Assignment: '${{ fromJson(needs.setup-matrix.outputs.runner-config)[matrix.notebook] || 'ubuntu-latest' }}'"
+          echo "  Format: Either string for regular runners or {group: name} object for GitHub-hosted larger runners"
+          echo "  Runner Name: ${{ runner.name }}"
+          echo "  Runner OS: ${{ runner.os }}"
+          echo "  Runner Arch: ${{ runner.arch }}"
+          echo "  GitHub Actor: ${{ github.actor }}"
+          echo "  Repository: ${{ github.repository }}"
+          echo "  Workflow: ${{ github.workflow }}"
+          echo "  Job: ${{ github.job }}"
+          echo "  Run ID: ${{ github.run_id }}"
+          echo ""
+          echo "🔍 System Information:"
+          echo "  Hostname: $(hostname || echo 'N/A')"
+          echo "  Available CPU cores: $(nproc || echo 'N/A')"
+          echo "  Available memory: $(free -h 2>/dev/null | grep '^Mem:' | awk '{print $2}' || echo 'N/A')"
+          echo "  Memory usage: $(free -h 2>/dev/null | grep '^Mem:' | awk '{printf \"%.1f%%\", ($3/$2)*100}' || echo 'N/A')"
+          echo ""
+          echo "💽 Initial Disk Usage:"
+          df -h / 2>/dev/null || echo "❌ Failed to get disk info"
+          df -h . 2>/dev/null | tail -1 | awk '{printf "  Workspace: %s used / %s total (%s available) - %s\n", $3, $2, $4, $5}' || echo "❌ Failed to get workspace disk info"
+          echo ""
+          echo "📂 Largest directories in /tmp:"
+          du -sh /tmp/* 2>/dev/null | sort -hr | head -5 || echo "  No data available"
+          echo ""
+          echo "📝 JSON Lookup Test:"
+          echo '${{ needs.setup-matrix.outputs.runner-config }}' | jq '.' || echo "❌ Invalid JSON"
+          echo "🔑 Available keys in runner config:"
+          echo '${{ needs.setup-matrix.outputs.runner-config }}' | jq -r 'keys[]' || echo "❌ Failed to extract keys"
+          echo "🎯 Direct key test:"
+          echo '${{ needs.setup-matrix.outputs.runner-config }}' | jq -r '.["${{ matrix.notebook }}"]' || echo "❌ Key lookup failed"
+          
+      - name: Check if notebook is deprecated
+        id: deprecation-check
+        run: |
+          notebook="${{ matrix.notebook }}"
+          
+          # Check for deprecation markers in notebook
+          if grep -q "DEPRECATED\|deprecated\|DEPRECATION" "$notebook"; then
+            echo "⚠️ Notebook marked as deprecated: $notebook"
+            echo "deprecated=true" >> $GITHUB_OUTPUT
+          else
+            echo "deprecated=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Python environment with micromamba
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-name: ci-env
+          init-shell: bash
+          create-args: "python=${{ inputs.python-version }} pip jupyter nbval nbconvert bandit pytest"
+          cache-environment: false
+
+      - name: Set up custom conda environment
+        if: inputs.conda-environment != ''
+        run: |
+          echo "🔧 Setting up custom conda environment: ${{ inputs.conda-environment }}"
+          # Create environment with specified conda environment packages
+          micromamba install -n ci-env ${{ inputs.conda-environment }} -y
+
+      - name: Install requirements
+        run: |
+          notebook="${{ matrix.notebook }}"
+          nb_dir=$(dirname "$notebook")
+          
+          # Activate the micromamba environment
+          eval "$(micromamba shell hook --shell bash)"
+          micromamba activate ci-env
+          
+          # Install custom requirements if specified
+          if [ -n "${{ inputs.custom-requirements }}" ]; then
+            echo "Installing custom requirements: ${{ inputs.custom-requirements }}"
+            pip install -r "${{ inputs.custom-requirements }}"
+          elif [ -f "$nb_dir/requirements.txt" ]; then
+            echo "Installing directory-specific requirements: $nb_dir/requirements.txt"
+            pip install -r "$nb_dir/requirements.txt"
+          else
+            echo "No requirements.txt found in $nb_dir - using base environment only"
+          fi
+
+      - name: Run pre-processing script
+        if: inputs.pre-processing-script != ''
+        run: |
+          notebook="${{ matrix.notebook }}"
+          nb_dir=$(dirname "$notebook")
+
+          eval "$(micromamba shell hook --shell bash)"
+          micromamba activate ci-env
+
+          script_path="${{ inputs.pre-processing-script }}"
+
+          if [ -f "$script_path" ]; then
+            echo "🔧 Running pre-processing script: $script_path"
+            python "$script_path" || echo "⚠️ Pre-processing script exited with non-zero status; continuing."
+          elif [ -f "$nb_dir/$script_path" ]; then
+            echo "🔧 Running notebook-local pre-processing script: $nb_dir/$script_path"
+            python "$nb_dir/$script_path" || echo "⚠️ Notebook-local pre-processing script exited with non-zero status; continuing."
+          else
+            echo "ℹ️ Pre-processing script not found at repo or notebook level; skipping."
+          fi
+
+      - name: Validate notebook
+        if: inputs.enable-validation == true && (inputs.trigger-event == 'all' || inputs.trigger-event == 'validate')
+        run: |
+          eval "$(micromamba shell hook --shell bash)"
+          micromamba activate ci-env
+          echo "🔍 Validating notebook: ${{ matrix.notebook }}"
+          # Clear outputs to ensure clean validation
+          jupyter nbconvert --clear-output --inplace "${{ matrix.notebook }}"
+          pytest --nbval --current-env --nbval-cell-timeout=4000 "${{ matrix.notebook }}"
+
+      - name: Security scan
+        if: inputs.enable-security == true && (inputs.trigger-event == 'all' || inputs.trigger-event == 'security')
+        run: |
+          eval "$(micromamba shell hook --shell bash)"
+          micromamba activate ci-env
+          echo "🛡️ Security scanning: ${{ matrix.notebook }}"
+          notebook="${{ matrix.notebook }}"
+          jupyter nbconvert --to script "$notebook"
+          py_file="${notebook%.ipynb}.py"
+          if [ -f "$py_file" ]; then
+            bandit "$py_file" || echo "Security warnings found"
+            rm -f "$py_file"
+          fi
+
+      - name: Execute notebook
+        if: inputs.enable-execution == true && (inputs.trigger-event == 'all' || inputs.trigger-event == 'execute')
+        run: |
+          eval "$(micromamba shell hook --shell bash)"
+          micromamba activate ci-env
+          echo "▶️ Executing notebook: ${{ matrix.notebook }}"
+          
+          # Create cell tracking file for monitoring
+          CELL_TRACKER="/tmp/current_cell_info.txt"
+          echo "Initialization" > "$CELL_TRACKER"
+          
+          # Start background system monitoring with cell tracking
+          echo "� Starting system resource monitoring with cell-level tracking..."
+          (
+            while true; do
+              # Disk usage monitoring
+              df_output=$(df -h . 2>/dev/null | tail -1)
+              used_space=$(echo "$df_output" | awk '{print $3}')
+              available_space=$(echo "$df_output" | awk '{print $4}')
+              disk_usage_percent=$(echo "$df_output" | awk '{print $5}' | sed 's/%//')
+              total_space=$(echo "$df_output" | awk '{print $2}')
+              
+              # CPU usage monitoring (1-second average)
+              cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' || echo "N/A")
+              if [ "$cpu_usage" = "N/A" ]; then
+                # Fallback method using /proc/stat
+                cpu_usage=$(awk '/^cpu / {usage=($2+$4)*100/($2+$3+$4+$5)} END {printf "%.1f", usage}' /proc/stat 2>/dev/null || echo "N/A")
+              fi
+              
+              # Memory usage monitoring
+              mem_info=$(free | grep '^Mem:')
+              mem_total=$(echo "$mem_info" | awk '{print $2}')
+              mem_used=$(echo "$mem_info" | awk '{print $3}')
+              mem_usage_percent=$(echo "$mem_info" | awk '{printf "%.1f", ($3/$2)*100}')
+              
+              # Load average
+              load_avg=$(uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//' || echo "N/A")
+              
+              # Get current cell information if available
+              current_cell="Unknown"
+              if [ -f "$CELL_TRACKER" ]; then
+                current_cell=$(cat "$CELL_TRACKER" 2>/dev/null || echo "Unknown")
+              fi
+              
+              echo "� [$(date '+%H:%M:%S')] System Resources (Current: $current_cell):"
+              echo "  💽 Disk: ${disk_usage_percent}% (${used_space}/${total_space} used, ${available_space} available)"
+              echo "  🖥️  CPU: ${cpu_usage}% (Load: ${load_avg})"
+              echo "  🧠 Memory: ${mem_usage_percent}% ($(echo $mem_used | awk '{printf "%.1fG", $1/1024/1024}')G/$(echo $mem_total | awk '{printf "%.1fG", $1/1024/1024}')G used)"
+              
+              # Alert if resource usage is high - now includes current cell info
+              if [ "$disk_usage_percent" -gt 85 ]; then
+                echo "⚠️ WARNING: Disk usage is ${disk_usage_percent}% during execution of: $current_cell"
+                echo "   📍 Resource limit approaching - consider optimizing cell or splitting workload"
+              elif [ "$disk_usage_percent" -gt 95 ]; then
+                echo "🚨 CRITICAL: Disk usage is ${disk_usage_percent}% during execution of: $current_cell"
+                echo "   📍 Execution may fail - immediate attention required for this cell"
+              fi
+              
+              # CPU usage alerts with cell context
+              if [ "$cpu_usage" != "N/A" ]; then
+                cpu_num=$(echo "$cpu_usage" | cut -d'.' -f1)
+                if [ "$cpu_num" -gt 90 ]; then
+                  echo "🚨 CRITICAL: CPU usage is ${cpu_usage}% during execution of: $current_cell"
+                  echo "   📍 System overloaded - this cell may be computationally intensive"
+                elif [ "$cpu_num" -gt 75 ]; then
+                  echo "⚠️ WARNING: CPU usage is ${cpu_usage}% during execution of: $current_cell"
+                  echo "   📍 High system load detected - monitor this cell for optimization"
+                fi
+              fi
+              
+              # Memory usage alerts with cell context
+              mem_num=$(echo "$mem_usage_percent" | cut -d'.' -f1)
+              if [ "$mem_num" -gt 90 ]; then
+                echo "🚨 CRITICAL: Memory usage is ${mem_usage_percent}% during execution of: $current_cell"
+                echo "   📍 OOM risk - this cell may have memory leaks or excessive data loading"
+              elif [ "$mem_num" -gt 80 ]; then
+                echo "⚠️ WARNING: Memory usage is ${mem_usage_percent}% during execution of: $current_cell"
+                echo "   📍 Approaching memory limits - review data handling in this cell"
+              fi
+              
+              sleep 5
+            done
+          ) &
+          
+          # Store the monitoring process PID
+          MONITOR_PID=$!
+          echo "📊 System monitoring started (PID: $MONITOR_PID)"
+          
+          # Create a custom nbconvert script with cell tracking
+          cat > /tmp/execute_with_tracking.py << 'EOF'
+          import nbformat
+          import sys
+          import os
+          import subprocess
+          from nbconvert.preprocessors import ExecutePreprocessor
+          from nbconvert import NotebookExporter
+          import time
+          
+          def update_cell_tracker(cell_info):
+              """Update the cell tracker file with current execution info"""
+              try:
+                  with open('/tmp/current_cell_info.txt', 'w') as f:
+                      f.write(cell_info)
+              except:
+                  pass  # Ignore errors to not interrupt execution
+          
+          def execute_notebook_with_tracking(notebook_path):
+              # Convert to absolute path and verify file exists
+              if not os.path.isabs(notebook_path):
+                  notebook_path = os.path.abspath(notebook_path)
+              
+              if not os.path.exists(notebook_path):
+                  error_msg = f"Notebook file not found: {notebook_path}"
+                  update_cell_tracker(f"ERROR: {error_msg}")
+                  print(f"❌ {error_msg}")
+                  print(f"🔍 Current working directory: {os.getcwd()}")
+                  print(f"📁 Directory contents:")
+                  try:
+                      for item in os.listdir('.'):
+                          print(f"  - {item}")
+                  except:
+                      print("  Could not list directory contents")
+                  sys.exit(1)
+              
+              print(f"📝 Reading notebook: {notebook_path}")
+              
+              # Read the notebook
+              with open(notebook_path, 'r', encoding='utf-8') as f:
+                  nb = nbformat.read(f, as_version=4)
+              
+              # Set working directory to notebook directory for proper imports
+              notebook_dir = os.path.dirname(notebook_path)
+              
+              # Use the standard approach: execute the entire notebook but with cell tracking
+              ep = ExecutePreprocessor(kernel_name='python3', timeout=None)
+              
+              update_cell_tracker("Starting notebook execution")
+              
+              total_cells = len([cell for cell in nb.cells if cell.cell_type == 'code'])
+              print(f"📊 Found {total_cells} code cells to execute")
+              
+              # Override the preprocess method to add cell tracking
+              original_preprocess_cell = ep.preprocess_cell
+              current_cell_num = 0
+              
+              def tracked_preprocess_cell(cell, resources, cell_index):
+                  nonlocal current_cell_num
+                  
+                  if cell.cell_type == 'code':
+                      current_cell_num += 1
+                      
+                      # Extract cell info for tracking
+                      cell_source = cell.source[:100].replace('\n', ' ').replace('\r', '') if cell.source else "Empty cell"
+                      cell_info = f"Cell {current_cell_num}/{total_cells} (Index {cell_index + 1}): {cell_source}..."
+                      
+                      update_cell_tracker(cell_info)
+                      print(f"🔍 Executing: {cell_info}")
+                  
+                  # Call the original preprocess_cell method
+                  return original_preprocess_cell(cell, resources, cell_index)
+              
+              # Replace the method with our tracked version
+              ep.preprocess_cell = tracked_preprocess_cell
+              
+              try:
+                  # Execute the entire notebook (with our cell tracking wrapper)
+                  ep.preprocess(nb, {'metadata': {'path': notebook_dir}})
+                  update_cell_tracker("Execution completed successfully")
+              except Exception as e:
+                  error_info = f"ERROR during execution: {str(e)[:100]}"
+                  update_cell_tracker(error_info)
+                  print(f"❌ Execution failed: {e}")
+                  raise
+              
+              # Save the executed notebook
+              with open(notebook_path, 'w', encoding='utf-8') as f:
+                  nbformat.write(nb, f)
+              
+              print(f"✅ Successfully executed {total_cells} code cells")
+          
+          if __name__ == "__main__":
+              if len(sys.argv) != 2:
+                  print("Usage: python execute_with_tracking.py <notebook_path>")
+                  sys.exit(1)
+              
+              notebook_path = sys.argv[1]
+              execute_notebook_with_tracking(notebook_path)
+          EOF
+          
+          # Execute notebook with cell tracking
+          echo "🚀 Starting notebook execution with cell-level tracking..."
+          python /tmp/execute_with_tracking.py "${{ matrix.notebook }}" &
+          EXECUTION_PID=$!
+          
+          # Wait for notebook execution to complete
+          wait $EXECUTION_PID
+          EXECUTION_EXIT_CODE=$?
+          
+          # Stop system monitoring
+          kill $MONITOR_PID 2>/dev/null || true
+          echo "📊 System monitoring stopped"
+          
+          # Clean up temporary files
+          rm -f /tmp/execute_with_tracking.py
+          rm -f "$CELL_TRACKER"
+          
+          # Report final system usage
+          final_df=$(df -h . 2>/dev/null | tail -1)
+          final_disk_usage=$(echo "$final_df" | awk '{print $5}')
+          final_disk_available=$(echo "$final_df" | awk '{print $4}')
+          final_cpu=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' || awk '/^cpu / {usage=($2+$4)*100/($2+$3+$4+$5)} END {printf "%.1f", usage}' /proc/stat 2>/dev/null || echo "N/A")
+          final_mem=$(free | grep '^Mem:' | awk '{printf "%.1f%%", ($3/$2)*100}')
+          
+          echo "� Final system resources:"
+          echo "  💽 Disk: $final_disk_usage ($final_disk_available available)"
+          echo "  🖥️  CPU: ${final_cpu}%"
+          echo "  🧠 Memory: $final_mem"
+          
+          # Exit with the same code as notebook execution
+          if [ $EXECUTION_EXIT_CODE -ne 0 ]; then
+            echo "❌ Notebook execution failed with exit code: $EXECUTION_EXIT_CODE"
+            exit $EXECUTION_EXIT_CODE
+          else
+            echo "✅ Notebook execution completed successfully"
+          fi
+
+      - name: Store executed notebook to gh-storage
+        if: |
+          inputs.enable-storage == true && 
+          steps.deprecation-check.outputs.deprecated != 'true' &&
+          success() && 
+          (inputs.execution-mode != 'pr' || inputs.execution-mode == 'merge' || inputs.execution-mode == 'on-demand' || inputs.trigger-event == 'execute')
+        run: |
+          echo "💾 Storing executed notebook to gh-storage with retry logic"
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          
+          notebook="${{ matrix.notebook }}"
+          
+          # Function to handle atomic git operations with retry logic
+          # This function ONLY touches the specified notebook file and leaves all other files untouched
+          push_notebook_atomic() {
+            local notebook_path="$1"
+            local commit_message="$2"
+            local max_retries=5
+            local retry_count=0
+            local base_delay=2
+            
+            echo "📝 Atomic storage: Will only modify $notebook_path, leaving all other files untouched"
+            
+            while [ $retry_count -lt $max_retries ]; do
+              echo "🔄 Attempt $((retry_count + 1))/$max_retries to store $notebook_path"
+              
+              # Add random jitter to reduce collision probability
+              local jitter=$(( RANDOM % 3 + 1 ))
+              local delay=$(( base_delay * (retry_count + 1) + jitter ))
+              
+              if [ $retry_count -gt 0 ]; then
+                echo "⏱️ Waiting ${delay}s before retry (attempt $((retry_count + 1)))"
+                sleep $delay
+              fi
+              
+              # Start fresh each time to avoid state issues
+              echo "� Fetching latest gh-storage state..."
+              if ! git fetch origin gh-storage; then
+                echo "⚠️ Failed to fetch gh-storage, continuing with local state"
+              fi
+              
+              # Reset to latest remote state
+              if git ls-remote --exit-code origin gh-storage >/dev/null 2>&1; then
+                git reset --hard origin/gh-storage
+                echo "✅ Reset to latest gh-storage state (preserving all existing files)"
+              fi
+              
+              # Apply ONLY our single notebook change (preserve everything else)
+              echo "📁 Creating directory structure for: $(dirname "$notebook_path")"
+              mkdir -p "$(dirname "$notebook_path")"
+              
+              echo "📋 Copying ONLY the executed notebook: $notebook_path"
+              cp "/tmp/executed_$(basename "$notebook_path")" "$notebook_path"
+              
+              # Stage ONLY this specific notebook file
+              git add "$notebook_path"
+              
+              # Verify we're only changing the one file we intend to
+              staged_files=$(git diff --cached --name-only | wc -l)
+              if [ "$staged_files" -ne 1 ]; then
+                echo "⚠️ Warning: Expected to stage 1 file, but staged $staged_files files"
+                echo "Staged files:"
+                git diff --cached --name-only
+              else
+                echo "✅ Confirmed: Only staging the target notebook file"
+              fi
+              
+              # Check if there are changes to commit
+              if git diff --cached --quiet; then
+                echo "ℹ️ No changes detected in $notebook_path, storage operation complete"
+                return 0
+              fi
+              
+              # Commit ONLY the changes to this notebook (all other files untouched)
+              if git commit -m "$commit_message"; then
+                echo "✅ Committed changes for $notebook_path (all other files preserved)"
+                
+                # Try to push
+                if git push origin gh-storage; then
+                  echo "🚀 Successfully stored $notebook_path to gh-storage on attempt $((retry_count + 1))"
+                  echo "📦 All other files in gh-storage remain untouched"
+                  return 0
+                else
+                  echo "⚠️ Push failed on attempt $((retry_count + 1)), will retry..."
+                  # Reset the commit to try again
+                  git reset --soft HEAD~1
+                fi
+              else
+                echo "⚠️ Commit failed on attempt $((retry_count + 1))"
+              fi
+              
+              retry_count=$((retry_count + 1))
+            done
+            
+            echo "❌ Failed to store $notebook_path after $max_retries attempts"
+            return 1
+          }
+          
+          # Main execution logic
+          if [ "${{ inputs.execution-mode }}" = "pr" ]; then
+            echo "🔄 PR mode: Force-pushing ONLY the executed notebook to gh-storage"
+            commit_msg="Update executed notebook $notebook from PR #${{ github.event.number }} [skip ci]"
+          else
+            echo "🔄 Merge/Execute mode: Adding notebook to gh-storage"
+            commit_msg="Update executed notebook $notebook [skip ci]"
+          fi
+          
+          # Store current state
+          current_branch=$(git branch --show-current)
+          echo "📍 Current branch: $current_branch"
+          
+          # Create a backup copy of the executed notebook BEFORE any branch operations
+          temp_notebook="/tmp/executed_$(basename "$notebook")"
+          cp "$notebook" "$temp_notebook"
+          echo "📋 Backed up executed notebook to: $temp_notebook"
+          
+          # Stash the executed notebook changes to allow clean branch switch
+          git add "$notebook"
+          git stash push -m "Temporary stash of executed notebook for gh-storage" -- "$notebook" || echo "⚠️ Stash failed, continuing..."
+          echo "📦 Stashed executed notebook changes for clean branch switch"
+          
+          # Switch to gh-storage branch (create if doesn't exist)
+          if git ls-remote --exit-code origin gh-storage >/dev/null 2>&1; then
+            echo "📦 Using existing gh-storage branch"
+            git fetch origin gh-storage
+            git checkout gh-storage || git checkout -B gh-storage origin/gh-storage
+          else
+            echo "🆕 Creating new gh-storage branch"
+            git checkout --orphan gh-storage
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+          
+          # Call the atomic push function with retry logic
+          if push_notebook_atomic "$notebook" "$commit_msg"; then
+            echo "✅ Successfully stored notebook to gh-storage"
+            exit_code=0
+          else
+            echo "❌ Failed to store notebook after all retry attempts"
+            exit_code=1
+          fi
+          
+          # Clean up backup file and return to original branch
+          rm -f "$temp_notebook"
+          
+          # Return to original branch (handle empty branch name)
+          if [ -n "$current_branch" ]; then
+            git checkout "$current_branch" || echo "⚠️ Failed to return to $current_branch"
+            echo "🔄 Returned to original branch: $current_branch"
+          else
+            # Fallback to default branch if current_branch is empty
+            git checkout "${{ github.ref_name }}" || git checkout main || git checkout master || echo "⚠️ Failed to return to original branch"
+            echo "🔄 Returned to default branch (current_branch was empty)"
+          fi
+          
+          # Clean up stash if it exists
+          if git stash list | grep -q "Temporary stash of executed notebook for gh-storage"; then
+            git stash drop || echo "⚠️ Failed to clean up stash"
+            echo "🧹 Cleaned up temporary stash"
+          fi
+          
+          # Exit with the result of the push operation
+          exit $exit_code
+
+      - name: Record execution result
+        if: always()
+        run: |
+          # Record the result for this notebook
+          notebook="${{ matrix.notebook }}"
+          result="${{ job.status }}"
+          
+          echo "📊 Recording result for $notebook: $result"
+          
+          # Show final system resource usage
+          echo "💽 Final System Resources:"
+          df -h / 2>/dev/null | head -2 || echo "❌ Failed to get root disk info"
+          df -h . 2>/dev/null | tail -1 | awk '{printf "  Workspace: %s used / %s total (%s available) - %s\n", $3, $2, $4, $5}' || echo "❌ Failed to get workspace disk info"
+          echo "  Memory: $(free -h 2>/dev/null | grep '^Mem:' | awk '{printf \"%s used / %s total (%.1f%% used)\", $3, $2, ($3/$2)*100}' || echo 'N/A')"
+          
+          # Show largest directories that might be consuming space
+          echo "📂 Largest directories in workspace:"
+          du -sh ./* 2>/dev/null | sort -hr | head -5 || echo "  No data available"
+          echo "📂 Temporary files usage:"
+          du -sh /tmp/* 2>/dev/null | sort -hr | head -3 || echo "  No large temp files"
+          
+          # Check for common space-consuming patterns
+          echo "🔍 Space usage analysis:"
+          echo "  Jupyter cache: $(du -sh ~/.jupyter 2>/dev/null | cut -f1 || echo 'N/A')"
+          echo "  Conda cache: $(du -sh ~/.conda 2>/dev/null | cut -f1 || echo 'N/A')" 
+          echo "  Pip cache: $(du -sh ~/.cache/pip 2>/dev/null | cut -f1 || echo 'N/A')"
+          echo "  Docker (if any): $(du -sh /var/lib/docker 2>/dev/null | cut -f1 || echo 'N/A')"
+          
+          # Create a results directory if it doesn't exist
+          mkdir -p /tmp/notebook-results
+          
+          # Write result to a file
+          echo "$notebook:$result" >> /tmp/notebook-results/execution-results.txt
+          
+          # Also create individual result files for easier parsing
+          if [ "$result" = "success" ]; then
+            echo "$notebook" >> /tmp/notebook-results/successful.txt
+          else
+            echo "$notebook" >> /tmp/notebook-results/failed.txt
+          fi
+
+      - name: Collect execution results
+        id: collect-results
+        if: always()
+        run: |
+          # This will run after all matrix jobs complete
+          # We'll collect results from the artifact system in the summary job instead
+          echo "results=pending" >> $GITHUB_OUTPUT
+          echo "total=1" >> $GITHUB_OUTPUT
+          echo "successful=0" >> $GITHUB_OUTPUT  
+          echo "failed=0" >> $GITHUB_OUTPUT
+
+  # HTML Documentation Build
+  build-documentation:
+    needs: [setup-matrix, process-notebooks, store-non-notebook-files]
+    if: |
+      always() && 
+      inputs.enable-html-build == true &&
+      (needs.setup-matrix.outputs.docs-only == 'true' || 
+       inputs.execution-mode == 'merge' ||
+       inputs.trigger-event == 'html' ||
+       (inputs.execution-mode == 'on-demand' && (needs.process-notebooks.result == 'success' || needs.process-notebooks.result == 'failure')) ||
+       (needs.process-notebooks.result == 'success' && inputs.execution-mode != 'merge'))
+    runs-on: ubuntu-24.04
+    outputs:
+      fetched-doc-files: ${{ steps.fetch-docs.outputs.doc-files }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ (inputs.execution-mode == 'merge' || inputs.trigger-event == 'html') && 'gh-storage' || github.ref }}
+          fetch-depth: 0
+          
+      - name: Fetch executed notebooks from gh-storage
+        id: fetch-docs
+        if: always() && inputs.enable-html-build == true
+        run: |
+          echo "📦 Fetching executed notebooks from gh-storage branch"
+          git fetch origin gh-storage
+          git checkout gh-storage
+          echo "✅ Switched to gh-storage branch with executed notebooks"
+          
+          # Fetch essential configuration files and targeted documentation from main branch
+          echo "🔄 Fetching documentation files from main branch based on _toc.yml"
+          
+          # Fetch the main branch first
+          git fetch origin main
+          
+          # First, get essential JupyterBook configuration files from main
+          echo "📋 Fetching JupyterBook configuration files..."
+          git checkout origin/main -- _config.yml 2>/dev/null || echo "ℹ️ No _config.yml in main"
+          git checkout origin/main -- _toc.yml 2>/dev/null || echo "ℹ️ No _toc.yml in main"
+          
+          # Parse _toc.yml to get specific documentation files needed
+          echo "📖 Parsing _toc.yml to identify required documentation files"
+          
+          # Create a Python script to safely parse _toc.yml and extract only .md/.html files
+          python3 -c "
+          import yaml
+          import os
+          import sys
+
+          def extract_doc_files_from_toc(toc_data, files_list, path=[]):
+              if isinstance(toc_data, dict):
+                  if 'file' in toc_data:
+                      file_path = toc_data['file']
+                      # Only include files with explicit .md or .html extensions
+                      # Skip entries without extensions (they're likely directories or notebook refs)
+                      if file_path.endswith(('.md', '.html')):
+                          files_list.append(file_path)
+                  for key, value in toc_data.items():
+                      if key not in ['file']:
+                          extract_doc_files_from_toc(value, files_list, path + [key])
+              elif isinstance(toc_data, list):
+                  for item in toc_data:
+                      extract_doc_files_from_toc(item, files_list, path)
+
+          try:
+              with open('_toc.yml', 'r', encoding='utf-8') as f:
+                  toc = yaml.safe_load(f)
+              files_to_fetch = []
+              extract_doc_files_from_toc(toc, files_to_fetch)
+              files_to_fetch = sorted(list(set(files_to_fetch)))
+              for file_path in files_to_fetch:
+                  print(file_path)
+          except Exception as e:
+              print(f'Error parsing _toc.yml: {e}', file=sys.stderr)
+              sys.exit(1)
+          " > toc_files.txt 2>/dev/null || echo "" > toc_files.txt
+          
+          # Parse _toc.yml and get list of documentation files to fetch
+          if [ -f "_toc.yml" ]; then
+            echo "📖 _toc.yml found, parsing for documentation file references..."
+            
+            # Get list of .md/.html files referenced in _toc.yml from the output file
+            DOC_FILES=$(cat toc_files.txt 2>/dev/null | tr '\n' '\n' || echo "")
+            
+            # Initialize arrays for tracking
+            FETCHED_FILES=""
+            FAILED_FILES=""
+            
+            if [ -n "$DOC_FILES" ]; then
+              echo "📄 Fetching specific documentation files from main branch (preserving executed notebooks):"
+              
+              # Fetch each documentation file individually from main branch
+              while IFS= read -r doc_file; do
+                if [ -n "$doc_file" ]; then
+                  echo "  📝 Fetching: $doc_file"
+                  
+                  # Create directory structure if needed
+                  mkdir -p "$(dirname "$doc_file")" 2>/dev/null || true
+                  
+                  # Try to fetch the file, with fallback extensions if no extension provided
+                  FETCHED=false
+                  ACTUAL_FILE=""
+                  
+                  # First, try the exact path as specified in _toc.yml
+                  if git show "origin/main:$doc_file" > "$doc_file" 2>/dev/null; then
+                    echo "    ✅ Successfully fetched: $doc_file"
+                    FETCHED=true
+                    ACTUAL_FILE="$doc_file"
+                  else
+                    # If file has no extension, try common extensions
+                    if [[ "$doc_file" != *.* ]]; then
+                      echo "    🔍 File not found, trying with extensions..."
+                      
+                      # Try .md extension
+                      if git show "origin/main:${doc_file}.md" > "$doc_file" 2>/dev/null; then
+                        echo "    ✅ Successfully fetched: ${doc_file}.md → $doc_file"
+                        FETCHED=true
+                        ACTUAL_FILE="${doc_file}.md"
+                      # Try .html extension
+                      elif git show "origin/main:${doc_file}.html" > "$doc_file" 2>/dev/null; then
+                        echo "    ✅ Successfully fetched: ${doc_file}.html → $doc_file"
+                        FETCHED=true
+                        ACTUAL_FILE="${doc_file}.html"
+                      fi
+                    fi
+                  fi
+                  
+                  # Track results
+                  if [ "$FETCHED" = true ]; then
+                    if [ -z "$FETCHED_FILES" ]; then
+                      FETCHED_FILES="$ACTUAL_FILE"
+                    else
+                      FETCHED_FILES="$FETCHED_FILES,$ACTUAL_FILE"
+                    fi
+                  else
+                    echo "    ⚠️ File not found in main branch: $doc_file"
+                    if [ -z "$FAILED_FILES" ]; then
+                      FAILED_FILES="$doc_file"
+                    else
+                      FAILED_FILES="$FAILED_FILES,$doc_file"
+                    fi
+                  fi
+                fi
+              done <<< "$DOC_FILES"
+              
+              echo "✅ Documentation files from _toc.yml successfully fetched from main branch"
+            else
+              echo "⚠️ No documentation files found in _toc.yml or parsing failed"
+            fi
+            
+            # Create JSON output for workflow summary
+            if [ -n "$FETCHED_FILES" ]; then
+              FETCHED_JSON=$(echo "$FETCHED_FILES" | tr ',' '\n' | jq -R . | jq -s -c .)
+            else
+              FETCHED_JSON="[]"
+            fi
+            
+            if [ -n "$FAILED_FILES" ]; then
+              FAILED_JSON=$(echo "$FAILED_FILES" | tr ',' '\n' | jq -R . | jq -s -c .)
+            else
+              FAILED_JSON="[]"
+            fi
+            
+            # Output for workflow summary
+            echo "doc-files={\"fetched\":$FETCHED_JSON,\"failed\":$FAILED_JSON}" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ No _toc.yml found - skipping documentation file fetch"
+          fi
+          
+          # Clean up temporary files
+          rm -f toc_files.txt
+          
+          echo "✅ Documentation files fetched from main branch (executed notebooks preserved)"
+          echo "📋 Current working directory contents:"
+          find . -name "*.html" -o -name "*.md" -o -name "_*.yml" -o -name "*.ipynb" | head -10
+          
+      - name: Add failure warnings to notebooks
+        if: inputs.execution-mode == 'on-demand' && needs.process-notebooks.result == 'failure'
+        run: |
+          echo "⚠️ Adding failure warnings to notebooks that may have failed execution"
+          
+          # Get the list of notebooks that were processed
+          NOTEBOOKS='${{ needs.setup-matrix.outputs.matrix-notebooks }}'
+
+          # Build a set of notebooks that actually failed execution, based on
+          # execution results recorded by the process-notebooks job.
+          FAILED_NOTEBOOKS_FILE="/tmp/notebook-results/failed.txt"
+          declare -A FAILED_SET
+
+          if [ -f "$FAILED_NOTEBOOKS_FILE" ]; then
+            echo "📊 Loading failed notebook list from $FAILED_NOTEBOOKS_FILE"
+            while IFS= read -r failed_nb; do
+              if [ -n "$failed_nb" ]; then
+                FAILED_SET["$failed_nb"]=1
+              fi
+            done < "$FAILED_NOTEBOOKS_FILE"
+          else
+            echo "ℹ️ No failed notebook list found; skipping failure banner injection"
+          fi
+
+          if [ "${#FAILED_SET[@]}" -eq 0 ]; then
+            echo "ℹ️ No failed notebooks recorded; no execution warnings will be added"
+            exit 0
+          fi
+
+          if [ "$NOTEBOOKS" != "[]" ] && [ "$NOTEBOOKS" != "null" ] && [ "$NOTEBOOKS" != "" ]; then
+            echo "$NOTEBOOKS" | jq -r '.[]' 2>/dev/null | while read -r notebook; do
+              # Only add a warning for notebooks that actually failed
+              if [ -z "${FAILED_SET[$notebook]}" ]; then
+                echo "ℹ️ Notebook executed successfully, skipping warning banner: $notebook"
+                continue
+              fi
+
+              if [ -f "$notebook" ]; then
+                echo "🔧 Adding warning banner to failed notebook: $notebook"
+
+                # Create a temporary Python script to add the warning banner
+                cat > add_warning.py << 'EOF'
+          import json
+          import sys
+          
+          notebook_path = sys.argv[1]
+          
+          try:
+              with open(notebook_path, 'r', encoding='utf-8') as f:
+                  nb = json.load(f)
+              
+              # Create warning banner cell
+              warning_cell = {
+                  "cell_type": "markdown",
+                  "metadata": {
+                      "tags": ["execution-warning"]
+                  },
+                  "source": [
+                      "<div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 15px; margin: 10px 0; border-left: 4px solid #f39c12;'>\n",
+                      "<h3 style='color: #856404; margin-top: 0;'>⚠️ EXECUTION WARNING</h3>\n",
+                      "<p style='color: #856404; margin-bottom: 0;'><strong>This notebook may not execute properly in the current environment.</strong></p>\n",
+                      "<p style='color: #856404; margin-bottom: 0;'>Some cells may have failed during automated testing. Please review the notebook content and test manually before use.</p>\n",
+                      "<p style='color: #856404; margin-bottom: 0; font-size: 0.9em;'><em>Generated during CI/CD pipeline - some outputs may be incomplete or missing.</em></p>\n",
+                      "</div>\n"
+                  ]
+              }
+              
+              # Check if warning already exists
+              has_warning = False
+              for cell in nb.get('cells', []):
+                  if cell.get('cell_type') == 'markdown' and 'tags' in cell.get('metadata', {}):
+                      if 'execution-warning' in cell['metadata']['tags']:
+                          has_warning = True
+                          break
+              
+              # Add warning at the beginning if not already present
+              if not has_warning:
+                  nb['cells'].insert(0, warning_cell)
+                  
+                  with open(notebook_path, 'w', encoding='utf-8') as f:
+                      json.dump(nb, f, indent=2, ensure_ascii=False)
+                  
+                  print(f"✅ Added execution warning to {notebook_path}")
+              else:
+                  print(f"ℹ️ Warning already exists in {notebook_path}")
+                  
+          except Exception as e:
+              print(f"❌ Error processing {notebook_path}: {e}")
+          EOF
+                
+                # Run the Python script to add warning
+                python add_warning.py "$notebook"
+                rm -f add_warning.py
+              else
+                echo "⚠️ Notebook not found: $notebook"
+              fi
+            done
+          else
+            echo "ℹ️ No notebooks to process for warnings"
+          fi
+
+      - name: Add deprecation warnings to notebooks
+        run: |
+          echo "🏷️ Checking for deprecated notebooks and adding deprecation warnings"
+          
+          # Find all notebooks in the current directory
+          find . -name "*.ipynb" -type f | while read -r notebook; do
+            if [ -f "$notebook" ]; then
+              echo "🔍 Checking for deprecation in: $notebook"
+              
+              # Create a temporary Python script to check and add deprecation warnings
+              cat > add_deprecation_warning.py << 'EOF'
+          import json
+          import sys
+          from datetime import datetime
+          import re
+          
+          notebook_path = sys.argv[1]
+          
+          try:
+              with open(notebook_path, 'r', encoding='utf-8') as f:
+                  nb = json.load(f)
+              
+              # Check if notebook has deprecation metadata using only the structured field
+              is_deprecated = False
+              deprecation_date = None
+              has_existing_warning = False
+              
+              # Check if deprecation warning banner already exists (to avoid duplicates)
+              for cell in nb.get('cells', []):
+                  if cell.get('cell_type') == 'markdown' and 'tags' in cell.get('metadata', {}):
+                      if 'deprecation-warning' in cell['metadata']['tags']:
+                          # Already has a deprecation warning, don't add another
+                          has_existing_warning = True
+                          print(f"ℹ️ Deprecation warning already exists in {notebook_path}")
+                          break
+              
+              # Only check notebook metadata for the 'deprecated' field
+              # This is the field set by the workflow's manual deprecation process
+              if not has_existing_warning and 'metadata' in nb:
+                  nb_metadata = nb['metadata']
+                  if 'deprecated' in nb_metadata:
+                      is_deprecated = True
+                      if isinstance(nb_metadata['deprecated'], dict):
+                          deprecation_date = nb_metadata['deprecated'].get('date')
+                      elif isinstance(nb_metadata['deprecated'], str):
+                          # Try to parse as date
+                          if re.match(r'\d{4}-\d{2}-\d{2}', nb_metadata['deprecated']):
+                              deprecation_date = nb_metadata['deprecated']
+              
+              if is_deprecated:
+                  print(f"📅 Found deprecated notebook: {notebook_path}")
+                  
+                  # Create deprecation warning banner
+                  if not deprecation_date:
+                      deprecation_date = "unspecified date"
+                      date_text = "This notebook is deprecated and may be removed in the future."
+                  else:
+                      try:
+                          dep_date = datetime.strptime(deprecation_date, '%Y-%m-%d')
+                          if dep_date <= datetime.now():
+                              date_text = f"This notebook was deprecated on <strong>{deprecation_date}</strong> and may be moved or removed."
+                          else:
+                              date_text = f"This notebook is scheduled for deprecation on <strong>{deprecation_date}</strong>."
+                      except:
+                          date_text = f"This notebook is deprecated (target date: {deprecation_date})."
+                  
+                  deprecation_warning_cell = {
+                      "cell_type": "markdown",
+                      "metadata": {
+                          "tags": ["deprecation-warning"]
+                      },
+                      "source": [
+                          "<div style='background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; padding: 15px; margin: 10px 0; border-left: 4px solid #dc3545;'>\n",
+                          "<h3 style='color: #721c24; margin-top: 0;'>🚨 DEPRECATED NOTEBOOK</h3>\n",
+                          f"<p style='color: #721c24; margin-bottom: 5px;'><strong>{date_text}</strong></p>\n",
+                          "<p style='color: #721c24; margin-bottom: 0;'>Please migrate to newer alternatives or contact maintainers before using this notebook in production.</p>\n",
+                          "<p style='color: #721c24; margin-bottom: 0; font-size: 0.9em;'><em>This warning was automatically generated during documentation build.</em></p>\n",
+                          "</div>\n"
+                      ]
+                  }
+                  
+                  # Check if deprecation warning already exists
+                  has_deprecation_warning = False
+                  for cell in nb.get('cells', []):
+                      if cell.get('cell_type') == 'markdown' and 'tags' in cell.get('metadata', {}):
+                          if 'deprecation-warning' in cell['metadata']['tags']:
+                              has_deprecation_warning = True
+                              break
+                  
+                  # Add deprecation warning at the beginning if not already present
+                  if not has_deprecation_warning:
+                      nb['cells'].insert(0, deprecation_warning_cell)
+                      
+                      with open(notebook_path, 'w', encoding='utf-8') as f:
+                          json.dump(nb, f, indent=2, ensure_ascii=False)
+                      
+                      print(f"✅ Added deprecation warning to {notebook_path}")
+                  else:
+                      print(f"ℹ️ Deprecation warning already exists in {notebook_path}")
+              else:
+                  print(f"✅ No deprecation found in {notebook_path}")
+                  
+          except Exception as e:
+              print(f"❌ Error processing {notebook_path}: {e}")
+          EOF
+              
+              # Run the deprecation check and warning addition
+              python add_deprecation_warning.py "$notebook"
+              rm -f add_deprecation_warning.py
+            fi
+          done
+          
+          echo "✅ Deprecation warning check completed"
+          
+      - name: Set up Python environment with micromamba
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-name: docs-env
+          init-shell: bash
+          create-args: "python=${{ inputs.python-version }} pip jupyter-book sphinx"
+          cache-environment: false
+
+      - name: Setup Node.js (required for jupyter-book v2.x)
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          
+      - name: Install documentation dependencies
+        run: |
+          eval "$(micromamba shell hook --shell bash)"
+          micromamba activate docs-env
+          echo "📚 Installing documentation dependencies"
+          # Pin to v1.x for now to avoid v2.x breaking changes and Node.js requirements
+          pip install "jupyter-book<2.0" sphinx
+          
+      - name: Build JupyterBook documentation
+        run: |
+          eval "$(micromamba shell hook --shell bash)"
+          micromamba activate docs-env
+          echo "📖 Building JupyterBook documentation"
+          
+          # Verify _config.yml has only_build_toc_files setting
+          if [ -f "_config.yml" ]; then
+            echo "🔍 Checking _config.yml for only_build_toc_files setting:"
+            grep "only_build_toc_files" _config.yml || echo "⚠️ only_build_toc_files not found in _config.yml"
+          fi
+          
+          # Show what files exist before build
+          echo "📁 Current working directory: $(pwd)"
+          echo "📁 Files present before build:"
+          echo "  _toc.yml exists: $([ -f '_toc.yml' ] && echo 'yes' || echo 'no')"
+          echo "  _config.yml exists: $([ -f '_config.yml' ] && echo 'yes' || echo 'no')"
+          echo "  notebooks/ exists: $([ -d 'notebooks' ] && echo 'yes' || echo 'no')"
+          echo "📁 Top-level directory contents:"
+          ls -la | head -20
+          
+          # Check for any unusual files or symlinks that might confuse JupyterBook
+          echo "🔍 Checking for potential issues:"
+          echo "  Symlinks in root:"
+          find . -maxdepth 1 -type l -ls || echo "  None found"
+          echo "  Files/dirs named same as repo:"
+          ls -la notebook-ci-testing 2>/dev/null || echo "  None found"
+          
+          # Clean any existing build directory
+          rm -rf _build
+          
+          # Build the documentation
+          echo "🔨 Starting JupyterBook build..."
+          echo "which jupyter-book: $(which jupyter-book || true)"
+          echo "jupyter-book version: $(jupyter-book --version 2>&1 || true)"
+          echo "python: $(python --version)"
+          python -m pip show jupyter-book || true
+          
+          # Use v1.x command syntax (we pinned to v1.x in installation)
+          echo "Command: jupyter-book build ."
+          jupyter-book build . 2>&1 | tee build.log
+          BUILD_EXIT_CODE=$?
+          
+          echo ""
+          echo "📊 Build results:"
+          echo "  Build exit code: $BUILD_EXIT_CODE"
+          echo "  _build/html exists: $([ -d '_build/html' ] && echo 'yes' || echo 'no')"
+          if [ -d '_build/html' ]; then
+            echo "  HTML files generated: $(find _build/html -name '*.html' | wc -l)"
+            echo "  Notebook HTML files: $(find _build/html/notebooks -name '*.html' 2>/dev/null | wc -l)"
+          fi
+          
+          # If build failed, show log tail
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo ""
+            echo "⚠️ Build failed with exit code $BUILD_EXIT_CODE"
+            echo "Last 80 lines of build.log:"
+            tail -n 80 build.log || true
+          fi
+          
+          echo "✅ JupyterBook documentation build completed"
+          
+      - name: Run post-processing script
+        if: inputs.post-processing-script != ''
+        run: |
+          eval "$(micromamba shell hook --shell bash)"
+          micromamba activate docs-env
+          echo "🔧 Running post-processing script: ${{ inputs.post-processing-script }}"
+          if [ -f "${{ inputs.post-processing-script }}" ]; then
+            chmod +x "${{ inputs.post-processing-script }}"
+            "${{ inputs.post-processing-script }}"
+            echo "✅ Post-processing completed"
+          else
+            echo "⚠️ Post-processing script not found: ${{ inputs.post-processing-script }}"
+          fi
+
+      - name: Deploy to GitHub Pages
+        if: inputs.execution-mode == 'merge' || inputs.trigger-event == 'html' || inputs.trigger-event == 'all'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_build/html
+          cname: ${{ vars.PAGES_CNAME || '' }}
+          commit_message: "Deploy documentation from executed notebooks [skip ci]"
+
+  # Deprecation Management
+  manage-deprecation:
+    needs: setup-matrix
+    if: inputs.trigger-event == 'deprecate' || inputs.execution-mode == 'scheduled'
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          
+      - name: Install GitHub CLI
+        if: inputs.trigger-event == 'deprecate'
+        run: |
+          sudo apt-get update
+          sudo apt-get install gh -y
+          echo "✅ GitHub CLI installed"
+          
+      - name: Tag notebook for deprecation
+        if: inputs.trigger-event == 'deprecate' && inputs.single-notebook != ''
+        run: |
+          input_notebook="${{ inputs.single-notebook }}"
+          deprecation_date=$(date -d "+${{ inputs.deprecation-days }} days" +%Y-%m-%d)
+          
+          echo "🏷️ Tagging notebook for deprecation: $input_notebook"
+          echo "📅 Deprecation date: $deprecation_date"
+          
+          # Use path discovery logic like in setup-matrix
+          if [[ "$input_notebook" == *"/"* ]]; then
+            # Full path provided
+            notebook="$input_notebook"
+            echo "📁 Full path provided: $notebook"
+          else
+            # Just filename provided - find the full path
+            echo "🔍 Filename only provided, searching for: $input_notebook"
+            notebook=$(find notebooks/ -name "$input_notebook" -type f | head -1)
+            if [ -z "$notebook" ]; then
+              echo "❌ Notebook not found: $input_notebook"
+              echo "📂 Available notebooks:"
+              find notebooks/ -name '*.ipynb' | head -10
+              echo "💡 Tip: Provide either the filename or full path relative to repository root"
+              exit 1
+            fi
+            echo "✅ Found notebook at: $notebook"
+          fi
+          
+          # Final check that the resolved notebook exists
+          if [ ! -f "$notebook" ]; then
+            echo "❌ Error: Resolved notebook file not found: $notebook"
+            exit 1
+          fi
+          
+          # Create a deprecation branch
+          deprecation_branch="deprecate-$(basename "$notebook" .ipynb)-$(date +%Y%m%d-%H%M%S)"
+          echo "🌿 Creating deprecation branch: $deprecation_branch"
+          git checkout -b "$deprecation_branch"
+          
+          # Add deprecation metadata to notebook
+          python3 << EOF
+          import json
+          import sys
+          from datetime import datetime, timedelta
+          
+          notebook_path = "$notebook"
+          days = ${{ inputs.deprecation-days }}
+          
+          # Verify file exists before processing
+          import os
+          if not os.path.exists(notebook_path):
+              print(f"❌ Error: File not found: {notebook_path}")
+              sys.exit(1)
+          
+          with open(notebook_path, 'r') as f:
+              nb = json.load(f)
+          
+          deprecation_date = (datetime.now() + timedelta(days=days)).strftime('%Y-%m-%d')
+          
+          # Add deprecation metadata to notebook
+          if 'metadata' not in nb:
+              nb['metadata'] = {}
+          
+          nb['metadata']['deprecated'] = {
+              'status': 'deprecated',
+              'date': deprecation_date,
+              'message': f'This notebook is scheduled for deprecation on {deprecation_date}'
+          }
+          
+          # Add a deprecation tag cell for backward compatibility
+          deprecation_cell = {
+              "cell_type": "markdown",
+              "metadata": {
+                  "tags": ["deprecated"],
+                  "deprecation": {
+                      "date": deprecation_date,
+                      "status": "deprecated"
+                  }
+              },
+              "source": [
+                  f"<!-- DEPRECATED: This notebook is scheduled for deprecation on {deprecation_date} -->\n"
+              ]
+          }
+          
+          # Insert at the beginning
+          nb['cells'].insert(0, deprecation_cell)
+          
+          with open(notebook_path, 'w') as f:
+              json.dump(nb, f, indent=2)
+          
+          print(f"✅ Added deprecation metadata to {notebook_path}")
+          EOF
+          
+          # Commit the changes to the deprecation branch
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add "$notebook"
+          git commit -m "Mark notebook as deprecated: $notebook
+
+          This notebook is scheduled for deprecation on $deprecation_date.
+          
+          - Added deprecation metadata to notebook
+          - Added deprecation tag cell
+          - Requires team review before merging
+          
+          Closes #deprecation-request"
+          
+          # Push the deprecation branch
+          git push origin "$deprecation_branch"
+          echo "✅ Pushed deprecation branch: $deprecation_branch"
+          
+          # Create a Pull Request using GitHub CLI
+          pr_title="Deprecate notebook: $(basename "$notebook")"
+          pr_body="## 📋 Deprecation Request
+
+          **Notebook**: \`$notebook\`  
+          **Scheduled Deprecation Date**: $deprecation_date  
+          **Days until deprecation**: ${{ inputs.deprecation-days }}
+
+          ### Changes Made:
+          - ✅ Added deprecation metadata to notebook metadata
+          - ✅ Added deprecation tag cell at the beginning of the notebook
+          - ✅ Notebook will show deprecation warnings when rendered
+
+          ### Next Steps:
+          1. **Review** this deprecation request
+          2. **Merge** this PR to finalize the deprecation
+          3. **Automatic** HTML documentation will be rebuilt on merge
+          4. **GitHub Pages** will be updated with deprecation warnings
+
+          ### Notes:
+          - This notebook will continue to work but will show deprecation warnings
+          - On the scheduled date, automated processes may remove or archive the notebook
+          - Users will be directed to alternative notebooks or resources
+
+          **Please review and approve if this deprecation is appropriate.**"
+
+          # Create the PR (requires GITHUB_TOKEN with proper permissions)
+          echo "🔄 Creating Pull Request for deprecation..."
+          
+          # First, create the PR without labels to avoid label errors
+          pr_url=$(gh pr create \
+            --title "$pr_title" \
+            --body "$pr_body" \
+            --base main \
+            --head "$deprecation_branch" 2>&1)
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ Created Pull Request for notebook deprecation"
+            echo "🔗 PR URL: $pr_url"
+            
+            # Try to add labels if they exist (non-blocking - wrapped in subshell to prevent script exit)
+            (
+              echo "🏷️ Attempting to add labels..."
+              
+              # Check what labels exist first
+              echo "📋 Checking available repository labels..."
+              AVAILABLE_LABELS=$(gh label list --json name --jq '.[].name' 2>/dev/null | tr '\n' ',' || echo "")
+              echo "Available labels: $AVAILABLE_LABELS"
+              
+              # Try adding each label individually with better error handling
+              for label in "deprecation" "documentation"; do
+                if echo "$AVAILABLE_LABELS" | grep -q "$label"; then
+                  if gh pr edit "$deprecation_branch" --add-label "$label" 2>/dev/null; then
+                    echo "✅ Added '$label' label"
+                  else
+                    echo "⚠️ Failed to add '$label' label (but continuing)"
+                  fi
+                else
+                  echo "ℹ️ Label '$label' not found in repository - skipping"
+                fi
+              done
+              
+              echo "✅ Label assignment completed (PR created successfully regardless of labels)"
+            ) || echo "⚠️ Label assignment section failed, but PR was created successfully"
+          else
+            echo "❌ Failed to create Pull Request: $pr_url"
+            exit 1
+          fi
+          
+          # Store deprecated notebook to gh-storage for immediate documentation update
+          echo "📦 Storing deprecated notebook to gh-storage for documentation preview"
+          
+          # Create a backup copy of the deprecated notebook
+          temp_notebook="/tmp/deprecated_$(basename "$notebook")"
+          cp "$notebook" "$temp_notebook"
+          echo "📋 Backed up deprecated notebook to: $temp_notebook"
+          
+          # Switch to gh-storage branch
+          if git ls-remote --exit-code origin gh-storage >/dev/null 2>&1; then
+            echo "📦 Using existing gh-storage branch"
+            git fetch origin gh-storage
+            git checkout gh-storage
+          else
+            echo "🆕 Creating new gh-storage branch"
+            git checkout --orphan gh-storage
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+          
+          # Create directory structure and copy the deprecated notebook from backup
+          echo "📁 Setting up directory: $(dirname "$notebook")"
+          mkdir -p "$(dirname "$notebook")"
+          cp "$temp_notebook" "$notebook"
+          echo "📋 Copied deprecated notebook from backup: $notebook"
+          
+          # Stage and commit the deprecated notebook to gh-storage
+          git add "$notebook"
+          if git diff --cached --quiet; then
+            echo "ℹ️ No changes detected in $notebook on gh-storage"
+          else
+            echo "✅ Changes detected, committing deprecated notebook to gh-storage"
+            git commit -m "Update deprecated notebook $notebook for documentation preview [skip ci]"
+            
+            # Try regular push first, then pull-rebase-push if conflicts
+            if git push origin gh-storage; then
+              echo "🚀 Successfully pushed deprecated notebook to gh-storage"
+            else
+              echo "⚠️ Push failed due to conflicts, attempting rebase..."
+              git pull --rebase origin gh-storage
+              git push origin gh-storage
+              echo "🚀 Successfully pushed deprecated notebook to gh-storage after rebase"
+            fi
+          fi
+          
+          # Clean up backup file and return to deprecation branch
+          rm -f "$temp_notebook"
+          git checkout "$deprecation_branch"
+          echo "🔄 Returned to deprecation branch: $deprecation_branch"
+          echo "✅ Deprecated notebook stored to gh-storage and PR created"
+          echo ""
+          echo "📝 Summary:"
+          echo "  - Deprecation branch created: $deprecation_branch"
+          echo "  - Pull Request created for team review"
+          echo "  - Notebook stored to gh-storage for documentation preview"
+          echo "  - HTML documentation will be rebuilt automatically on PR merge"
+
+      - name: Check for expired deprecations
+        if: inputs.execution-mode == 'scheduled'
+        run: |
+          echo "🔍 Checking for expired deprecated notebooks"
+          
+          # Find deprecated notebooks
+          python3 << 'EOF'
+          import json
+          import os
+          import subprocess
+          from datetime import datetime
+          from pathlib import Path
+          
+          def check_notebook_deprecation(notebook_path):
+              with open(notebook_path, 'r') as f:
+                  nb = json.load(f)
+              
+              # Only check the structured metadata field set by the workflow
+              if 'metadata' in nb and 'deprecated' in nb.get('metadata', {}):
+                  deprecated_info = nb['metadata']['deprecated']
+                  # Extract the deprecation date from the metadata
+                  if isinstance(deprecated_info, dict) and 'date' in deprecated_info:
+                      dep_date_str = deprecated_info['date']
+                      try:
+                          dep_date = datetime.strptime(dep_date_str, '%Y-%m-%d')
+                          # Check if the deprecation date has passed
+                          if dep_date <= datetime.now():
+                              return True, dep_date
+                      except ValueError:
+                          pass  # Invalid date format, skip this notebook
+              
+              return False, None
+          
+          deprecated_notebooks = []
+          
+          for notebook in Path('notebooks').rglob('*.ipynb'):
+              is_expired, dep_date = check_notebook_deprecation(notebook)
+              if is_expired:
+                  deprecated_notebooks.append(str(notebook))
+                  print(f"Found expired deprecated notebook: {notebook} (expired: {dep_date})")
+          
+          if deprecated_notebooks:
+              # Create deprecated branch if it doesn't exist
+              subprocess.run(['git', 'fetch', 'origin', 'deprecated'], capture_output=True)
+              result = subprocess.run(['git', 'checkout', 'deprecated'], capture_output=True)
+              if result.returncode != 0:
+                  subprocess.run(['git', 'checkout', '--orphan', 'deprecated'])
+                  subprocess.run(['git', 'rm', '-rf', '.'])
+              
+              # Copy deprecated notebooks
+              subprocess.run(['git', 'checkout', 'main'])
+              for notebook in deprecated_notebooks:
+                  subprocess.run(['git', 'checkout', 'deprecated'])
+                  subprocess.run(['mkdir', '-p', os.path.dirname(notebook)])
+                  subprocess.run(['git', 'checkout', 'main', '--', notebook])
+                  subprocess.run(['git', 'add', notebook])
+              
+              # Commit to deprecated branch
+              subprocess.run(['git', 'commit', '-m', f'Move {len(deprecated_notebooks)} expired notebooks to deprecated branch'])
+              subprocess.run(['git', 'push', 'origin', 'deprecated'])
+              
+              # Remove from main branch
+              subprocess.run(['git', 'checkout', 'main'])
+              for notebook in deprecated_notebooks:
+                  subprocess.run(['git', 'rm', notebook])
+              
+              subprocess.run(['git', 'commit', '-m', f'Remove {len(deprecated_notebooks)} deprecated notebooks from main'])
+              subprocess.run(['git', 'push', 'origin', 'main'])
+              
+              print(f"Moved {len(deprecated_notebooks)} notebooks to deprecated branch")
+          else:
+              print("No expired deprecated notebooks found")
+          EOF
+
+  # Summary and Status
+  workflow-summary:
+    needs: [setup-matrix, process-notebooks, store-non-notebook-files, build-documentation, manage-deprecation]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          
+      - name: Generate workflow summary
+        run: |
+          echo "## 📊 Unified Notebook CI/CD Summary" >> $GITHUB_STEP_SUMMARY
+          echo "*Generated: $(date -u +'%Y-%m-%d %H:%M:%S UTC')*" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 🔧 Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- **Execution Mode**: ${{ inputs.execution-mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger Event**: ${{ inputs.trigger-event }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Python Version**: ${{ inputs.python-version }}" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ inputs.conda-environment }}" ]; then
+            echo "- **Custom Conda Environment**: ${{ inputs.conda-environment }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -n "${{ inputs.custom-requirements }}" ]; then
+            echo "- **Custom Requirements**: ${{ inputs.custom-requirements }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -n "${{ inputs.single-notebook }}" ]; then
+            echo "- **Single Notebook Target**: \`${{ inputs.single-notebook }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 📊 Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status | Duration |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Matrix Setup | ${{ needs.setup-matrix.result }} | - |" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.execution-mode }}" != "merge" ] && [ "${{ inputs.trigger-event }}" != "deprecate" ]; then
+            echo "| Notebook Processing | ${{ needs.process-notebooks.result }} | - |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ inputs.trigger-event }}" = "deprecate" ]; then
+            echo "| Notebook Processing | Skipped (deprecation mode) | - |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Notebook Processing | Skipped (merge mode) | - |" >> $GITHUB_STEP_SUMMARY
+          fi
+          # Show non-notebook file storage job only if it ran (merge mode only)
+          if [ "${{ needs.store-non-notebook-files.result }}" != "skipped" ]; then
+            echo "| Non-Notebook File Storage | ${{ needs.store-non-notebook-files.result }} | - |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "| Documentation Build | ${{ needs.build-documentation.result }} | - |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deprecation Management | ${{ needs.manage-deprecation.result }} | - |" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.trigger-event }}" = "deprecate" ] && [ "${{ inputs.execution-mode }}" = "on-demand" ]; then
+            echo "| Documentation Rebuild | ${{ needs.rebuild-docs-after-deprecation.result }} | - |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 📝 Execution Details" >> $GITHUB_STEP_SUMMARY
+          
+          # Get the notebooks that were processed (with proper JSON quoting)
+          NOTEBOOKS='${{ needs.setup-matrix.outputs.matrix-notebooks }}'
+          AFFECTED_DIRS='${{ needs.setup-matrix.outputs.affected-dirs }}'
+          
+          # Better notebook count logic with robust error handling
+          if [ "$NOTEBOOKS" = "null" ] || [ "$NOTEBOOKS" = "" ] || [ "$NOTEBOOKS" = "[]" ]; then
+            NOTEBOOK_COUNT=0
+          else
+            # Try to get count, fallback to 0 if parsing fails
+            NOTEBOOK_COUNT=$(echo "$NOTEBOOKS" | jq -r 'length' 2>/dev/null || echo "0")
+            if [ "$NOTEBOOK_COUNT" = "null" ] || [ -z "$NOTEBOOK_COUNT" ]; then
+              NOTEBOOK_COUNT=0
+            fi
+          fi
+          
+          # Show what directories were affected (only if there are any)
+          if [ "$AFFECTED_DIRS" != "[]" ] && [ "$AFFECTED_DIRS" != "null" ] && [ "$AFFECTED_DIRS" != "" ]; then
+            echo "**📁 Affected Directories:**" >> $GITHUB_STEP_SUMMARY
+            echo "$AFFECTED_DIRS" | jq -r '.[]' 2>/dev/null | while read -r dir; do
+              echo "- \`$dir\`" >> $GITHUB_STEP_SUMMARY
+            done || echo "- Could not parse affected directories" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Determine what actually happened based on job results rather than just notebook count
+          PROCESS_RESULT="${{ needs.process-notebooks.result }}"
+          
+          if [ "${{ needs.setup-matrix.outputs.docs-only }}" = "true" ]; then
+            echo "**📖 Documentation-Only Build**" >> $GITHUB_STEP_SUMMARY
+            echo "- No notebooks executed - documentation built from existing executed notebooks" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.setup-matrix.outputs.skip-execution }}" = "true" ]; then
+            echo "**⏭️ Execution Skipped**" >> $GITHUB_STEP_SUMMARY
+            echo "- No notebook processing performed (skip execution flag enabled)" >> $GITHUB_STEP_SUMMARY
+          elif [ "$PROCESS_RESULT" = "skipped" ] && [ "${{ inputs.execution-mode }}" = "merge" ]; then
+            echo "**� Merge Mode**" >> $GITHUB_STEP_SUMMARY
+            echo "- Notebook processing skipped in merge mode (using pre-executed notebooks)" >> $GITHUB_STEP_SUMMARY
+          elif [ "$PROCESS_RESULT" = "success" ] || [ "$PROCESS_RESULT" = "failure" ]; then
+            # We know notebooks were processed because the job ran
+            echo "**🚀 Notebook Processing Results**" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$NOTEBOOK_COUNT" -gt 0 ]; then
+              echo "- **Total Notebooks**: $NOTEBOOK_COUNT" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- **Notebooks Processed**: Job completed (count unavailable)" >> $GITHUB_STEP_SUMMARY
+            fi
+            
+            # Show what was actually done based on trigger event
+            case "${{ inputs.trigger-event }}" in
+              "validate")
+                echo "- **Operation**: Notebook validation" >> $GITHUB_STEP_SUMMARY
+                ;;
+              "execute")
+                echo "- **Operation**: Notebook execution" >> $GITHUB_STEP_SUMMARY
+                ;;
+              "security")
+                echo "- **Operation**: Security scanning" >> $GITHUB_STEP_SUMMARY
+                ;;
+              "all")
+                echo "- **Operation**: Full pipeline (validation, execution, security)" >> $GITHUB_STEP_SUMMARY
+                ;;
+              "html")
+                echo "- **Operation**: Documentation build" >> $GITHUB_STEP_SUMMARY
+                ;;
+              "deprecate")
+                echo "- **Operation**: Deprecation management" >> $GITHUB_STEP_SUMMARY
+                if [ "${{ inputs.execution-mode }}" = "on-demand" ] && [ "${{ needs.rebuild-docs-after-deprecation.result }}" = "success" ]; then
+                  echo "- **Documentation**: ✅ Automatically rebuilt and deployed with deprecation warnings" >> $GITHUB_STEP_SUMMARY
+                elif [ "${{ inputs.execution-mode }}" = "on-demand" ]; then
+                  echo "- **Documentation**: ⚠️ Rebuild was attempted but may have failed" >> $GITHUB_STEP_SUMMARY
+                fi
+                ;;
+              *)
+                echo "- **Operation**: Notebook processing" >> $GITHUB_STEP_SUMMARY
+                ;;
+            esac
+            
+            # Show result
+            if [ "$PROCESS_RESULT" = "success" ]; then
+              echo "- **Status**: ✅ SUCCESS - All operations completed without errors" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- **Status**: ❌ FAILURE - Some operations failed" >> $GITHUB_STEP_SUMMARY
+              if [ "${{ inputs.execution-mode }}" = "on-demand" ] && [ "${{ needs.build-documentation.result }}" = "success" ]; then
+                echo "- **Documentation**: ⚠️ Generated with warnings - failed notebooks marked with execution warnings" >> $GITHUB_STEP_SUMMARY
+              fi
+            fi
+            
+            # Add note about deprecation warnings in documentation
+            if [ "${{ needs.build-documentation.result }}" = "success" ]; then
+              echo "- **Documentation Warnings**: Deprecated notebooks automatically marked with deprecation banners" >> $GITHUB_STEP_SUMMARY
+            fi
+            
+            # List specific notebooks if we can parse them
+            if [ "$NOTEBOOK_COUNT" -gt 0 ] && [ "$NOTEBOOKS" != "[]" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**📄 Processed Notebooks:**" >> $GITHUB_STEP_SUMMARY
+              if [ "$NOTEBOOK_COUNT" = "1" ]; then
+                SINGLE_NOTEBOOK=$(echo "$NOTEBOOKS" | jq -r '.[0]' 2>/dev/null)
+                if [ "$SINGLE_NOTEBOOK" != "null" ] && [ -n "$SINGLE_NOTEBOOK" ]; then
+                  echo "- \`$SINGLE_NOTEBOOK\`" >> $GITHUB_STEP_SUMMARY
+                fi
+              else
+                echo "$NOTEBOOKS" | jq -r '.[]' 2>/dev/null | while read -r notebook; do
+                  if [ -n "$notebook" ] && [ "$notebook" != "null" ]; then
+                    echo "- \`$notebook\`" >> $GITHUB_STEP_SUMMARY
+                  fi
+                done
+              fi
+            fi
+          else
+            echo "**📋 No Processing Performed**" >> $GITHUB_STEP_SUMMARY
+            echo "- No notebooks matched selection criteria or processing was not required" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Show documentation files that were fetched from main branch
+          if [ "${{ needs.build-documentation.result }}" = "success" ]; then
+            DOC_FILES_INFO='${{ needs.build-documentation.outputs.fetched-doc-files }}'
+            
+            if [ -n "$DOC_FILES_INFO" ] && [ "$DOC_FILES_INFO" != "null" ]; then
+              echo "**📚 Documentation Files Updated**" >> $GITHUB_STEP_SUMMARY
+              
+              # Parse the fetched files JSON
+              FETCHED_FILES=$(echo "$DOC_FILES_INFO" | jq -r '.fetched[]?' 2>/dev/null || echo "")
+              FAILED_FILES=$(echo "$DOC_FILES_INFO" | jq -r '.failed[]?' 2>/dev/null || echo "")
+              
+              if [ -n "$FETCHED_FILES" ]; then
+                echo "- **Files fetched from main branch:**" >> $GITHUB_STEP_SUMMARY
+                echo "$FETCHED_FILES" | while IFS= read -r file; do
+                  if [ -n "$file" ] && [ "$file" != "null" ]; then
+                    echo "  - \`$file\`" >> $GITHUB_STEP_SUMMARY
+                  fi
+                done
+              fi
+              
+              if [ -n "$FAILED_FILES" ]; then
+                echo "- **Files not found in main branch:**" >> $GITHUB_STEP_SUMMARY
+                echo "$FAILED_FILES" | while IFS= read -r file; do
+                  if [ -n "$file" ] && [ "$file" != "null" ]; then
+                    echo "  - \`$file\` ⚠️" >> $GITHUB_STEP_SUMMARY
+                  fi
+                done
+              fi
+              
+              echo "- **Note**: Documentation files from _toc.yml were updated from main branch while preserving executed notebooks" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add error reporting section if there were failures
+          if [ "${{ needs.setup-matrix.result }}" = "failure" ] || [ "${{ needs.process-notebooks.result }}" = "failure" ] || [ "${{ needs.build-documentation.result }}" = "failure" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🚨 Error Information" >> $GITHUB_STEP_SUMMARY
+            echo "One or more jobs failed. Check the following:" >> $GITHUB_STEP_SUMMARY
+            echo "1. **Job Logs**: Click on the failed job(s) above to see detailed error messages" >> $GITHUB_STEP_SUMMARY
+            echo "2. **Common Issues**:" >> $GITHUB_STEP_SUMMARY
+            echo "   - Missing dependencies in requirements.txt" >> $GITHUB_STEP_SUMMARY
+            echo "   - Notebook execution errors (infinite loops, missing data, etc.)" >> $GITHUB_STEP_SUMMARY
+            echo "   - Environment setup issues" >> $GITHUB_STEP_SUMMARY
+            echo "   - Security vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+            echo "3. **Debugging**: Use on-demand mode to test specific notebooks individually" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Add final status indicator
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Determine overall workflow status
+          SETUP_RESULT="${{ needs.setup-matrix.result }}"
+          PROCESS_RESULT="${{ needs.process-notebooks.result }}"
+          BUILD_RESULT="${{ needs.build-documentation.result }}"
+          DEPRECATION_RESULT="${{ needs.manage-deprecation.result }}"
+          
+          # Count successful and failed jobs
+          SUCCESS_COUNT=0
+          FAILURE_COUNT=0
+          
+          # Check each job result
+          for result in "$SETUP_RESULT" "$PROCESS_RESULT" "$BUILD_RESULT" "$DEPRECATION_RESULT"; do
+            case "$result" in
+              "success") SUCCESS_COUNT=$((SUCCESS_COUNT + 1)) ;;
+              "failure") FAILURE_COUNT=$((FAILURE_COUNT + 1)) ;;
+              "skipped") ;; # Don't count skipped jobs as failures
+              "cancelled") FAILURE_COUNT=$((FAILURE_COUNT + 1)) ;;
+            esac
+          done
+          
+          # Special handling for process-notebooks in merge mode
+          if [ "${{ inputs.execution-mode }}" = "merge" ] && [ "$PROCESS_RESULT" = "skipped" ]; then
+            echo "**Note**: Notebook processing was intentionally skipped in merge mode" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "$FAILURE_COUNT" -eq 0 ]; then
+            echo "## 🎉 Workflow completed successfully!" >> $GITHUB_STEP_SUMMARY
+            echo "*All required jobs completed without errors*" >> $GITHUB_STEP_SUMMARY
+          elif [ "$SUCCESS_COUNT" -gt 0 ]; then
+            echo "## ⚠️ Workflow completed with partial success" >> $GITHUB_STEP_SUMMARY
+            echo "*Some jobs succeeded but $FAILURE_COUNT job(s) failed - see error details above*" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Workflow failed" >> $GITHUB_STEP_SUMMARY
+            echo "*Multiple critical failures occurred - see error details above*" >> $GITHUB_STEP_SUMMARY
+          fi

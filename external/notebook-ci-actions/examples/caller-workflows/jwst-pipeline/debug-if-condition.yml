@@ -1,0 +1,50 @@
+name: Debug If Condition
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-setup:
+    runs-on: ubuntu-24.04
+    outputs:
+      skip-execution: "false"
+      matrix-notebooks: '["notebook1.ipynb","notebook2.ipynb"]'
+    steps:
+      - name: Setup test outputs
+        run: |
+          echo "skip-execution=false" >> $GITHUB_OUTPUT
+          echo 'matrix-notebooks=["notebook1.ipynb","notebook2.ipynb"]' >> $GITHUB_OUTPUT
+          
+  debug-conditions:
+    needs: test-setup
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Debug all condition values
+        run: |
+          echo "🔍 Debugging conditional values:"
+          echo "  needs.test-setup.outputs.skip-execution: '${{ needs.test-setup.outputs.skip-execution }}'"
+          echo "  needs.test-setup.outputs.matrix-notebooks: '${{ needs.test-setup.outputs.matrix-notebooks }}'"
+          echo "  Default execution-mode (pr): 'pr'"
+          echo "  Default trigger-event (all): 'all'"
+          echo ""
+          echo "🧪 Testing each condition:"
+          echo "  skip-execution != 'true': ${{ needs.test-setup.outputs.skip-execution != 'true' }}"
+          echo "  matrix-notebooks != '[]': ${{ needs.test-setup.outputs.matrix-notebooks != '[]' }}"
+          echo "  execution-mode != 'merge': ${{ 'pr' != 'merge' }}"
+          echo "  trigger-event != 'deprecate': ${{ 'all' != 'deprecate' }}"
+          echo ""
+          echo "📊 Combined condition should be:"
+          RESULT=${{ needs.test-setup.outputs.skip-execution != 'true' && needs.test-setup.outputs.matrix-notebooks != '[]' && 'pr' != 'merge' && 'all' != 'deprecate' }}
+          echo "  Final result: $RESULT"
+          
+  test-conditional-job:
+    needs: test-setup
+    if: |
+      needs.test-setup.outputs.skip-execution != 'true' && 
+      needs.test-setup.outputs.matrix-notebooks != '[]' &&
+      'pr' != 'merge' &&
+      'all' != 'deprecate'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: This job should run
+        run: echo "✅ Conditional job is running!"

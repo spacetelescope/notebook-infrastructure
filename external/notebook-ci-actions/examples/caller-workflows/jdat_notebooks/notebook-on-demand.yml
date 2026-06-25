@@ -1,0 +1,91 @@
+# On-demand workflow for jdat_notebooks repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - On Demand
+
+on:
+  workflow_dispatch:
+    inputs:
+      action_type:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - 'validate-all'
+          - 'execute-all'
+          - 'security-scan-all'
+          - 'validate-single'
+          - 'execute-single'
+          - 'full-pipeline-all'
+          - 'full-pipeline-single'
+          - 'build-html-only'
+          - 'deprecate-notebook'
+        default: 'validate-all'
+      
+      single_notebook:
+        description: 'Single notebook path (for single-notebook actions)'
+        required: false
+        type: string
+        
+      python_version:
+        description: 'Python version'
+        required: false
+        type: string
+        default: '3.11'
+        
+      conda_environment:
+        description: 'Custom conda environment (optional)'
+        required: false
+        type: string
+        default: 'hstcal'
+        
+      deprecation_days:
+        description: 'Days until deprecation (for deprecate action)'
+        required: false
+        type: string
+        default: '60'
+        
+      enable_debug:
+        description: 'Enable debug logging'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2
+    with:
+      # Required: execution mode
+      execution-mode: 'on-demand'
+      trigger-event: ${{ 
+        inputs.action_type == 'validate-all' && 'validate' ||
+        inputs.action_type == 'validate-single' && 'validate' ||
+        inputs.action_type == 'execute-all' && 'execute' ||
+        inputs.action_type == 'execute-single' && 'execute' ||
+        inputs.action_type == 'security-scan-all' && 'security' ||
+        inputs.action_type == 'build-html-only' && 'html' ||
+        inputs.action_type == 'deprecate-notebook' && 'deprecate' ||
+        inputs.action_type == 'full-pipeline-all' && 'all' ||
+        inputs.action_type == 'full-pipeline-single' && 'all' ||
+        'validate'
+      }}
+      
+      # Optional: target specific notebook
+      single-notebook: ${{ contains(inputs.action_type, 'single') && inputs.single_notebook || '' }}
+      
+      # Environment Configuration  
+      python-version: ${{ inputs.python_version }}
+      conda-environment: ${{ inputs.conda_environment }}
+      custom-requirements: 'requirements.txt'
+      
+      # Deprecation settings
+      deprecation-days: ${{ inputs.deprecation_days }}
+      
+      # Feature flags based on action type
+      enable-validation: ${{ contains(inputs.action_type, 'validate') || contains(inputs.action_type, 'full-pipeline') }}
+      enable-security: ${{ contains(inputs.action_type, 'security') || contains(inputs.action_type, 'full-pipeline') }}
+      enable-execution: ${{ contains(inputs.action_type, 'execute') || contains(inputs.action_type, 'full-pipeline') }}
+      enable-storage: ${{ contains(inputs.action_type, 'execute') || contains(inputs.action_type, 'full-pipeline') }}
+      enable-html-build: ${{ contains(inputs.action_type, 'html') || contains(inputs.action_type, 'full-pipeline') }}
+      
+    secrets: inherit

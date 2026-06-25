@@ -1,0 +1,68 @@
+# Notebook PR Validation for JWST Pipeline Notebooks
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook PR - JWST Pipeline
+
+on:
+  # Run on pull requests to main branch
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'notebooks/**'
+      - 'requirements.txt'
+      - 'ci_config.txt'
+      - '.github/workflows/**'
+
+  # Allow manual triggering for testing
+  workflow_dispatch:
+    inputs:
+      execution_mode:
+        description: 'Execution mode'
+        required: false
+        default: 'cache_only'
+        type: choice
+        options:
+          - cache_only
+          - force_execute
+          - collect_only
+      notebook_pattern:
+        description: 'Notebook pattern (optional)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  validate-notebooks:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Execution Configuration
+      execution-mode: 'pr'
+      
+      # Repository Configuration
+      python-version: '3.11'
+      conda-environment: 'stenv'  # STScI environment for JWST pipeline
+      custom-requirements: ''
+      
+      # Notebook Selection
+      single-notebook: ''
+      affected-directories: '[]'
+      
+      # Feature Configuration - Optimized for PR validation
+      enable-validation: true      # Always validate notebooks
+      enable-security: true        # Check for security issues
+      enable-execution: true       # Execute notebooks to catch runtime errors
+      enable-storage: true         # Store results for comparison
+      enable-html-build: false     # Skip docs build for PRs (faster feedback)
+      
+      # Custom Runner Configuration
+      custom-runner-config: true   # Use ci_config.txt for runner selection
+      
+      # Post-processing
+      post-processing-script: ''
+      
+      # Deprecation (not used in PR mode)
+      deprecation-days: 60
+      
+    secrets:
+      CASJOBS_USERID: ${{ secrets.CASJOBS_USERID }}
+      CASJOBS_PW: ${{ secrets.CASJOBS_PW }}

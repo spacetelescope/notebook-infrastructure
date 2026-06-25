@@ -1,0 +1,24 @@
+name: Test Individual Runner Config
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-individual-config:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2-pipeline
+    with:
+      # Test Configuration
+      execution-mode: 'debug'
+      python-version: '3.11'
+      conda-environment: 'stenv'
+      
+      # Enable individual runner configuration
+      custom-runner-config: true
+      
+      # Minimal features for testing
+      enable-validation: true
+      enable-security: false
+      enable-execution: false
+      enable-storage: false
+      enable-html-build: false
+    secrets: inherit

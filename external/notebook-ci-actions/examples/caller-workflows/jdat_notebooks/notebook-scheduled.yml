@@ -1,0 +1,34 @@
+# Scheduled workflow for jdat_notebooks repository
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Notebook CI - Scheduled
+
+on:
+  # Run weekly on Sundays at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * 0'
+
+jobs:
+  notebook-ci:
+    uses: spacetelescope/notebook-ci-actions/.github/workflows/notebook-ci-unified.yml@dev-actions-v2
+    with:
+      # Required: execution mode
+      execution-mode: 'scheduled'
+      trigger-event: 'all'
+      
+      # Environment Configuration  
+      python-version: '3.11'
+      custom-requirements: 'requirements.txt'
+      
+      
+      # Feature flags (scheduled does everything)
+      enable-validation: true
+      enable-security: true
+      enable-execution: true
+      enable-storage: true
+      enable-html-build: true
+      
+      # Deprecation management for scheduled runs
+      deprecation-days: 60
+      
+    secrets: inherit
