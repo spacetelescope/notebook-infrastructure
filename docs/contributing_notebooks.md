@@ -228,8 +228,7 @@ Note also that these steps are slightly different for if you update a notebook a
 
 (sometimes you have to reset the upstream, so in that case it is ``git push --set-upstream origin new_notebook_branch_name``)
 
-8. When you are happy with your notebook, double check that you have satisfied the thecnical requirements of the specific status
-of your notebook (see above).
+8. When you are happy with your notebook, double check that you have satisfied the technical requirements of the specific status of your notebook (see above).
 
 9. Now you can create a Pull Request from the ``spacetelescope/<your-notebook-repo>`` repository. You do that
 by clicking on ``New pull request`` on the webpage, then the link ``compare across forks``. Then set the base repository
