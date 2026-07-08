@@ -1,6 +1,6 @@
 # Notebook CI Dashboard
 
-_Generated 2026-07-06 05:26 UTC_
+_Generated 2026-07-08 16:02 UTC_
 
 Workflow tracked: `Notebook CI - Scheduled`
 
@@ -9,7 +9,7 @@ Workflow tracked: `Notebook CI - Scheduled`
 | Repository | Latest Failures | New Failures | Resolved | Consistent Failures | Latest Run |
 |---|---:|---:|---:|---:|---|
 | `spacetelescope/hellouniverse` | 0 | 0 | 0 | 0 | [#35](https://github.com/spacetelescope/hellouniverse/actions/runs/24619741210) |
-| `spacetelescope/hst_notebooks` | 4 | 1 | 2 | 3 | [#37](https://github.com/spacetelescope/hst_notebooks/actions/runs/28727903281) |
+| `spacetelescope/hst_notebooks` | 4 | 1 | 1 | 3 | [#37](https://github.com/spacetelescope/hst_notebooks/actions/runs/28727903281) |
 | `spacetelescope/jdat_notebooks` | 7 | 3 | 0 | 4 | [#35](https://github.com/spacetelescope/jdat_notebooks/actions/runs/28727879256) |
 | `spacetelescope/jwst-pipeline-notebooks` | 0 | 0 | 0 | 0 | [#24](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/28727930274) |
 | `spacetelescope/mast_notebooks` | 3 | 0 | 0 | 3 | [#43](https://github.com/spacetelescope/mast_notebooks/actions/runs/28727954034) |
@@ -114,7 +114,7 @@ xychart-beta
 | 2026-06-14 | 4 | 0 | 1 | 4 | [#34](https://github.com/spacetelescope/hst_notebooks/actions/runs/27486943195) |
 | 2026-06-21 | 4 | 1 | 1 | 3 | [#35](https://github.com/spacetelescope/hst_notebooks/actions/runs/27892030218) |
 | 2026-06-28 | 5 | 1 | 0 | 4 | [#36](https://github.com/spacetelescope/hst_notebooks/actions/runs/28309845173) |
-| 2026-07-05 | 4 | 1 | 2 | 3 | [#37](https://github.com/spacetelescope/hst_notebooks/actions/runs/28727903281) |
+| 2026-07-05 | 4 | 1 | 1 | 3 | [#37](https://github.com/spacetelescope/hst_notebooks/actions/runs/28727903281) |
 
 ### `spacetelescope/jdat_notebooks`
 
