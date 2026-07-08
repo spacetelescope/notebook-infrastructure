@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-06T05:26:31Z",
+  "generated_at": "2026-07-08T16:02:00Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -269,30 +269,21 @@
         "fail_latest": 4,
         "pass_latest": 71,
         "total_latest": 75,
-        "fail_previous": 5,
-        "pass_previous": 70,
+        "fail_previous": 4,
+        "pass_previous": 71,
         "total_previous": 75,
         "new_failures": 1,
-        "resolved_failures": 2,
+        "resolved_failures": 1,
         "consistent_failures": 3,
-        "consistent_successes": 69
+        "consistent_successes": 70
       },
-      "recent_notebooks_60d": [
-        {
-          "notebook": "notebooks/STIS/time_tag/time_tag.ipynb",
-          "added_at": "2026-05-08",
-          "current_status": "success",
-          "latest_run_url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/28727903281",
-          "latest_run_number": 37
-        }
-      ],
+      "recent_notebooks_60d": [],
       "details": {
         "new_failures": [
           "notebooks/HASP/WavelengthAdjustment/WavelengthAdjustment.ipynb"
         ],
         "resolved_failures": [
-          "notebooks/COS/CalCOS/CalCOS.ipynb",
-          "notebooks/COS/SplitTag/SplitTag.ipynb"
+          "notebooks/COS/CalCOS/CalCOS.ipynb"
         ],
         "consistent_failures": [
           "notebooks/COS/LSF/LSF.ipynb",
@@ -329,6 +320,7 @@
           "notebooks/COS/ExceptionReport/ExceptionReport.ipynb",
           "notebooks/COS/Extract/Extract.ipynb",
           "notebooks/COS/Setup/Setup.ipynb",
+          "notebooks/COS/SplitTag/SplitTag.ipynb",
           "notebooks/COS/ViewData/ViewData.ipynb",
           "notebooks/DrizzlePac/align_mosaics/align_mosaics.ipynb",
           "notebooks/DrizzlePac/align_multiple_visits/align_multiple_visits.ipynb",
