@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-08T16:02:00Z",
+  "generated_at": "2026-07-08T16:34:19Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -164,34 +164,30 @@
     {
       "repo": "spacetelescope/jdat_notebooks",
       "latest_run": {
-        "number": 35,
-        "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/28727879256",
-        "created_at": "2026-07-05T03:12:06Z"
-      },
-      "previous_run": {
         "number": 34,
         "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/28309818810",
         "created_at": "2026-06-28T03:16:14Z"
       },
+      "previous_run": {
+        "number": 33,
+        "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/27892006796",
+        "created_at": "2026-06-21T03:18:01Z"
+      },
       "summary": {
-        "fail_latest": 7,
-        "pass_latest": 47,
+        "fail_latest": 4,
+        "pass_latest": 50,
         "total_latest": 54,
         "fail_previous": 4,
         "pass_previous": 50,
         "total_previous": 54,
-        "new_failures": 3,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 4,
-        "consistent_successes": 47
+        "consistent_successes": 50
       },
       "recent_notebooks_60d": [],
       "details": {
-        "new_failures": [
-          "notebooks/MIRI/psf_photometry/miri_1028.ipynb",
-          "notebooks/MIRI/psf_photometry/miri_spacephot.ipynb",
-          "notebooks/NIRCam/psf_photometry_with_space_phot/nircam_spacephot.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/NIRCam/psf_photometry/NIRCam_PSF_Photometry_Example.ipynb",
@@ -213,13 +209,16 @@
           "notebooks/MIRI/MIRI_IFU_YSOs_in_the_LMC/isha_nayak_ysos_in_the_lmc.ipynb",
           "notebooks/MIRI/MIRI_LRS_spectral_extraction/miri_lrs_advanced_extraction.ipynb",
           "notebooks/MIRI/MRS_Mstar_analysis/JWST_Mstar_dataAnalysis_analysis.ipynb",
+          "notebooks/MIRI/psf_photometry/miri_1028.ipynb",
           "notebooks/MIRI/psf_photometry/miri_1028_photutils.ipynb",
           "notebooks/MIRI/psf_photometry/miri_photutils.ipynb",
+          "notebooks/MIRI/psf_photometry/miri_spacephot.ipynb",
           "notebooks/NIRCam/NIRCam_claw_detection/nircam_claw_detection.ipynb",
           "notebooks/NIRCam/NIRCam_photometry/NIRCam_multiband_photometry.ipynb",
           "notebooks/NIRCam/NIRCam_wisp_subtraction/nircam_wisp_subtraction.ipynb",
           "notebooks/NIRCam/aperture_photometry/NIRCam_Aperture_Photometry_Example.ipynb",
           "notebooks/NIRCam/psf_photometry_basics/psf_photometry_basics.ipynb",
+          "notebooks/NIRCam/psf_photometry_with_space_phot/nircam_spacephot.ipynb",
           "notebooks/NIRISS/NIRISS_WFSS_advanced/00_niriss_mast_query_data_setup.ipynb",
           "notebooks/NIRISS/NIRISS_WFSS_advanced/01_niriss_wfss_image2_image3.ipynb",
           "notebooks/NIRISS/NIRISS_WFSS_advanced/extra_niriss_individual_steps.ipynb",
@@ -380,23 +379,20 @@
         "created_at": "2026-06-28T03:16:15Z"
       },
       "summary": {
-        "fail_latest": 4,
-        "pass_latest": 16,
+        "fail_latest": 2,
+        "pass_latest": 18,
         "total_latest": 20,
         "fail_previous": 2,
         "pass_previous": 18,
         "total_previous": 20,
-        "new_failures": 2,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 2,
-        "consistent_successes": 16
+        "consistent_successes": 18
       },
       "recent_notebooks_60d": [],
       "details": {
-        "new_failures": [
-          "notebooks/catalog_database_access/catalog_database_access.ipynb",
-          "notebooks/pandeia/pandeia.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/data_visualization/data_visualization.ipynb",
@@ -405,12 +401,14 @@
         "consistent_successes": [
           "notebooks/aperture_photometry/aperture_photometry.ipynb",
           "notebooks/background_visualization_tool/RBVT.ipynb",
+          "notebooks/catalog_database_access/catalog_database_access.ipynb",
           "notebooks/data_discovery_and_access/data_discovery_and_access.ipynb",
           "notebooks/exposure_pipeline/exposure_pipeline.ipynb",
           "notebooks/grism_spectral_extraction/grism_spectral_extraction.ipynb",
           "notebooks/ground_test_analysis/wfi_tvac_brightstar.ipynb",
           "notebooks/measuring_galaxy_shapes/measuring_galaxy_shapes.ipynb",
           "notebooks/mosaic_pipeline/mosaic_pipeline.ipynb",
+          "notebooks/pandeia/pandeia.ipynb",
           "notebooks/rist/rist.ipynb",
           "notebooks/roman_cutouts/roman_cutouts.ipynb",
           "notebooks/romanisim/romanisim.ipynb",

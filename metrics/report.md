@@ -1,6 +1,6 @@
 # Notebook CI – Latest vs Previous Run Comparison
 
-_Generated 2026-07-08 16:02 UTC_
+_Generated 2026-07-08 16:34 UTC_
 
 Workflow name: `Notebook CI - Scheduled`
 
@@ -10,9 +10,9 @@ Workflow name: `Notebook CI - Scheduled`
 |---|---|---|---:|---:|---:|---:|
 | `spacetelescope/hellouniverse` | [#35](https://github.com/spacetelescope/hellouniverse/actions/runs/24619741210) | [#34](https://github.com/spacetelescope/hellouniverse/actions/runs/24297475556) | 0 | 0 | 0 | 0 |
 | `spacetelescope/mast_notebooks` | [#43](https://github.com/spacetelescope/mast_notebooks/actions/runs/28727954034) | [#42](https://github.com/spacetelescope/mast_notebooks/actions/runs/28309896030) | 0 | 0 | 3 | 3 |
-| `spacetelescope/jdat_notebooks` | [#35](https://github.com/spacetelescope/jdat_notebooks/actions/runs/28727879256) | [#34](https://github.com/spacetelescope/jdat_notebooks/actions/runs/28309818810) | 3 | 0 | 4 | 7 |
+| `spacetelescope/jdat_notebooks` | [#34](https://github.com/spacetelescope/jdat_notebooks/actions/runs/28309818810) | [#33](https://github.com/spacetelescope/jdat_notebooks/actions/runs/27892006796) | 0 | 0 | 4 | 4 |
 | `spacetelescope/hst_notebooks` | [#37](https://github.com/spacetelescope/hst_notebooks/actions/runs/28727903281) | [#36](https://github.com/spacetelescope/hst_notebooks/actions/runs/28309845173) | 1 | 1 | 3 | 4 |
-| `spacetelescope/roman_notebooks` | [#33](https://github.com/spacetelescope/roman_notebooks/actions/runs/28727877968) | [#32](https://github.com/spacetelescope/roman_notebooks/actions/runs/28309819176) | 2 | 0 | 2 | 4 |
+| `spacetelescope/roman_notebooks` | [#33](https://github.com/spacetelescope/roman_notebooks/actions/runs/28727877968) | [#32](https://github.com/spacetelescope/roman_notebooks/actions/runs/28309819176) | 0 | 0 | 2 | 2 |
 | `spacetelescope/jwst-pipeline-notebooks` | [#24](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/28727930274) | [#23](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/28309871466) | 0 | 0 | 0 | 0 |
 
 ## Per-Repository Details
@@ -170,18 +170,16 @@ _No resolved failures_
 
 | | Run | Date | Pass | Fail | Total |
 |---|---|---|---|---|---|
-| **Latest** | [#35](https://github.com/spacetelescope/jdat_notebooks/actions/runs/28727879256) | 2026-07-05 | 47 | 7 | 54 |
-| **Previous** | [#34](https://github.com/spacetelescope/jdat_notebooks/actions/runs/28309818810) | 2026-06-28 | 50 | 4 | 54 |
+| **Latest** | [#34](https://github.com/spacetelescope/jdat_notebooks/actions/runs/28309818810) | 2026-06-28 | 50 | 4 | 54 |
+| **Previous** | [#33](https://github.com/spacetelescope/jdat_notebooks/actions/runs/27892006796) | 2026-06-21 | 50 | 4 | 54 |
 
-- **New failures:** 3
+- **New failures:** 0
 - **Resolved failures:** 0
 - **Consistent failures:** 4
 
-### 🔴 New Failures (3)
+### 🔴 New Failures (0)
 
-- `notebooks/MIRI/psf_photometry/miri_1028.ipynb`
-- `notebooks/MIRI/psf_photometry/miri_spacephot.ipynb`
-- `notebooks/NIRCam/psf_photometry_with_space_phot/nircam_spacephot.ipynb`
+_No new failures_ ✅
 
 ### 🟢 Resolved Failures (0)
 
@@ -194,7 +192,7 @@ _No resolved failures_
 - `notebooks/cross_instrument/rgb_imviz/imviz_rgb_carina.ipynb`
 - `notebooks/cross_instrument/stpsf_examples/stpsf_examples.ipynb`
 
-### ✅ Consistent Successes (47)
+### ✅ Consistent Successes (50)
 
 <details>
 <summary>Click to expand</summary>
@@ -212,13 +210,16 @@ _No resolved failures_
 - `notebooks/MIRI/MIRI_IFU_YSOs_in_the_LMC/isha_nayak_ysos_in_the_lmc.ipynb`
 - `notebooks/MIRI/MIRI_LRS_spectral_extraction/miri_lrs_advanced_extraction.ipynb`
 - `notebooks/MIRI/MRS_Mstar_analysis/JWST_Mstar_dataAnalysis_analysis.ipynb`
+- `notebooks/MIRI/psf_photometry/miri_1028.ipynb`
 - `notebooks/MIRI/psf_photometry/miri_1028_photutils.ipynb`
 - `notebooks/MIRI/psf_photometry/miri_photutils.ipynb`
+- `notebooks/MIRI/psf_photometry/miri_spacephot.ipynb`
 - `notebooks/NIRCam/NIRCam_claw_detection/nircam_claw_detection.ipynb`
 - `notebooks/NIRCam/NIRCam_photometry/NIRCam_multiband_photometry.ipynb`
 - `notebooks/NIRCam/NIRCam_wisp_subtraction/nircam_wisp_subtraction.ipynb`
 - `notebooks/NIRCam/aperture_photometry/NIRCam_Aperture_Photometry_Example.ipynb`
 - `notebooks/NIRCam/psf_photometry_basics/psf_photometry_basics.ipynb`
+- `notebooks/NIRCam/psf_photometry_with_space_phot/nircam_spacephot.ipynb`
 - `notebooks/NIRISS/NIRISS_WFSS_advanced/00_niriss_mast_query_data_setup.ipynb`
 - `notebooks/NIRISS/NIRISS_WFSS_advanced/01_niriss_wfss_image2_image3.ipynb`
 - `notebooks/NIRISS/NIRISS_WFSS_advanced/extra_niriss_individual_steps.ipynb`
@@ -358,17 +359,16 @@ _No resolved failures_
 
 | | Run | Date | Pass | Fail | Total |
 |---|---|---|---|---|---|
-| **Latest** | [#33](https://github.com/spacetelescope/roman_notebooks/actions/runs/28727877968) | 2026-07-05 | 16 | 4 | 20 |
+| **Latest** | [#33](https://github.com/spacetelescope/roman_notebooks/actions/runs/28727877968) | 2026-07-05 | 18 | 2 | 20 |
 | **Previous** | [#32](https://github.com/spacetelescope/roman_notebooks/actions/runs/28309819176) | 2026-06-28 | 18 | 2 | 20 |
 
-- **New failures:** 2
+- **New failures:** 0
 - **Resolved failures:** 0
 - **Consistent failures:** 2
 
-### 🔴 New Failures (2)
+### 🔴 New Failures (0)
 
-- `notebooks/catalog_database_access/catalog_database_access.ipynb`
-- `notebooks/pandeia/pandeia.ipynb`
+_No new failures_ ✅
 
 ### 🟢 Resolved Failures (0)
 
@@ -379,19 +379,21 @@ _No resolved failures_
 - `notebooks/data_visualization/data_visualization.ipynb`
 - `notebooks/footprint_visualization/footprint_visualization.ipynb`
 
-### ✅ Consistent Successes (16)
+### ✅ Consistent Successes (18)
 
 <details>
 <summary>Click to expand</summary>
 
 - `notebooks/aperture_photometry/aperture_photometry.ipynb`
 - `notebooks/background_visualization_tool/RBVT.ipynb`
+- `notebooks/catalog_database_access/catalog_database_access.ipynb`
 - `notebooks/data_discovery_and_access/data_discovery_and_access.ipynb`
 - `notebooks/exposure_pipeline/exposure_pipeline.ipynb`
 - `notebooks/grism_spectral_extraction/grism_spectral_extraction.ipynb`
 - `notebooks/ground_test_analysis/wfi_tvac_brightstar.ipynb`
 - `notebooks/measuring_galaxy_shapes/measuring_galaxy_shapes.ipynb`
 - `notebooks/mosaic_pipeline/mosaic_pipeline.ipynb`
+- `notebooks/pandeia/pandeia.ipynb`
 - `notebooks/rist/rist.ipynb`
 - `notebooks/roman_cutouts/roman_cutouts.ipynb`
 - `notebooks/romanisim/romanisim.ipynb`
