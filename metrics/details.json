@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-13T05:08:32Z",
+  "generated_at": "2026-07-13T15:28:35Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -271,16 +271,16 @@
         "created_at": "2026-07-05T03:13:12Z"
       },
       "summary": {
-        "fail_latest": 5,
-        "pass_latest": 71,
+        "fail_latest": 4,
+        "pass_latest": 72,
         "total_latest": 76,
         "fail_previous": 4,
         "pass_previous": 71,
         "total_previous": 75,
-        "new_failures": 1,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 4,
-        "consistent_successes": 70
+        "consistent_successes": 71
       },
       "recent_notebooks_60d": [
         {
@@ -292,9 +292,7 @@
         }
       ],
       "details": {
-        "new_failures": [
-          "notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/COS/LSF/LSF.ipynb",
@@ -338,6 +336,7 @@
           "notebooks/DrizzlePac/align_mosaics/align_mosaics.ipynb",
           "notebooks/DrizzlePac/align_multiple_visits/align_multiple_visits.ipynb",
           "notebooks/DrizzlePac/align_sparse_fields/align_sparse_fields.ipynb",
+          "notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb",
           "notebooks/DrizzlePac/drizzle_wfpc2/drizzle_wfpc2.ipynb",
           "notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb",
           "notebooks/DrizzlePac/optimize_image_sampling/optimize_image_sampling.ipynb",
@@ -454,22 +453,20 @@
         "created_at": "2026-07-05T03:14:26Z"
       },
       "summary": {
-        "fail_latest": 1,
-        "pass_latest": 16,
+        "fail_latest": 0,
+        "pass_latest": 17,
         "total_latest": 17,
         "fail_previous": 0,
         "pass_previous": 17,
         "total_previous": 17,
-        "new_failures": 1,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 0,
-        "consistent_successes": 16
+        "consistent_successes": 17
       },
       "recent_notebooks_60d": [],
       "details": {
-        "new_failures": [
-          "notebooks/MIRI/MRS/JWPipeNB-MIRI-MRS.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [],
         "consistent_successes": [
@@ -478,6 +475,7 @@
           "notebooks/MIRI/Imaging/JWPipeNB-MIRI-imaging.ipynb",
           "notebooks/MIRI/LRS-slit/JWPipeNB-MIRI-LRS-slit.ipynb",
           "notebooks/MIRI/LRS-slitless-TSO/JWPipeNB-MIRI-LRS-slitless-TSO.ipynb",
+          "notebooks/MIRI/MRS/JWPipeNB-MIRI-MRS.ipynb",
           "notebooks/NIRCAM/Coronagraphy/JWPipeNB-nircam-coronagraphy.ipynb",
           "notebooks/NIRCAM/Imaging/JWPipeNB-nircam-imaging.ipynb",
           "notebooks/NIRCAM/LW_Grism_Time_Series/JWPipeNB-NIRCam-LWGTS.ipynb",
