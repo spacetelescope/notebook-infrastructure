@@ -1,6 +1,6 @@
 # Notebook CI – Latest vs Previous Run Comparison
 
-_Generated 2026-07-13 05:08 UTC_
+_Generated 2026-07-13 15:28 UTC_
 
 Workflow name: `Notebook CI - Scheduled`
 
@@ -11,9 +11,9 @@ Workflow name: `Notebook CI - Scheduled`
 | `spacetelescope/hellouniverse` | [#35](https://github.com/spacetelescope/hellouniverse/actions/runs/24619741210) | [#34](https://github.com/spacetelescope/hellouniverse/actions/runs/24297475556) | 0 | 0 | 0 | 0 |
 | `spacetelescope/mast_notebooks` | [#44](https://github.com/spacetelescope/mast_notebooks/actions/runs/29177889743) | [#43](https://github.com/spacetelescope/mast_notebooks/actions/runs/28727954034) | 1 | 0 | 3 | 4 |
 | `spacetelescope/jdat_notebooks` | [#36](https://github.com/spacetelescope/jdat_notebooks/actions/runs/29177817203) | [#35](https://github.com/spacetelescope/jdat_notebooks/actions/runs/28727879256) | 0 | 0 | 7 | 7 |
-| `spacetelescope/hst_notebooks` | [#38](https://github.com/spacetelescope/hst_notebooks/actions/runs/29177842499) | [#37](https://github.com/spacetelescope/hst_notebooks/actions/runs/28727903281) | 1 | 0 | 4 | 5 |
+| `spacetelescope/hst_notebooks` | [#38](https://github.com/spacetelescope/hst_notebooks/actions/runs/29177842499) | [#37](https://github.com/spacetelescope/hst_notebooks/actions/runs/28727903281) | 0 | 0 | 4 | 4 |
 | `spacetelescope/roman_notebooks` | [#34](https://github.com/spacetelescope/roman_notebooks/actions/runs/29177816450) | [#33](https://github.com/spacetelescope/roman_notebooks/actions/runs/28727877968) | 0 | 0 | 2 | 2 |
-| `spacetelescope/jwst-pipeline-notebooks` | [#25](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/29177865406) | [#24](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/28727930274) | 1 | 0 | 0 | 1 |
+| `spacetelescope/jwst-pipeline-notebooks` | [#25](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/29177865406) | [#24](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/28727930274) | 0 | 0 | 0 | 0 |
 
 ## Per-Repository Details
 
@@ -257,16 +257,16 @@ _No resolved failures_
 
 | | Run | Date | Pass | Fail | Total |
 |---|---|---|---|---|---|
-| **Latest** | [#38](https://github.com/spacetelescope/hst_notebooks/actions/runs/29177842499) | 2026-07-12 | 71 | 5 | 76 |
+| **Latest** | [#38](https://github.com/spacetelescope/hst_notebooks/actions/runs/29177842499) | 2026-07-12 | 72 | 4 | 76 |
 | **Previous** | [#37](https://github.com/spacetelescope/hst_notebooks/actions/runs/28727903281) | 2026-07-05 | 71 | 4 | 75 |
 
-- **New failures:** 1
+- **New failures:** 0
 - **Resolved failures:** 0
 - **Consistent failures:** 4
 
-### 🔴 New Failures (1)
+### 🔴 New Failures (0)
 
-- `notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb`
+_No new failures_ ✅
 
 ### 🟢 Resolved Failures (0)
 
@@ -279,7 +279,7 @@ _No resolved failures_
 - `notebooks/HASP/FluxScaleTutorial/FluxScaleTutorial.ipynb`
 - `notebooks/HASP/WavelengthAdjustment/WavelengthAdjustment.ipynb`
 
-### ✅ Consistent Successes (70)
+### ✅ Consistent Successes (71)
 
 <details>
 <summary>Click to expand</summary>
@@ -319,6 +319,7 @@ _No resolved failures_
 - `notebooks/DrizzlePac/align_mosaics/align_mosaics.ipynb`
 - `notebooks/DrizzlePac/align_multiple_visits/align_multiple_visits.ipynb`
 - `notebooks/DrizzlePac/align_sparse_fields/align_sparse_fields.ipynb`
+- `notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb`
 - `notebooks/DrizzlePac/drizzle_wfpc2/drizzle_wfpc2.ipynb`
 - `notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb`
 - `notebooks/DrizzlePac/optimize_image_sampling/optimize_image_sampling.ipynb`
@@ -417,16 +418,16 @@ _No resolved failures_
 
 | | Run | Date | Pass | Fail | Total |
 |---|---|---|---|---|---|
-| **Latest** | [#25](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/29177865406) | 2026-07-12 | 16 | 1 | 17 |
+| **Latest** | [#25](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/29177865406) | 2026-07-12 | 17 | 0 | 17 |
 | **Previous** | [#24](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/28727930274) | 2026-07-05 | 17 | 0 | 17 |
 
-- **New failures:** 1
+- **New failures:** 0
 - **Resolved failures:** 0
 - **Consistent failures:** 0
 
-### 🔴 New Failures (1)
+### 🔴 New Failures (0)
 
-- `notebooks/MIRI/MRS/JWPipeNB-MIRI-MRS.ipynb`
+_No new failures_ ✅
 
 ### 🟢 Resolved Failures (0)
 
@@ -436,7 +437,7 @@ _No resolved failures_
 
 _No consistent failures_ ✅
 
-### ✅ Consistent Successes (16)
+### ✅ Consistent Successes (17)
 
 <details>
 <summary>Click to expand</summary>
@@ -446,6 +447,7 @@ _No consistent failures_ ✅
 - `notebooks/MIRI/Imaging/JWPipeNB-MIRI-imaging.ipynb`
 - `notebooks/MIRI/LRS-slit/JWPipeNB-MIRI-LRS-slit.ipynb`
 - `notebooks/MIRI/LRS-slitless-TSO/JWPipeNB-MIRI-LRS-slitless-TSO.ipynb`
+- `notebooks/MIRI/MRS/JWPipeNB-MIRI-MRS.ipynb`
 - `notebooks/NIRCAM/Coronagraphy/JWPipeNB-nircam-coronagraphy.ipynb`
 - `notebooks/NIRCAM/Imaging/JWPipeNB-nircam-imaging.ipynb`
 - `notebooks/NIRCAM/LW_Grism_Time_Series/JWPipeNB-NIRCam-LWGTS.ipynb`
