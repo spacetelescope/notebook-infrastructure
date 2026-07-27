@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T05:15:35Z",
+  "generated_at": "2026-07-27T14:30:19Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -45,124 +45,6 @@
       }
     },
     {
-      "repo": "spacetelescope/mast_notebooks",
-      "latest_run": {
-        "number": 47,
-        "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/30185793593",
-        "created_at": "2026-07-26T03:12:24Z"
-      },
-      "previous_run": {
-        "number": 46,
-        "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/29671399083",
-        "created_at": "2026-07-19T03:12:20Z"
-      },
-      "summary": {
-        "fail_latest": 9,
-        "pass_latest": 71,
-        "total_latest": 80,
-        "fail_previous": 3,
-        "pass_previous": 77,
-        "total_previous": 80,
-        "new_failures": 6,
-        "resolved_failures": 0,
-        "consistent_failures": 3,
-        "consistent_successes": 71
-      },
-      "recent_notebooks_60d": [],
-      "details": {
-        "new_failures": [
-          "notebooks/SDSS/eBOSS_JWST_tutorial/eBOSS_JWST_tutorial.ipynb",
-          "notebooks/TESS/beginner_how_to_use_dvt/beginner_how_to_use_dvt.ipynb",
-          "notebooks/TESS/beginner_how_to_use_tp/beginner_how_to_use_tp.ipynb",
-          "notebooks/TESS/beginner_tour_lc_tp/beginner_tour_lc_tp.ipynb",
-          "notebooks/TESS/interm_tess_prf_retrieve/interm_tess_prf_retrieve.ipynb",
-          "notebooks/multi_mission/missions_mast_search/missions_mast_search.ipynb"
-        ],
-        "resolved_failures": [],
-        "consistent_failures": [
-          "notebooks/HSC/SWEEPS_HSCV3P1_API/sweeps_hscv3p1_api.ipynb",
-          "notebooks/TESS/interm_tasoc_lc/interm_tasoc_lc.ipynb",
-          "notebooks/multi_mission/beginner_zcut/beginner_zcut.ipynb"
-        ],
-        "consistent_successes": [
-          "execute-all / process-notebooks (notebooks/IUE/exploring_UV_extinction_curves/exploring_UV_extinction_curves.ip...",
-          "execute-all / process-notebooks (notebooks/K2/removing_instrumental_noise_using_pld/removing_instrumental_noise...",
-          "execute-all / process-notebooks (notebooks/Kepler/how_to_estimate_a_stars_mass_and_radius_using_asteroseismolog...",
-          "execute-all / process-notebooks (notebooks/Kepler/how_to_understand_and_manipulate_the_periodogram_of_an_oscill...",
-          "execute-all / process-notebooks (notebooks/Kepler/identifying_transiting_planet_signals/identifying_transiting_...",
-          "execute-all / process-notebooks (notebooks/Kepler/instrumental_noise_1_data_gaps_and_quality_flags/instrumental...",
-          "execute-all / process-notebooks (notebooks/Kepler/instrumental_noise_2_spurious_signals_and_time_sampling_effec...",
-          "execute-all / process-notebooks (notebooks/Kepler/instrumental_noise_3_seasonal_and_detector_effects/instrument...",
-          "execute-all / process-notebooks (notebooks/Kepler/instrumental_noise_4_electronic_noise/instrumental_noise_4_el...",
-          "execute-all / process-notebooks (notebooks/Kepler/lightkurve_analyzing_lc_products/lightkurve_analyzing_lc_prod...",
-          "execute-all / process-notebooks (notebooks/Kepler/lightkurve_analyzing_tpf_products/lightkurve_analyzing_tpf_pr...",
-          "execute-all / process-notebooks (notebooks/Kepler/lightkurve_combining_multiple_quarters/lightkurve_combining_m...",
-          "execute-all / process-notebooks (notebooks/Kepler/lightkurve_custom_aperture_photometry/lightkurve_custom_apert...",
-          "execute-all / process-notebooks (notebooks/Kepler/lightkurve_interactively_inspecting_TPFs_and_LCs/lightkurve_i...",
-          "execute-all / process-notebooks (notebooks/Kepler/lightkurve_searching_for_data/lightkurve_searching_for_data.i...",
-          "execute-all / process-notebooks (notebooks/Kepler/verifying_the_location_of_a_signal/verifying_the_location_of_...",
-          "execute-all / process-notebooks (notebooks/Kepler/visualizing_periodic_signals_using_a_river_plot/visualizing_p...",
-          "execute-all / process-notebooks (notebooks/MCCM/FIMS-SPEAR/hyperspectral_healpix_maps/hyperspectral_healpix_map...",
-          "execute-all / process-notebooks (notebooks/TESS/removing_scattered_light_using_regression/removing_scattered_li...",
-          "execute-all / process-notebooks (notebooks/multi_mission/galex_panstarrs_bulk_download/galex_panstarrs_bulk_dow...",
-          "execute-all / process-notebooks (notebooks/multi_mission/historic_quasar_observations/historic_quasar_observati...",
-          "notebooks/GALEX/mis_mosaic/mis_mosaic.ipynb",
-          "notebooks/HSC/HCV_API/HCV_API_demo.ipynb",
-          "notebooks/HSC/HCV_CASJOBS/HCV_casjobs_demo.ipynb",
-          "notebooks/HSC/HSCV3_API/hscv3_api.ipynb",
-          "notebooks/HSC/HSCV3_SMC_API/hscv3_smc_api.ipynb",
-          "notebooks/HSC/HSC_TAP/HSC_TAP.ipynb",
-          "notebooks/HSC/SWEEPS_HSCV3P1/sweeps_hscv3p1.ipynb",
-          "notebooks/JWST/Engineering_Database_Retreival/EDB_Retrieval.ipynb",
-          "notebooks/JWST/MAST_metadata_search/MAST_metadata_search.ipynb",
-          "notebooks/JWST/SI_keyword_exoplanet_search/SI_keyword_exoplanet_search.ipynb",
-          "notebooks/JWST/download_by_program_id/download_by_program_id.ipynb",
-          "notebooks/JWST/duplication_checking/duplication_checking.ipynb",
-          "notebooks/K2/Lightcurve/Lightcurve.ipynb",
-          "notebooks/K2/TPF/TPF.ipynb",
-          "notebooks/K2/beginner_how_to_use_ffi/beginner_how_to_use_ffi.ipynb",
-          "notebooks/Kepler/creating_periodograms/creating_periodograms.ipynb",
-          "notebooks/Kepler/measuring_a_rotation_period/measuring_a_rotation_period.ipynb",
-          "notebooks/Kepler/plotting_catalog_over_FFI/plotting_catalog_over_FFI.ipynb",
-          "notebooks/Kepler/plotting_dvts/plotting_dvts.ipynb",
-          "notebooks/Kepler/plotting_images_from_tpf/plotting_images_from_tpf.ipynb",
-          "notebooks/Kepler/plotting_lightcurves/plotting_lightcurves.ipynb",
-          "notebooks/PanSTARRS/PS1_DR2_TAP/PS1_DR2_TAP.ipynb",
-          "notebooks/PanSTARRS/PS1_image/PS1_image.ipynb",
-          "notebooks/SDSS/APOGEE_TESS_tutorial/APOGEE_TESS_tutorial.ipynb",
-          "notebooks/SDSS/MaNGA_HST_tutorial/MaNGA_HST_tutorial.ipynb",
-          "notebooks/SDSS/SDSS_LEGACY_IMAGING_cmd/cmd_diagram.ipynb",
-          "notebooks/SDSS/SDSS_LEGACY_IMAGING_galaxy_morphology/galaxy_morphology.ipynb",
-          "notebooks/SDSS/SDSS_SEGUE_spectra/sdss_stellar_spectra.ipynb",
-          "notebooks/SDSS/eBOSS_HST_hubbles_law/hubbles_law.ipynb",
-          "notebooks/TESS/asteroid_rotation/asteroid_rotation.ipynb",
-          "notebooks/TESS/asteroid_rotation/asteroid_rotation_soutions.ipynb",
-          "notebooks/TESS/beginner_astroquery_dv/beginner_astroquery_dv.ipynb",
-          "notebooks/TESS/beginner_how_to_use_ffi/beginner_how_to_use_ffi.ipynb",
-          "notebooks/TESS/beginner_how_to_use_lc/beginner_how_to_use_lc.ipynb",
-          "notebooks/TESS/beginner_tess_exomast/beginner_tess_exomast.ipynb",
-          "notebooks/TESS/beginner_tess_tap_search/beginner_tess_tap_search.ipynb",
-          "notebooks/TESS/beginner_tesscut_astroquery/beginner_tesscut_astroquery.ipynb",
-          "notebooks/TESS/beginner_tic_search_hd209458/beginner_tic_search_hd209458.ipynb",
-          "notebooks/TESS/interm_gi_query/interm_gi_query.ipynb",
-          "notebooks/TESS/interm_tesscut_dss_overlay/interm_tesscut_dss_overlay.ipynb",
-          "notebooks/TESS/interm_tesscut_requests/interm_tesscut_requests.ipynb",
-          "notebooks/TESS/making_tess_cubes_and_cutouts/making_tess_cubes_and_cutouts.ipynb",
-          "notebooks/Visualizations/mast_sky/mast_sky.ipynb",
-          "notebooks/multi_mission/beginner_search/beginner_search.ipynb",
-          "notebooks/multi_mission/cloud_data_access/cloud_data_access.ipynb",
-          "notebooks/multi_mission/display_footprints/display_footprints.ipynb",
-          "notebooks/multi_mission/large_downloads/large_downloads.ipynb",
-          "notebooks/multi_mission/resolve_objects/resolve_objects.ipynb",
-          "notebooks/multi_mission/subscriptions/subscriptions.ipynb",
-          "notebooks/multi_mission/wildcard_searches/wildcard_searches.ipynb"
-        ],
-        "changed_other": [],
-        "only_in_latest": [],
-        "only_in_previous": []
-      }
-    },
-    {
       "repo": "spacetelescope/jdat_notebooks",
       "latest_run": {
         "number": 38,
@@ -175,22 +57,20 @@
         "created_at": "2026-07-19T03:08:50Z"
       },
       "summary": {
-        "fail_latest": 8,
-        "pass_latest": 45,
+        "fail_latest": 7,
+        "pass_latest": 47,
         "total_latest": 54,
         "fail_previous": 7,
         "pass_previous": 47,
         "total_previous": 54,
-        "new_failures": 1,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 7,
-        "consistent_successes": 45
+        "consistent_successes": 47
       },
       "recent_notebooks_60d": [],
       "details": {
-        "new_failures": [
-          "notebooks/NIRSpec/NIRSpec_NSClean/BOTS_NSClean_example.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/MIRI/psf_photometry/miri_1028.ipynb",
@@ -227,6 +107,8 @@
           "notebooks/NIRISS/NIRISS_WFSS_advanced/extra_niriss_individual_steps.ipynb",
           "notebooks/NIRISS/NIRISS_WFSS_postpipeline/00_Optimal_extraction.ipynb",
           "notebooks/NIRISS/NIRISS_WFSS_postpipeline/02_Cross_correlation_template.ipynb",
+          "notebooks/NIRSpec/IFU_cube_continuum_fit/NGC4151_FeII_ContinuumFit.ipynb",
+          "notebooks/NIRSpec/NIRSpec_NSClean/BOTS_NSClean_example.ipynb",
           "notebooks/NIRSpec/NIRSpec_NSClean/FS_NSClean_example.ipynb",
           "notebooks/NIRSpec/NIRSpec_NSClean/IFU_NSClean_example.ipynb",
           "notebooks/NIRSpec/NIRSpec_NSClean/MOS_NSClean_example.ipynb",
@@ -248,13 +130,7 @@
           "notebooks/jdaviz_demo/notebooks/Specviz_Specviz2d.ipynb",
           "notebooks/jdaviz_demo/notebooks/specreduce_extraction.ipynb"
         ],
-        "changed_other": [
-          {
-            "notebook": "notebooks/NIRSpec/IFU_cube_continuum_fit/NGC4151_FeII_ContinuumFit.ipynb",
-            "previous": "success",
-            "current": "cancelled"
-          }
-        ],
+        "changed_other": [],
         "only_in_latest": [],
         "only_in_previous": []
       }
@@ -272,16 +148,16 @@
         "created_at": "2026-07-19T03:09:39Z"
       },
       "summary": {
-        "fail_latest": 7,
-        "pass_latest": 70,
+        "fail_latest": 4,
+        "pass_latest": 73,
         "total_latest": 77,
         "fail_previous": 4,
         "pass_previous": 72,
         "total_previous": 76,
-        "new_failures": 3,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 4,
-        "consistent_successes": 69
+        "consistent_successes": 72
       },
       "recent_notebooks_60d": [
         {
@@ -293,11 +169,7 @@
         }
       ],
       "details": {
-        "new_failures": [
-          "notebooks/STIS/drizpac_notebook/STIS_DrizzlePac_Tutorial.ipynb",
-          "notebooks/WFC3/mast_api_psf/download_psf_cutouts.ipynb",
-          "notebooks/WFC3/persistence/wfc3_ir_persistence.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/COS/LSF/LSF.ipynb",
@@ -356,6 +228,7 @@
           "notebooks/STIS/calstis/calstis_2d_ccd.ipynb",
           "notebooks/STIS/cross-correlation/cross-correlation.ipynb",
           "notebooks/STIS/custom_ccd_darks/custom_ccd_darks.ipynb",
+          "notebooks/STIS/drizpac_notebook/STIS_DrizzlePac_Tutorial.ipynb",
           "notebooks/STIS/e1_notebook/wavecal-cross-corr.ipynb",
           "notebooks/STIS/extraction/1D_Extraction.ipynb",
           "notebooks/STIS/low_count_uncertainties/Low_Count_Uncertainties.ipynb",
@@ -368,6 +241,8 @@
           "notebooks/WFC3/filter_transformations/filter_transformations.ipynb",
           "notebooks/WFC3/flux_conversion_tool/flux_conversion_tool.ipynb",
           "notebooks/WFC3/image_displayer_analyzer/wfc3_image_displayer_analyzer.ipynb",
+          "notebooks/WFC3/mast_api_psf/download_psf_cutouts.ipynb",
+          "notebooks/WFC3/persistence/wfc3_ir_persistence.ipynb",
           "notebooks/WFC3/photometry_examples/phot_examples.ipynb",
           "notebooks/WFC3/point_spread_function/hst_point_spread_function.ipynb",
           "notebooks/WFC3/slitlessutils_IR_extraction/slitlessutils_IR_extraction.ipynb",
@@ -399,24 +274,23 @@
         "created_at": "2026-07-19T03:08:42Z"
       },
       "summary": {
-        "fail_latest": 7,
-        "pass_latest": 13,
+        "fail_latest": 6,
+        "pass_latest": 14,
         "total_latest": 20,
         "fail_previous": 3,
         "pass_previous": 17,
         "total_previous": 20,
-        "new_failures": 4,
+        "new_failures": 3,
         "resolved_failures": 0,
         "consistent_failures": 3,
-        "consistent_successes": 13
+        "consistent_successes": 14
       },
       "recent_notebooks_60d": [],
       "details": {
         "new_failures": [
           "notebooks/measuring_galaxy_shapes/measuring_galaxy_shapes.ipynb",
           "notebooks/pandeia/pandeia.ipynb",
-          "notebooks/stpsf/stpsf.ipynb",
-          "notebooks/synphot/synphot.ipynb"
+          "notebooks/stpsf/stpsf.ipynb"
         ],
         "resolved_failures": [],
         "consistent_failures": [
@@ -436,6 +310,7 @@
           "notebooks/rist/rist.ipynb",
           "notebooks/roman_cutouts/roman_cutouts.ipynb",
           "notebooks/romanisim/romanisim.ipynb",
+          "notebooks/synphot/synphot.ipynb",
           "notebooks/time_domain_simulations/time_domain_simulations.ipynb",
           "notebooks/working_with_asdf/working_with_asdf.ipynb"
         ],
@@ -498,5 +373,7 @@
       }
     }
   ],
-  "errors": []
+  "errors": [
+    "`spacetelescope/mast_notebooks`: HTTPSConnectionPool(host='api.github.com', port=443): Max retries exceeded with url: /repositories/596163036/actions/runs/30185793593/jobs?per_page=100&filter=all&page=4 (Caused by NameResolutionError(\"HTTPSConnection(host='api.github.com', port=443): Failed to resolve 'api.github.com' ([Errno -3] Temporary failure in name resolution)\"))"
+  ]
 }
