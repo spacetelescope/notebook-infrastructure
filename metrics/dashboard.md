@@ -1,6 +1,6 @@
 # Notebook CI Dashboard
 
-_Generated 2026-07-27 14:30 UTC_
+_Generated 2026-07-27 14:39 UTC_
 
 Workflow tracked: `Notebook CI - Scheduled`
 
@@ -12,7 +12,7 @@ Workflow tracked: `Notebook CI - Scheduled`
 | `spacetelescope/hst_notebooks` | 4 | 0 | 0 | 4 | [#40](https://github.com/spacetelescope/hst_notebooks/actions/runs/30185717220) |
 | `spacetelescope/jdat_notebooks` | 7 | 0 | 0 | 7 | [#38](https://github.com/spacetelescope/jdat_notebooks/actions/runs/30185688746) |
 | `spacetelescope/jwst-pipeline-notebooks` | 0 | 0 | 0 | 0 | [#27](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/30185742455) |
-| `spacetelescope/mast_notebooks` | 9 | 6 | 0 | 3 | [#47](https://github.com/spacetelescope/mast_notebooks/actions/runs/30185793593) |
+| `spacetelescope/mast_notebooks` | 4 | 1 | 0 | 3 | [#47](https://github.com/spacetelescope/mast_notebooks/actions/runs/30185793593) |
 | `spacetelescope/roman_notebooks` | 6 | 3 | 0 | 3 | [#36](https://github.com/spacetelescope/roman_notebooks/actions/runs/30185687556) |
 
 ## Latest Failure Count by Repository
@@ -21,8 +21,8 @@ Workflow tracked: `Notebook CI - Scheduled`
 xychart-beta
     title "Latest failure count by repository"
     x-axis ["hellouniverse", "hst_notebooks", "jdat_notebooks", "jwst-pipeline-notebooks", "mast_notebooks", "roman_notebooks"]
-    y-axis "Failures" 0 --> 10
-    bar [0, 4, 7, 0, 9, 6]
+    y-axis "Failures" 0 --> 8
+    bar [0, 4, 7, 0, 4, 6]
 ```
 
 ## Rolling Trend Table
@@ -33,7 +33,7 @@ xychart-beta
 | `spacetelescope/hst_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 3 | 3 | 4 | 3 | 3 | 3 | 3 | 3 | 5 | 5 | 3 | 8 | 5 | 4 | 3 | 4 | 5 | 5 | 5 | 4 | 4 | 5 | 4 | 4 | 4 | 4 |
 | `spacetelescope/jdat_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 6 | 10 | 10 | 10 | 10 | 10 | 10 | 4 | 4 | 4 | 14 | 10 | 10 | 5 | 5 | 3 | 3 | 3 | 4 | 4 | 4 | 7 | 7 | 7 | 7 |
 | `spacetelescope/jwst-pipeline-notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 4 | 4 | 3 | 4 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `spacetelescope/mast_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 0 | 1 | 3 | 7 | 7 | 7 | 5 | 7 | 7 | 6 | 5 | 4 | 2 | 2 | 3 | 1 | 4 | 3 | 2 | 4 | 4 | 3 | 3 | 4 | 3 | 9 |
+| `spacetelescope/mast_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 0 | 1 | 3 | 7 | 7 | 7 | 5 | 7 | 7 | 6 | 5 | 4 | 2 | 2 | 3 | 1 | 4 | 3 | 2 | 4 | 4 | 3 | 3 | 4 | 3 | 4 |
 | `spacetelescope/roman_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 10 | 9 | 9 | 9 | 9 | 9 | 9 | 9 | 9 | 9 | 9 | 11 | 10 | 12 | 11 | 11 | 10 | 5 | 1 | 2 | 2 | 2 | 2 | 2 | 3 | 6 |
 
 ## Per-Repository Trends
@@ -200,8 +200,8 @@ xychart-beta
 xychart-beta
     title "mast_notebooks failure trend"
     x-axis ["2026-02-01", "2026-02-08", "2026-02-15", "2026-02-22", "2026-03-01", "2026-03-08", "2026-03-15", "2026-03-22", "2026-03-29", "2026-04-05", "2026-04-12", "2026-04-19", "2026-04-26", "2026-05-03", "2026-05-10", "2026-05-17", "2026-05-24", "2026-05-31", "2026-06-07", "2026-06-14", "2026-06-21", "2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19", "2026-07-26"]
-    y-axis "Failures" 0 --> 10
-    line [0, 1, 3, 7, 7, 7, 5, 7, 7, 6, 5, 4, 2, 2, 3, 1, 4, 3, 2, 4, 4, 3, 3, 4, 3, 9]
+    y-axis "Failures" 0 --> 8
+    line [0, 1, 3, 7, 7, 7, 5, 7, 7, 6, 5, 4, 2, 2, 3, 1, 4, 3, 2, 4, 4, 3, 3, 4, 3, 4]
 ```
 
 | Date | Failures | New | Resolved | Consistent | Latest Run |
@@ -231,7 +231,7 @@ xychart-beta
 | 2026-07-05 | 3 | 0 | 0 | 3 | [#43](https://github.com/spacetelescope/mast_notebooks/actions/runs/28727954034) |
 | 2026-07-12 | 4 | 1 | 0 | 3 | [#44](https://github.com/spacetelescope/mast_notebooks/actions/runs/29177889743) |
 | 2026-07-19 | 3 | 0 | 0 | 0 | [#46](https://github.com/spacetelescope/mast_notebooks/actions/runs/29671399083) |
-| 2026-07-26 | 9 | 6 | 0 | 3 | [#47](https://github.com/spacetelescope/mast_notebooks/actions/runs/30185793593) |
+| 2026-07-26 | 4 | 1 | 0 | 3 | [#47](https://github.com/spacetelescope/mast_notebooks/actions/runs/30185793593) |
 
 ### `spacetelescope/roman_notebooks`
 

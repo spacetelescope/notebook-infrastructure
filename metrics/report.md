@@ -1,6 +1,6 @@
 # Notebook CI – Latest vs Previous Run Comparison
 
-_Generated 2026-07-27 14:30 UTC_
+_Generated 2026-07-27 14:39 UTC_
 
 Workflow name: `Notebook CI - Scheduled`
 
@@ -9,6 +9,7 @@ Workflow name: `Notebook CI - Scheduled`
 | Repository | Latest Run | Previous Run | New Failures | Resolved | Consistent Failures | Latest Fail Count |
 |---|---|---|---:|---:|---:|---:|
 | `spacetelescope/hellouniverse` | [#35](https://github.com/spacetelescope/hellouniverse/actions/runs/24619741210) | [#34](https://github.com/spacetelescope/hellouniverse/actions/runs/24297475556) | 0 | 0 | 0 | 0 |
+| `spacetelescope/mast_notebooks` | [#47](https://github.com/spacetelescope/mast_notebooks/actions/runs/30185793593) | [#46](https://github.com/spacetelescope/mast_notebooks/actions/runs/29671399083) | 1 | 0 | 3 | 4 |
 | `spacetelescope/jdat_notebooks` | [#38](https://github.com/spacetelescope/jdat_notebooks/actions/runs/30185688746) | [#37](https://github.com/spacetelescope/jdat_notebooks/actions/runs/29671299968) | 0 | 0 | 7 | 7 |
 | `spacetelescope/hst_notebooks` | [#40](https://github.com/spacetelescope/hst_notebooks/actions/runs/30185717220) | [#39](https://github.com/spacetelescope/hst_notebooks/actions/runs/29671321714) | 0 | 0 | 4 | 4 |
 | `spacetelescope/roman_notebooks` | [#36](https://github.com/spacetelescope/roman_notebooks/actions/runs/30185687556) | [#35](https://github.com/spacetelescope/roman_notebooks/actions/runs/29671296636) | 3 | 0 | 3 | 6 |
@@ -50,6 +51,116 @@ _No consistent failures_ ✅
 - `execute-all / process-notebooks (notebooks/hello-universe/Estimating_TESS_rotation_periods_with_CNNs/Estimating...`
 - `execute-all / process-notebooks (notebooks/hello-universe/Regressing_3D-HST_galaxy_redshift_with_decision_trees...`
 - `notebooks/hello-universe/Interpreting_CNNs/Interpreting_CNNs.ipynb`
+
+</details>
+
+
+## `spacetelescope/mast_notebooks`
+
+| | Run | Date | Pass | Fail | Total |
+|---|---|---|---|---|---|
+| **Latest** | [#47](https://github.com/spacetelescope/mast_notebooks/actions/runs/30185793593) | 2026-07-26 | 76 | 4 | 80 |
+| **Previous** | [#46](https://github.com/spacetelescope/mast_notebooks/actions/runs/29671399083) | 2026-07-19 | 77 | 3 | 80 |
+
+- **New failures:** 1
+- **Resolved failures:** 0
+- **Consistent failures:** 3
+
+### 🔴 New Failures (1)
+
+- `notebooks/SDSS/eBOSS_JWST_tutorial/eBOSS_JWST_tutorial.ipynb`
+
+### 🟢 Resolved Failures (0)
+
+_No resolved failures_
+
+### 🟡 Consistent Failures (3)
+
+- `notebooks/HSC/SWEEPS_HSCV3P1_API/sweeps_hscv3p1_api.ipynb`
+- `notebooks/TESS/interm_tasoc_lc/interm_tasoc_lc.ipynb`
+- `notebooks/multi_mission/beginner_zcut/beginner_zcut.ipynb`
+
+### ✅ Consistent Successes (76)
+
+<details>
+<summary>Click to expand</summary>
+
+- `execute-all / process-notebooks (notebooks/IUE/exploring_UV_extinction_curves/exploring_UV_extinction_curves.ip...`
+- `execute-all / process-notebooks (notebooks/K2/removing_instrumental_noise_using_pld/removing_instrumental_noise...`
+- `execute-all / process-notebooks (notebooks/Kepler/how_to_estimate_a_stars_mass_and_radius_using_asteroseismolog...`
+- `execute-all / process-notebooks (notebooks/Kepler/how_to_understand_and_manipulate_the_periodogram_of_an_oscill...`
+- `execute-all / process-notebooks (notebooks/Kepler/identifying_transiting_planet_signals/identifying_transiting_...`
+- `execute-all / process-notebooks (notebooks/Kepler/instrumental_noise_1_data_gaps_and_quality_flags/instrumental...`
+- `execute-all / process-notebooks (notebooks/Kepler/instrumental_noise_2_spurious_signals_and_time_sampling_effec...`
+- `execute-all / process-notebooks (notebooks/Kepler/instrumental_noise_3_seasonal_and_detector_effects/instrument...`
+- `execute-all / process-notebooks (notebooks/Kepler/instrumental_noise_4_electronic_noise/instrumental_noise_4_el...`
+- `execute-all / process-notebooks (notebooks/Kepler/lightkurve_analyzing_lc_products/lightkurve_analyzing_lc_prod...`
+- `execute-all / process-notebooks (notebooks/Kepler/lightkurve_analyzing_tpf_products/lightkurve_analyzing_tpf_pr...`
+- `execute-all / process-notebooks (notebooks/Kepler/lightkurve_combining_multiple_quarters/lightkurve_combining_m...`
+- `execute-all / process-notebooks (notebooks/Kepler/lightkurve_custom_aperture_photometry/lightkurve_custom_apert...`
+- `execute-all / process-notebooks (notebooks/Kepler/lightkurve_interactively_inspecting_TPFs_and_LCs/lightkurve_i...`
+- `execute-all / process-notebooks (notebooks/Kepler/lightkurve_searching_for_data/lightkurve_searching_for_data.i...`
+- `execute-all / process-notebooks (notebooks/Kepler/verifying_the_location_of_a_signal/verifying_the_location_of_...`
+- `execute-all / process-notebooks (notebooks/Kepler/visualizing_periodic_signals_using_a_river_plot/visualizing_p...`
+- `execute-all / process-notebooks (notebooks/MCCM/FIMS-SPEAR/hyperspectral_healpix_maps/hyperspectral_healpix_map...`
+- `execute-all / process-notebooks (notebooks/TESS/removing_scattered_light_using_regression/removing_scattered_li...`
+- `execute-all / process-notebooks (notebooks/multi_mission/galex_panstarrs_bulk_download/galex_panstarrs_bulk_dow...`
+- `execute-all / process-notebooks (notebooks/multi_mission/historic_quasar_observations/historic_quasar_observati...`
+- `notebooks/GALEX/mis_mosaic/mis_mosaic.ipynb`
+- `notebooks/HSC/HCV_API/HCV_API_demo.ipynb`
+- `notebooks/HSC/HCV_CASJOBS/HCV_casjobs_demo.ipynb`
+- `notebooks/HSC/HSCV3_API/hscv3_api.ipynb`
+- `notebooks/HSC/HSCV3_SMC_API/hscv3_smc_api.ipynb`
+- `notebooks/HSC/HSC_TAP/HSC_TAP.ipynb`
+- `notebooks/HSC/SWEEPS_HSCV3P1/sweeps_hscv3p1.ipynb`
+- `notebooks/JWST/Engineering_Database_Retreival/EDB_Retrieval.ipynb`
+- `notebooks/JWST/MAST_metadata_search/MAST_metadata_search.ipynb`
+- `notebooks/JWST/SI_keyword_exoplanet_search/SI_keyword_exoplanet_search.ipynb`
+- `notebooks/JWST/download_by_program_id/download_by_program_id.ipynb`
+- `notebooks/JWST/duplication_checking/duplication_checking.ipynb`
+- `notebooks/K2/Lightcurve/Lightcurve.ipynb`
+- `notebooks/K2/TPF/TPF.ipynb`
+- `notebooks/K2/beginner_how_to_use_ffi/beginner_how_to_use_ffi.ipynb`
+- `notebooks/Kepler/creating_periodograms/creating_periodograms.ipynb`
+- `notebooks/Kepler/measuring_a_rotation_period/measuring_a_rotation_period.ipynb`
+- `notebooks/Kepler/plotting_catalog_over_FFI/plotting_catalog_over_FFI.ipynb`
+- `notebooks/Kepler/plotting_dvts/plotting_dvts.ipynb`
+- `notebooks/Kepler/plotting_images_from_tpf/plotting_images_from_tpf.ipynb`
+- `notebooks/Kepler/plotting_lightcurves/plotting_lightcurves.ipynb`
+- `notebooks/PanSTARRS/PS1_DR2_TAP/PS1_DR2_TAP.ipynb`
+- `notebooks/PanSTARRS/PS1_image/PS1_image.ipynb`
+- `notebooks/SDSS/APOGEE_TESS_tutorial/APOGEE_TESS_tutorial.ipynb`
+- `notebooks/SDSS/MaNGA_HST_tutorial/MaNGA_HST_tutorial.ipynb`
+- `notebooks/SDSS/SDSS_LEGACY_IMAGING_cmd/cmd_diagram.ipynb`
+- `notebooks/SDSS/SDSS_LEGACY_IMAGING_galaxy_morphology/galaxy_morphology.ipynb`
+- `notebooks/SDSS/SDSS_SEGUE_spectra/sdss_stellar_spectra.ipynb`
+- `notebooks/SDSS/eBOSS_HST_hubbles_law/hubbles_law.ipynb`
+- `notebooks/TESS/asteroid_rotation/asteroid_rotation.ipynb`
+- `notebooks/TESS/asteroid_rotation/asteroid_rotation_soutions.ipynb`
+- `notebooks/TESS/beginner_astroquery_dv/beginner_astroquery_dv.ipynb`
+- `notebooks/TESS/beginner_how_to_use_dvt/beginner_how_to_use_dvt.ipynb`
+- `notebooks/TESS/beginner_how_to_use_ffi/beginner_how_to_use_ffi.ipynb`
+- `notebooks/TESS/beginner_how_to_use_lc/beginner_how_to_use_lc.ipynb`
+- `notebooks/TESS/beginner_how_to_use_tp/beginner_how_to_use_tp.ipynb`
+- `notebooks/TESS/beginner_tess_exomast/beginner_tess_exomast.ipynb`
+- `notebooks/TESS/beginner_tess_tap_search/beginner_tess_tap_search.ipynb`
+- `notebooks/TESS/beginner_tesscut_astroquery/beginner_tesscut_astroquery.ipynb`
+- `notebooks/TESS/beginner_tic_search_hd209458/beginner_tic_search_hd209458.ipynb`
+- `notebooks/TESS/beginner_tour_lc_tp/beginner_tour_lc_tp.ipynb`
+- `notebooks/TESS/interm_gi_query/interm_gi_query.ipynb`
+- `notebooks/TESS/interm_tess_prf_retrieve/interm_tess_prf_retrieve.ipynb`
+- `notebooks/TESS/interm_tesscut_dss_overlay/interm_tesscut_dss_overlay.ipynb`
+- `notebooks/TESS/interm_tesscut_requests/interm_tesscut_requests.ipynb`
+- `notebooks/TESS/making_tess_cubes_and_cutouts/making_tess_cubes_and_cutouts.ipynb`
+- `notebooks/Visualizations/mast_sky/mast_sky.ipynb`
+- `notebooks/multi_mission/beginner_search/beginner_search.ipynb`
+- `notebooks/multi_mission/cloud_data_access/cloud_data_access.ipynb`
+- `notebooks/multi_mission/display_footprints/display_footprints.ipynb`
+- `notebooks/multi_mission/large_downloads/large_downloads.ipynb`
+- `notebooks/multi_mission/missions_mast_search/missions_mast_search.ipynb`
+- `notebooks/multi_mission/resolve_objects/resolve_objects.ipynb`
+- `notebooks/multi_mission/subscriptions/subscriptions.ipynb`
+- `notebooks/multi_mission/wildcard_searches/wildcard_searches.ipynb`
 
 </details>
 
@@ -348,7 +459,3 @@ _No consistent failures_ ✅
 
 </details>
 
-
-## Errors
-
-- `spacetelescope/mast_notebooks`: HTTPSConnectionPool(host='api.github.com', port=443): Max retries exceeded with url: /repositories/596163036/actions/runs/30185793593/jobs?per_page=100&filter=all&page=4 (Caused by NameResolutionError("HTTPSConnection(host='api.github.com', port=443): Failed to resolve 'api.github.com' ([Errno -3] Temporary failure in name resolution)"))
