@@ -9,6 +9,7 @@ run-name: |
       inputs.trigger-event == 'validate' && '🔍 On-Demand Validation' ||
       inputs.trigger-event == 'execute' && '▶️ On-Demand Execution' ||
       inputs.trigger-event == 'security' && '🛡️ Security Scan' ||
+      inputs.trigger-event == 'a11y-nb-check' && '🔦 Notebook Accessibility Check' ||
       inputs.trigger-event == 'html' && '📖 Documentation Build' ||
       inputs.trigger-event == 'deprecate' && '🏷️ Notebook Deprecation' ||
       inputs.trigger-event == 'all' && '🎯 Full Pipeline' ||
@@ -26,7 +27,7 @@ on:
         required: true
         type: string
       trigger-event:
-        description: 'Specific trigger: validate, execute, security, html, deprecate'
+        description: 'Specific trigger: validate, execute, security, html, deprecate, a11y-nb-check'
         required: false
         type: string
         default: 'all'
@@ -123,6 +124,13 @@ on:
       # Custom Runner Configuration
       custom-runner-config:
         description: 'Enable custom runner selection based on ci_config.txt'
+        required: false
+        type: boolean
+        default: false
+
+      # Style / quality checks
+      enable-a11y-nb-check:
+        description: 'Jupyter notebook accessibility checks on PRs (on by default; set false to opt out)'
         required: false
         type: boolean
         default: false
@@ -937,6 +945,51 @@ jobs:
           eval "$(micromamba shell hook --shell bash)"
           micromamba activate ci-env
           echo "🔍 Validating notebook: ${{ matrix.notebook }}"
+          
+          # nbval waits for the shell reply before draining IOPub. Widget-heavy
+          # applications such as jdaviz can exceed Jupyter's default 1,000-message
+          # receive queue and cause the trailing status:idle message to be lost.
+          python <<'PY'
+          from importlib.metadata import version
+          from pathlib import Path
+
+          import nbval.kernel
+
+          kernel_path = Path(nbval.kernel.__file__)
+          source = kernel_path.read_text(encoding="utf-8")
+
+          replacements = [
+              (
+                  "import logging\n",
+                  "import logging\nimport zmq\n",
+              ),
+              (
+                  "    kc = km.client()\n"
+                  "    kc.start_channels()\n",
+                  "    kc = km.client()\n"
+                  "    # Preserve large widget-message bursts until nbval drains IOPub.\n"
+                  "    kc.iopub_channel.socket.setsockopt(zmq.RCVHWM, 10000)\n"
+                  "    kc.start_channels()\n",
+              ),
+          ]
+
+          for old, new in replacements:
+              count = source.count(old)
+              if count != 1:
+                  raise RuntimeError(
+                      f"Cannot safely patch nbval {version('nbval')}: "
+                      f"expected one patch target in {kernel_path}, found {count}"
+                  )
+              source = source.replace(old, new, 1)
+
+          kernel_path.write_text(source, encoding="utf-8")
+          print(
+              f"Raised nbval {version('nbval')} IOPub RCVHWM "
+              f"from 1000 to 10000: {kernel_path}"
+          )
+          PY
+
+          
           # Clear outputs to ensure clean validation
           jupyter nbconvert --clear-output --inplace "${{ matrix.notebook }}"
           pytest --nbval --current-env --nbval-cell-timeout=4000 "${{ matrix.notebook }}"
@@ -2223,15 +2276,97 @@ jobs:
               print("No expired deprecated notebooks found")
           EOF
 
+  a11y-nb-check:
+    name: "Jupyter Notebook Accessibility Check: ${{ matrix.notebook }}"
+    if: inputs.enable-a11y-nb-check == true || inputs.trigger-event == 'a11y-nb-check'
+    needs: setup-matrix
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        notebook: ${{ fromJson(needs.setup-matrix.outputs.matrix-notebooks) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: "Collect accessibility findings for ${{ matrix.notebook }}"
+        id: report
+        env:
+          NOTEBOOK: ${{ matrix.notebook }}
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          mkdir -p a11y-reports
+          report_name=$(printf '%s' "$NOTEBOOK" | sha256sum | cut -c1-16)
+          report_path="a11y-reports/${report_name}.json"
+          raw_output="a11y-reports/${report_name}.log"
+          parsed_report="a11y-reports/${report_name}.checker.json"
+
+          # The checker exits with 1 when it finds accessibility issues. Capture
+          # that result so it can be reported without making the PR check fail.
+          set +e
+          npx --yes @jupyterlab-a11y-checker/cli --json "$NOTEBOOK" > "$raw_output" 2>&1
+          checker_exit_code=$?
+          set -e
+
+          # The CLI logs the file it is analyzing before emitting its JSON report.
+          # Extract the JSON object and wrap it in a stable workflow report format.
+          sed -n '/^{/,$p' "$raw_output" > "$parsed_report"
+          if jq -e '.summary.totalIssues | numbers' "$parsed_report" >/dev/null 2>&1; then
+            issue_count=$(jq -r '.summary.totalIssues' "$parsed_report")
+            if [ "$issue_count" -gt 0 ]; then
+              report_status="issues"
+            else
+              report_status="clean"
+            fi
+
+            jq \
+              --arg notebook "$NOTEBOOK" \
+              --arg status "$report_status" \
+              --argjson checker_exit_code "$checker_exit_code" \
+              --slurpfile checker_report "$parsed_report" \
+              '{notebook: $notebook, status: $status, checkerExitCode: $checker_exit_code, report: $checker_report[0]}' \
+              > "$report_path"
+          else
+            jq -n \
+              --arg notebook "$NOTEBOOK" \
+              --arg output "$(tail -c 4000 "$raw_output")" \
+              --argjson checker_exit_code "$checker_exit_code" \
+              '{notebook: $notebook, status: "checker-error", checkerExitCode: $checker_exit_code, error: $output}' \
+              > "$report_path"
+          fi
+
+          echo "artifact-name=a11y-report-${report_name}" >> "$GITHUB_OUTPUT"
+          echo "report-path=${report_path}" >> "$GITHUB_OUTPUT"
+          echo "Accessibility results captured for $NOTEBOOK; this advisory check will not fail CI."
+
+      - name: Upload accessibility report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.report.outputs.artifact-name }}
+          path: ${{ steps.report.outputs.report-path }}
+          if-no-files-found: error
+
   # Summary and Status
   workflow-summary:
-    needs: [setup-matrix, process-notebooks, store-non-notebook-files, build-documentation, manage-deprecation]
+    needs: [setup-matrix, process-notebooks, store-non-notebook-files, build-documentation, manage-deprecation, a11y-nb-check]
     if: always()
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - name: Download accessibility reports
+        if: |
+          (inputs.enable-a11y-nb-check == true || inputs.trigger-event == 'a11y-nb-check') &&
+          needs.setup-matrix.outputs.matrix-notebooks != '[]'
+        uses: actions/download-artifact@v5
+        with:
+          pattern: a11y-report-*
+          path: a11y-reports
+          merge-multiple: true
           
       - name: Generate workflow summary
         run: |
@@ -2273,6 +2408,9 @@ jobs:
           echo "| Deprecation Management | ${{ needs.manage-deprecation.result }} | - |" >> $GITHUB_STEP_SUMMARY
           if [ "${{ inputs.trigger-event }}" = "deprecate" ] && [ "${{ inputs.execution-mode }}" = "on-demand" ]; then
             echo "| Documentation Rebuild | ${{ needs.rebuild-docs-after-deprecation.result }} | - |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ inputs.enable-a11y-nb-check }}" = "true" ] || [ "${{ inputs.trigger-event }}" = "a11y-nb-check" ]; then
+            echo "| Notebook Accessibility Check | Advisory (non-blocking) | - |" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           
@@ -2423,7 +2561,53 @@ jobs:
               echo "- **Note**: Documentation files from _toc.yml were updated from main branch while preserving executed notebooks" >> $GITHUB_STEP_SUMMARY
             fi
           fi
-          
+          if [ "${{ inputs.enable-a11y-nb-check }}" = "true" ] || [ "${{ inputs.trigger-event }}" = "a11y-nb-check" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            if find a11y-reports -name '*.json' -print -quit 2>/dev/null | grep -q .; then
+              ISSUE_REPORT_COUNT=$(jq -r 'select(.status == "issues" or .status == "checker-error") | .notebook' a11y-reports/*.json 2>/dev/null | wc -l)
+            else
+              ISSUE_REPORT_COUNT=0
+            fi
+
+            if [ "$ISSUE_REPORT_COUNT" -gt 0 ]; then
+              echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
+              echo "> ## 🔦 Accessibility advisory" >> $GITHUB_STEP_SUMMARY
+              echo "> Accessibility findings do **not** affect the CI or PR check status." >> $GITHUB_STEP_SUMMARY
+              echo "> Review the notebooks below when practical." >> $GITHUB_STEP_SUMMARY
+              echo ">" >> $GITHUB_STEP_SUMMARY
+
+              for report_file in a11y-reports/*.json; do
+                [ -f "$report_file" ] || continue
+                REPORT_STATUS=$(jq -r '.status' "$report_file")
+                [ "$REPORT_STATUS" = "issues" ] || [ "$REPORT_STATUS" = "checker-error" ] || continue
+                NOTEBOOK=$(jq -r '.notebook' "$report_file")
+
+                if [ "$REPORT_STATUS" = "checker-error" ]; then
+                  echo "> ### ⚠️ \`$NOTEBOOK\` — checker could not produce a report" >> $GITHUB_STEP_SUMMARY
+                  echo "> \`\`\`text" >> $GITHUB_STEP_SUMMARY
+                  jq -r '.error' "$report_file" | head -c 4000 | sed 's/^/> /' >> $GITHUB_STEP_SUMMARY
+                  echo "> \`\`\`" >> $GITHUB_STEP_SUMMARY
+                  echo ">" >> $GITHUB_STEP_SUMMARY
+                  continue
+                fi
+
+                ISSUE_COUNT=$(jq -r '.report.summary.totalIssues' "$report_file")
+                echo "> ### ⚠️ \`$NOTEBOOK\` — $ISSUE_COUNT finding(s)" >> $GITHUB_STEP_SUMMARY
+                echo "> | Rule | Cell | Type | Details |" >> $GITHUB_STEP_SUMMARY
+                echo "> |------|------|------|---------|" >> $GITHUB_STEP_SUMMARY
+                while IFS=$'\t' read -r rule cell cell_type description snippet; do
+                  details="$description $snippet"
+                  details=$(printf '%s' "$details" | tr '\n' ' ' | sed 's/|/\\|/g')
+                  rule=$(printf '%s' "$rule" | sed 's/|/\\|/g')
+                  echo "> | $rule | $cell | $cell_type | $details |" >> $GITHUB_STEP_SUMMARY
+                done < <(jq -r '.report.issues[] | [.violationId, .cellIndex, .cellType, .description, .contentSnippet] | @tsv' "$report_file")
+                echo ">" >> $GITHUB_STEP_SUMMARY
+              done
+            else
+              echo "**🔦 Notebook Accessibility Check**" >> $GITHUB_STEP_SUMMARY
+              echo "- **Status**: ✅ No accessibility findings reported." >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           
           # Add error reporting section if there were failures
@@ -2448,8 +2632,8 @@ jobs:
           PROCESS_RESULT="${{ needs.process-notebooks.result }}"
           BUILD_RESULT="${{ needs.build-documentation.result }}"
           DEPRECATION_RESULT="${{ needs.manage-deprecation.result }}"
-          
-          # Count successful and failed jobs
+
+          # Count required-job results only. Accessibility findings are advisory.
           SUCCESS_COUNT=0
           FAILURE_COUNT=0
           
