@@ -32,6 +32,7 @@ jobs:
       
     outputs:
       new_version: ${{ steps.version.outputs.new_tag }}
+      major_version: ${{ steps.version.outputs.major_version }}
       changelog: ${{ steps.version.outputs.changelog }}
     
     steps:
@@ -169,6 +170,18 @@ jobs:
     
         git push origin "${{ steps.version.outputs.new_tag }}"
 
+        # Keep the major-version tag (for example, v1) pointing at the latest
+        # stable release so callers using @v1 receive compatible updates.
+        # Pre-releases do not move the stable floating tag.
+        if [ "${{ github.event.inputs.pre_release }}" != "true" ]; then
+          major_version="${{ steps.version.outputs.major_version }}"
+          git tag -fa "$major_version" "$target_commitish" \
+            -m "Update $major_version to ${{ steps.version.outputs.new_tag }}"
+          git push --force origin "refs/tags/$major_version"
+        else
+          echo "Pre-release detected; leaving ${{ steps.version.outputs.major_version }} unchanged"
+        fi
+
     - name: Write release notes
       run: |
         cat > release-notes.md <<'EOF'
@@ -248,7 +261,7 @@ jobs:
               ### Usage in Workflows:
               \`\`\`yaml
               # Recommended: Pin to major version
-              uses: ${{ github.repository }}/.github/workflows/notebook-ci-unified.yml@v${{ needs.release.outputs.new_version }}
+              uses: ${{ github.repository }}/.github/workflows/notebook-ci-unified.yml@${{ needs.release.outputs.major_version }}
               
               # Conservative: Pin to exact version  
               uses: ${{ github.repository }}/.github/workflows/notebook-ci-unified.yml@${{ needs.release.outputs.new_version }}
