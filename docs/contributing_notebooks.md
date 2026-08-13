@@ -3,12 +3,10 @@
 This document describes the general procedure for contributing notebooks to STScI notebook repos. While individual repos may contain some modifications from this procedure (detailed in the ``CONTRIBUTING.md`` in the repo), this is the general and most detailed description of the process.
 
 
-**THE BELOW NEEDS UPDATING TO NOT BE JDAT-SPECIFIC**
 
+## Development Procedure
 
-## Development Procedure for JDAT Notebooks
-
-This document is a description of the JWST Data Analysis Tools (JDAT) Approach to
+This document describes the STScI approach to
 "Notebook-Driven Development".  The procedures here outline the process for
 getting a notebook through successive development stages to become something
 that can be "live" on the spacetelescope notebooks repository.
@@ -195,16 +193,16 @@ it is supposed to work!
 
 Note also that these steps are slightly different for if you update a notebook after you've created the first pull request - you can skip steps 1-3 and 5.
 
-1. Go to the github working space https://github.com/spacetelescope/dat_pyinthesky and fork the repository to your user account
+1. Go to the github working space https://github.com/spacetelescope/<your-notebook-repo> and fork the repository to your user account
 (button "Fork" in the top right corner).
 
 2. Clone the repository locally on your machine
 
-``git clone git@github.com:username/dat_pyinthesky.git``
+``git clone git@github.com:username/<your-notebook-repo>.git``
 
 3. While this sets up ``origin`` to point to your fork, there is currently no connection to the main ``spacetelescope`` "upstream" repository.  So you can point your local clone to the right repository by doing:
 
-``git remote add upstream https://github.com/spacetelescope/dat_pyinthesky.git``
+``git remote add upstream https://github.com/spacetelescope/<your-notebook-repo>.git``
 
 4. Create a new branch where to start the development and move to that branch
 
@@ -214,7 +212,7 @@ Note also that these steps are slightly different for if you update a notebook a
 
 5. Create a new folder where to develop the notebook
 
-``cd jdat_notebook``
+``cd <your-notebook-repo>``
 
 ``mkdir new_notebook_name``
 
@@ -230,13 +228,12 @@ Note also that these steps are slightly different for if you update a notebook a
 
 (sometimes you have to reset the upstream, so in that case it is ``git push --set-upstream origin new_notebook_branch_name``)
 
-8. When you are happy with your notebook, double check that you have satisfied the thecnical requirements of the specific status
-of your notebook (see above).
+8. When you are happy with your notebook, double check that you have satisfied the technical requirements of the specific status of your notebook (see above).
 
-9. Now you can create a Pull Request from the ``spacetelescope/dat_pyinthesky`` repository. You do that
+9. Now you can create a Pull Request from the ``spacetelescope/<your-notebook-repo>`` repository. You do that
 by clicking on ``New pull request`` on the webpage, then the link ``compare across forks``. Then set the base repository
-to ``spacetelescope/dat_pyinthesky`` and branch ``master`` and the head fork to
-the branch on your personal fork, so repository ``username/dat_pyinthesky`` and branch ``new_notebook_branch_name``. You
+to ``spacetelescope/<your-notebook-repo>`` and branch ``main`` and the head fork to
+the branch on your personal fork, so repository ``username/<your-notebook-repo>`` and branch ``new_notebook_branch_name``. You
 set a title and you click on ``Create pull request``.
 
 One of the team members can then merge your Pull Request.

@@ -1,0 +1,11 @@
+/* Larger STScI logo in the header (Material default is 1.2rem).
+   Also nudge the header taller so the bigger logo isn't clipped. */
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 2.6rem;
+  width: auto;
+}
+
+.md-header__button.md-logo {
+  padding: 0.3rem;
+}

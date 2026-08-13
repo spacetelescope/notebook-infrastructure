@@ -53,7 +53,7 @@ Security-related failures indicate potential vulnerabilities detected by Bandit:
 - **Resolution Steps:**
   - Remove or securely manage any hard-coded sensitive information.
   - Replace insecure code patterns with recommended secure alternatives.
-  - Rerun Bandit locally (`bandit notebook.ipynb`) to confirm the issue is resolved.
+  - Rerun Bandit locally to confirm the issue is resolved. Bandit scans Python, so convert the notebook first: `jupyter nbconvert --to script notebook.ipynb && bandit notebook.py` (the CI performs this conversion for you).
 
 ## Step 5: Re-run CI Checks
 

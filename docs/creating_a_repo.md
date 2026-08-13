@@ -1,8 +1,31 @@
-# Setting Up a New Repository from a GitHub Template
+# Creating a Notebook Repository
 
-This detailed guide will walk you through setting up your own repository using a GitHub template designed specifically for notebook Continuous Integration (CI). This approach provides a structured way to manage and publish your Jupyter notebooks with ease.
+There are two ways to stand up a new notebook repository wired to this CI. Pick the one that matches you.
 
-**Important Note:** Repository creation via the GitHub template button is intended only for non-institute repositories. If you are creating a repository under the institute organization, you must use the Sack bot in the `github_administration` channel (documentation to follow).
+| You are | Use |
+| --- | --- |
+| **STScI staff** (institute repos) | The Slack bot (below) |
+| **Anyone else** (external) | The GitHub template (steps below) |
+
+## Internal (STScI): use the Slack bot
+
+Institute repositories are created with the Slack bot in the `github_administration` channel. Send it:
+
+```
+!CreateRepoFromTemplate spacetelescope <your-repo-name> notebook-ci-template
+```
+
+| Argument | Value | Meaning |
+| --- | --- | --- |
+| Organization | `spacetelescope` | Where the new repo is created |
+| Repository name | `<your-repo-name>` | Your new repo's name, no spaces |
+| Template | `notebook-ci-template` | The CI-ready template to copy from |
+
+The bot creates the repo from the template with the workflows already in place. Once it confirms, follow the customization and publishing steps below (branches, `_toc.yml`/`_config.yml`, the `PYTHON_VERSION` variable, and Pages).
+
+## External: use the GitHub template
+
+If you are outside STScI, create the repo yourself from the template, then follow the steps below. (The "Use this template" button is intended for non-institute repositories; institute repos use the Slack bot above.)
 
 ## Step 1: Using the GitHub Template
 
@@ -62,6 +85,16 @@ Ensure the CI system is working correctly by testing the actions:
 - Commit the changes and submit a pull request (PR) to your repository.
 - After creating the PR, GitHub Actions should automatically start running checks.
 - Verify the "Checks" tab within your PR to confirm actions for notebook validation, execution, and security are running successfully.
+
+## What success looks like
+
+When everything is wired up correctly:
+
+- Your pull requests show green checks for **validation**, **execution**, and **security** in the PR's Checks tab.
+- After merging to `main`, your notebooks publish to your repository's GitHub Pages site (`https://<owner>.github.io/<your-repo>/`).
+- The weekly [scheduled run](scheduled-runs.md) stays green, confirming your notebooks still execute as dependencies and data change over time.
+
+If a check is red, open it from the Checks/Actions tab and read the logs. See [Diagnosing CI Failures](ci_best_practices.md) and [Troubleshooting](troubleshooting-unified.md).
 
 ## Next Steps
 

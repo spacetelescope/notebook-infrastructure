@@ -2,7 +2,16 @@
 
 Welcome to the CI system for Jupyter notebooks! This system is designed to help developers test and validate their notebooks, as well as generate clear documentation for them.
 
-The system is built using GitHub Actions, which are stored in the 'notebooks-actions' repository to allow for global updates. When a user submits a pull request (PR) with a new or updated notebook, the system automatically executes and validates the notebook as a pre-merge check. If the notebook is successfully validated and executed, the executed version of the notebook is pushed to the 'gh-storage' branch to be used in the later weekly validation and execution process.
+!!! note "Source of truth"
+    The CI is implemented as a single unified, reusable workflow
+    (`notebook-ci-unified.yml`) in
+    [`spacetelescope/notebook-ci-actions`](https://github.com/spacetelescope/notebook-ci-actions).
+    That repository is the authoritative description of how the CI behaves; the
+    [Configuration Reference](configuration-reference.md) documents every option.
+
+The reusable workflow lives in
+[`spacetelescope/notebook-ci-actions`](https://github.com/spacetelescope/notebook-ci-actions),
+so updates roll out to every repository at once. When a user submits a pull request (PR) with a new or updated notebook, the system automatically executes and validates the notebook as a pre-merge check. If the notebook is successfully validated and executed, the executed version of the notebook is pushed to the `gh-storage` branch to be used in the later weekly validation and execution process.
 
 Jupyterbook is a powerful tool that allows you to customize the appearance and functionality of your documentation. You can configure the table of contents to your liking, add a Google Analytics tracking ID to gather usage statistics, and even customize the CSS and logos to match your mission.
 
@@ -20,8 +29,8 @@ In addition to the testing and documentation actions, the system also includes a
 
 In addition to running these actions when a PR is submitted, the system also runs weekly execution and validation against the notebooks in the 'gh-storage' branch to ensure that they remain error-free and up-to-date. This helps to ensure that the notebooks are always in good working condition and ready to be used.
 
-If any failures arise during the pre-merge checks or the weekly execution and validation process, they will be reported back and can be accessed through the Actions tab of the repository. This makes it easy to identify and fix any issues that may arise. Additionally, failures during scheduled testing are reported back to slack channels specific to the repository.
+If any failures arise during the pre-merge checks or the weekly execution and validation process, they will be reported back and can be accessed through the Actions tab of the repository. This makes it easy to identify and fix any issues that may arise. Scheduled-testing failures are reported to the repository-specific Slack channel, and GitHub also emails the maintainer who last edited the workflow file. See [Scheduled Weekly Runs](scheduled-runs.md) for how to read and act on them.
 
-To make it easy for developers to get started with the CI system, we've also included a deployable template for new notebook repositories. This template sets up the necessary actions and structure for testing and documentation, so that developers can quickly get their notebooks up and running with the system.
+To make it easy for developers to get started with the CI system, we've also included a deployable template ([`spacetelescope/notebook-ci-template`](https://github.com/spacetelescope/notebook-ci-template)) for new notebook repositories. This template sets up the necessary actions and structure for testing and documentation, so that developers can quickly get their notebooks up and running with the system.
 
 We hope that this CI system helps you easily maintain and improve your notebooks. If you have any questions or suggestions, please don't hesitate to let us know. Happy coding!
