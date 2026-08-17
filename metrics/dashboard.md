@@ -1,6 +1,6 @@
 # Notebook CI Dashboard
 
-_Generated 2026-08-17 04:15 UTC_
+_Generated 2026-08-17 13:29 UTC_
 
 Workflow tracked: `Notebook CI - Scheduled`
 
@@ -9,11 +9,11 @@ Workflow tracked: `Notebook CI - Scheduled`
 | Repository | Latest Failures | New Failures | Resolved | Consistent Failures | Latest Run |
 |---|---:|---:|---:|---:|---|
 | `spacetelescope/hellouniverse` | 0 | 0 | 0 | 0 | [#35](https://github.com/spacetelescope/hellouniverse/actions/runs/24619741210) |
-| `spacetelescope/hst_notebooks` | 6 | 2 | 0 | 4 | [#43](https://github.com/spacetelescope/hst_notebooks/actions/runs/31922062205) |
+| `spacetelescope/hst_notebooks` | 5 | 1 | 0 | 4 | [#43](https://github.com/spacetelescope/hst_notebooks/actions/runs/31922062205) |
 | `spacetelescope/jdat_notebooks` | 7 | 0 | 0 | 7 | [#41](https://github.com/spacetelescope/jdat_notebooks/actions/runs/31922048799) |
 | `spacetelescope/jwst-pipeline-notebooks` | 0 | 0 | 0 | 0 | [#30](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/31922083131) |
 | `spacetelescope/mast_notebooks` | 4 | 0 | 1 | 4 | [#50](https://github.com/spacetelescope/mast_notebooks/actions/runs/31922125149) |
-| `spacetelescope/roman_notebooks` | 2 | 2 | 0 | 0 | [#39](https://github.com/spacetelescope/roman_notebooks/actions/runs/31922049590) |
+| `spacetelescope/roman_notebooks` | 0 | 0 | 0 | 0 | [#39](https://github.com/spacetelescope/roman_notebooks/actions/runs/31922049590) |
 
 ## Latest Failure Count by Repository
 
@@ -22,7 +22,7 @@ xychart-beta
     title "Latest failure count by repository"
     x-axis ["hellouniverse", "hst_notebooks", "jdat_notebooks", "jwst-pipeline-notebooks", "mast_notebooks", "roman_notebooks"]
     y-axis "Failures" 0 --> 8
-    bar [0, 6, 7, 0, 4, 2]
+    bar [0, 5, 7, 0, 4, 0]
 ```
 
 ## Rolling Trend Table
@@ -30,11 +30,11 @@ xychart-beta
 | Repository | 2025-10-05 | 2025-10-12 | 2025-10-19 | 2025-10-26 | 2025-11-02 | 2025-11-09 | 2025-11-16 | 2025-11-23 | 2025-12-21 | 2025-12-28 | 2026-01-04 | 2026-01-11 | 2026-01-18 | 2026-01-25 | 2026-02-01 | 2026-02-08 | 2026-02-15 | 2026-02-22 | 2026-03-01 | 2026-03-08 | 2026-03-15 | 2026-03-22 | 2026-03-29 | 2026-04-05 | 2026-04-12 | 2026-04-19 | 2026-04-26 | 2026-05-03 | 2026-05-10 | 2026-05-17 | 2026-05-24 | 2026-05-31 | 2026-06-07 | 2026-06-14 | 2026-06-21 | 2026-06-28 | 2026-07-05 | 2026-07-12 | 2026-07-19 | 2026-07-26 | 2026-08-02 | 2026-08-09 | 2026-08-16 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | `spacetelescope/hellouniverse` | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 5 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `spacetelescope/hst_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 3 | 3 | 3 | 3 | 3 | 5 | 5 | 3 | 8 | 5 | 4 | 3 | 4 | 5 | 5 | 5 | 4 | 4 | 5 | 4 | 4 | 4 | 4 | 4 | 4 | 6 |
+| `spacetelescope/hst_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 3 | 3 | 3 | 3 | 3 | 5 | 5 | 3 | 8 | 5 | 4 | 3 | 4 | 5 | 5 | 5 | 4 | 4 | 5 | 4 | 4 | 4 | 4 | 4 | 4 | 5 |
 | `spacetelescope/jdat_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 10 | 10 | 10 | 10 | 4 | 4 | 4 | 14 | 10 | 10 | 5 | 5 | 3 | 3 | 3 | 4 | 4 | 4 | 7 | 7 | 7 | 7 | 7 | 7 | 7 |
 | `spacetelescope/jwst-pipeline-notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 4 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `spacetelescope/mast_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 7 | 7 | 7 | 5 | 7 | 7 | 6 | 5 | 4 | 2 | 2 | 3 | 1 | 4 | 3 | 2 | 4 | 4 | 3 | 3 | 4 | 3 | 4 | 6 | 5 | 4 |
-| `spacetelescope/roman_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 9 | 9 | 9 | 9 | 9 | 9 | 9 | 9 | 11 | 10 | 12 | 11 | 11 | 10 | 5 | 1 | 2 | 2 | 2 | 2 | 2 | 3 | 6 | 0 | 0 | 2 |
+| `spacetelescope/roman_notebooks` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 9 | 9 | 9 | 9 | 9 | 9 | 9 | 9 | 11 | 10 | 12 | 11 | 11 | 10 | 5 | 1 | 2 | 2 | 2 | 2 | 2 | 3 | 6 | 0 | 0 | 0 |
 
 ## Per-Repository Trends
 
@@ -84,7 +84,7 @@ xychart-beta
     title "hst_notebooks failure trend"
     x-axis ["2026-02-22", "2026-03-01", "2026-03-08", "2026-03-15", "2026-03-22", "2026-03-29", "2026-04-05", "2026-04-12", "2026-04-19", "2026-04-26", "2026-05-03", "2026-05-10", "2026-05-17", "2026-05-24", "2026-05-31", "2026-06-07", "2026-06-14", "2026-06-21", "2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19", "2026-07-26", "2026-08-02", "2026-08-09", "2026-08-16"]
     y-axis "Failures" 0 --> 9
-    line [3, 3, 3, 3, 3, 5, 5, 3, 8, 5, 4, 3, 4, 5, 5, 5, 4, 4, 5, 4, 4, 4, 4, 4, 4, 6]
+    line [3, 3, 3, 3, 3, 5, 5, 3, 8, 5, 4, 3, 4, 5, 5, 5, 4, 4, 5, 4, 4, 4, 4, 4, 4, 5]
 ```
 
 | Date | Failures | New | Resolved | Consistent | Latest Run |
@@ -114,7 +114,7 @@ xychart-beta
 | 2026-07-26 | 4 | 0 | 0 | 4 | [#40](https://github.com/spacetelescope/hst_notebooks/actions/runs/30185717220) |
 | 2026-08-02 | 4 | 0 | 0 | 4 | [#41](https://github.com/spacetelescope/hst_notebooks/actions/runs/30730129901) |
 | 2026-08-09 | 4 | 0 | 0 | 4 | [#42](https://github.com/spacetelescope/hst_notebooks/actions/runs/31291038879) |
-| 2026-08-16 | 6 | 2 | 0 | 4 | [#43](https://github.com/spacetelescope/hst_notebooks/actions/runs/31922062205) |
+| 2026-08-16 | 5 | 1 | 0 | 4 | [#43](https://github.com/spacetelescope/hst_notebooks/actions/runs/31922062205) |
 
 ### `spacetelescope/jdat_notebooks`
 
@@ -240,7 +240,7 @@ xychart-beta
     title "roman_notebooks failure trend"
     x-axis ["2026-02-22", "2026-03-01", "2026-03-08", "2026-03-15", "2026-03-22", "2026-03-29", "2026-04-05", "2026-04-12", "2026-04-19", "2026-04-26", "2026-05-03", "2026-05-10", "2026-05-17", "2026-05-24", "2026-05-31", "2026-06-07", "2026-06-14", "2026-06-21", "2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19", "2026-07-26", "2026-08-02", "2026-08-09", "2026-08-16"]
     y-axis "Failures" 0 --> 13
-    line [9, 9, 9, 9, 9, 9, 9, 9, 11, 10, 12, 11, 11, 10, 5, 1, 2, 2, 2, 2, 2, 3, 6, 0, 0, 2]
+    line [9, 9, 9, 9, 9, 9, 9, 9, 11, 10, 12, 11, 11, 10, 5, 1, 2, 2, 2, 2, 2, 3, 6, 0, 0, 0]
 ```
 
 | Date | Failures | New | Resolved | Consistent | Latest Run |
@@ -270,4 +270,4 @@ xychart-beta
 | 2026-07-26 | 6 | 3 | 0 | 3 | [#36](https://github.com/spacetelescope/roman_notebooks/actions/runs/30185687556) |
 | 2026-08-02 | 0 | 0 | 6 | 0 | [#37](https://github.com/spacetelescope/roman_notebooks/actions/runs/30730102843) |
 | 2026-08-09 | 0 | 0 | 0 | 0 | [#38](https://github.com/spacetelescope/roman_notebooks/actions/runs/31291004315) |
-| 2026-08-16 | 2 | 2 | 0 | 0 | [#39](https://github.com/spacetelescope/roman_notebooks/actions/runs/31922049590) |
+| 2026-08-16 | 0 | 0 | 0 | 0 | [#39](https://github.com/spacetelescope/roman_notebooks/actions/runs/31922049590) |
