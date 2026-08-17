@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-17T04:15:48Z",
+  "generated_at": "2026-08-17T13:29:19Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -272,16 +272,16 @@
         "created_at": "2026-08-09T02:46:34Z"
       },
       "summary": {
-        "fail_latest": 6,
-        "pass_latest": 71,
+        "fail_latest": 5,
+        "pass_latest": 72,
         "total_latest": 77,
         "fail_previous": 4,
         "pass_previous": 73,
         "total_previous": 77,
-        "new_failures": 2,
+        "new_failures": 1,
         "resolved_failures": 0,
         "consistent_failures": 4,
-        "consistent_successes": 71
+        "consistent_successes": 72
       },
       "recent_notebooks_60d": [
         {
@@ -294,7 +294,6 @@
       ],
       "details": {
         "new_failures": [
-          "notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb",
           "notebooks/STIS/drizpac_notebook/STIS_DrizzlePac_Tutorial.ipynb"
         ],
         "resolved_failures": [],
@@ -342,6 +341,7 @@
           "notebooks/DrizzlePac/align_sparse_fields/align_sparse_fields.ipynb",
           "notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb",
           "notebooks/DrizzlePac/drizzle_wfpc2/drizzle_wfpc2.ipynb",
+          "notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb",
           "notebooks/DrizzlePac/optimize_image_sampling/optimize_image_sampling.ipynb",
           "notebooks/HASP/CoaddTutorial/CoaddTutorial.ipynb",
           "notebooks/HASP/DataDiagnostic/DataDiagnostics.ipynb",
@@ -395,16 +395,16 @@
         "created_at": "2026-08-09T02:45:37Z"
       },
       "summary": {
-        "fail_latest": 2,
-        "pass_latest": 35,
+        "fail_latest": 0,
+        "pass_latest": 37,
         "total_latest": 37,
         "fail_previous": 0,
         "pass_previous": 36,
         "total_previous": 37,
-        "new_failures": 2,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 0,
-        "consistent_successes": 34
+        "consistent_successes": 36
       },
       "recent_notebooks_60d": [
         {
@@ -452,7 +452,7 @@
         {
           "notebook": "notebooks/crds_reference_files/flat_reffile.ipynb",
           "added_at": "2026-07-07",
-          "current_status": "failure",
+          "current_status": "success",
           "latest_run_url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/31922049590",
           "latest_run_number": 39
         },
@@ -473,7 +473,7 @@
         {
           "notebook": "notebooks/crds_reference_files/photom_reffile.ipynb",
           "added_at": "2026-07-07",
-          "current_status": "failure",
+          "current_status": "success",
           "latest_run_url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/31922049590",
           "latest_run_number": 39
         },
@@ -528,10 +528,7 @@
         }
       ],
       "details": {
-        "new_failures": [
-          "notebooks/crds_reference_files/flat_reffile.ipynb",
-          "notebooks/crds_reference_files/photom_reffile.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [],
         "consistent_successes": [
@@ -544,8 +541,10 @@
           "notebooks/crds_reference_files/crds_reference_files.ipynb",
           "notebooks/crds_reference_files/dark_reffile.ipynb",
           "notebooks/crds_reference_files/distortion_reffile.ipynb",
+          "notebooks/crds_reference_files/flat_reffile.ipynb",
           "notebooks/crds_reference_files/gain_reffile.ipynb",
           "notebooks/crds_reference_files/linearity_reffile.ipynb",
+          "notebooks/crds_reference_files/photom_reffile.ipynb",
           "notebooks/crds_reference_files/psf_reffile.ipynb",
           "notebooks/crds_reference_files/readnoise_reffile.ipynb",
           "notebooks/crds_reference_files/reference_pixel_reffile.ipynb",

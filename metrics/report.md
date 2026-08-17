@@ -1,6 +1,6 @@
 # Notebook CI – Latest vs Previous Run Comparison
 
-_Generated 2026-08-17 04:15 UTC_
+_Generated 2026-08-17 13:29 UTC_
 
 Workflow name: `Notebook CI - Scheduled`
 
@@ -11,8 +11,8 @@ Workflow name: `Notebook CI - Scheduled`
 | `spacetelescope/hellouniverse` | [#35](https://github.com/spacetelescope/hellouniverse/actions/runs/24619741210) | [#34](https://github.com/spacetelescope/hellouniverse/actions/runs/24297475556) | 0 | 0 | 0 | 0 |
 | `spacetelescope/mast_notebooks` | [#50](https://github.com/spacetelescope/mast_notebooks/actions/runs/31922125149) | [#49](https://github.com/spacetelescope/mast_notebooks/actions/runs/31291096091) | 0 | 1 | 4 | 4 |
 | `spacetelescope/jdat_notebooks` | [#41](https://github.com/spacetelescope/jdat_notebooks/actions/runs/31922048799) | [#40](https://github.com/spacetelescope/jdat_notebooks/actions/runs/31291008145) | 0 | 0 | 7 | 7 |
-| `spacetelescope/hst_notebooks` | [#43](https://github.com/spacetelescope/hst_notebooks/actions/runs/31922062205) | [#42](https://github.com/spacetelescope/hst_notebooks/actions/runs/31291038879) | 2 | 0 | 4 | 6 |
-| `spacetelescope/roman_notebooks` | [#39](https://github.com/spacetelescope/roman_notebooks/actions/runs/31922049590) | [#38](https://github.com/spacetelescope/roman_notebooks/actions/runs/31291004315) | 2 | 0 | 0 | 2 |
+| `spacetelescope/hst_notebooks` | [#43](https://github.com/spacetelescope/hst_notebooks/actions/runs/31922062205) | [#42](https://github.com/spacetelescope/hst_notebooks/actions/runs/31291038879) | 1 | 0 | 4 | 5 |
+| `spacetelescope/roman_notebooks` | [#39](https://github.com/spacetelescope/roman_notebooks/actions/runs/31922049590) | [#38](https://github.com/spacetelescope/roman_notebooks/actions/runs/31291004315) | 0 | 0 | 0 | 0 |
 | `spacetelescope/jwst-pipeline-notebooks` | [#30](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/31922083131) | [#29](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/31291054475) | 0 | 0 | 0 | 0 |
 
 ## Per-Repository Details
@@ -260,16 +260,15 @@ _No resolved failures_
 
 | | Run | Date | Pass | Fail | Total |
 |---|---|---|---|---|---|
-| **Latest** | [#43](https://github.com/spacetelescope/hst_notebooks/actions/runs/31922062205) | 2026-08-16 | 71 | 6 | 77 |
+| **Latest** | [#43](https://github.com/spacetelescope/hst_notebooks/actions/runs/31922062205) | 2026-08-16 | 72 | 5 | 77 |
 | **Previous** | [#42](https://github.com/spacetelescope/hst_notebooks/actions/runs/31291038879) | 2026-08-09 | 73 | 4 | 77 |
 
-- **New failures:** 2
+- **New failures:** 1
 - **Resolved failures:** 0
 - **Consistent failures:** 4
 
-### 🔴 New Failures (2)
+### 🔴 New Failures (1)
 
-- `notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb`
 - `notebooks/STIS/drizpac_notebook/STIS_DrizzlePac_Tutorial.ipynb`
 
 ### 🟢 Resolved Failures (0)
@@ -283,7 +282,7 @@ _No resolved failures_
 - `notebooks/HASP/FluxScaleTutorial/FluxScaleTutorial.ipynb`
 - `notebooks/HASP/WavelengthAdjustment/WavelengthAdjustment.ipynb`
 
-### ✅ Consistent Successes (71)
+### ✅ Consistent Successes (72)
 
 <details>
 <summary>Click to expand</summary>
@@ -325,6 +324,7 @@ _No resolved failures_
 - `notebooks/DrizzlePac/align_sparse_fields/align_sparse_fields.ipynb`
 - `notebooks/DrizzlePac/align_to_catalogs/align_to_catalogs.ipynb`
 - `notebooks/DrizzlePac/drizzle_wfpc2/drizzle_wfpc2.ipynb`
+- `notebooks/DrizzlePac/mask_satellite/mask_satellite.ipynb`
 - `notebooks/DrizzlePac/optimize_image_sampling/optimize_image_sampling.ipynb`
 - `notebooks/HASP/CoaddTutorial/CoaddTutorial.ipynb`
 - `notebooks/HASP/DataDiagnostic/DataDiagnostics.ipynb`
@@ -367,17 +367,16 @@ _No resolved failures_
 
 | | Run | Date | Pass | Fail | Total |
 |---|---|---|---|---|---|
-| **Latest** | [#39](https://github.com/spacetelescope/roman_notebooks/actions/runs/31922049590) | 2026-08-16 | 35 | 2 | 37 |
+| **Latest** | [#39](https://github.com/spacetelescope/roman_notebooks/actions/runs/31922049590) | 2026-08-16 | 37 | 0 | 37 |
 | **Previous** | [#38](https://github.com/spacetelescope/roman_notebooks/actions/runs/31291004315) | 2026-08-09 | 36 | 0 | 37 |
 
-- **New failures:** 2
+- **New failures:** 0
 - **Resolved failures:** 0
 - **Consistent failures:** 0
 
-### 🔴 New Failures (2)
+### 🔴 New Failures (0)
 
-- `notebooks/crds_reference_files/flat_reffile.ipynb`
-- `notebooks/crds_reference_files/photom_reffile.ipynb`
+_No new failures_ ✅
 
 ### 🟢 Resolved Failures (0)
 
@@ -387,7 +386,7 @@ _No resolved failures_
 
 _No consistent failures_ ✅
 
-### ✅ Consistent Successes (34)
+### ✅ Consistent Successes (36)
 
 <details>
 <summary>Click to expand</summary>
@@ -401,8 +400,10 @@ _No consistent failures_ ✅
 - `notebooks/crds_reference_files/crds_reference_files.ipynb`
 - `notebooks/crds_reference_files/dark_reffile.ipynb`
 - `notebooks/crds_reference_files/distortion_reffile.ipynb`
+- `notebooks/crds_reference_files/flat_reffile.ipynb`
 - `notebooks/crds_reference_files/gain_reffile.ipynb`
 - `notebooks/crds_reference_files/linearity_reffile.ipynb`
+- `notebooks/crds_reference_files/photom_reffile.ipynb`
 - `notebooks/crds_reference_files/psf_reffile.ipynb`
 - `notebooks/crds_reference_files/readnoise_reffile.ipynb`
 - `notebooks/crds_reference_files/reference_pixel_reffile.ipynb`
