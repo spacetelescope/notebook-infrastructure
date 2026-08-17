@@ -8,6 +8,12 @@ on:
       - "mkdocs.yml"
       - "requirements-docs.txt"
       - ".github/workflows/docs.yml"
+
+  workflow_run:
+    workflows: ["Cross-Repo Notebook CI Metrics v2"]
+    types:
+      - completed
+
   workflow_dispatch:
 
 permissions:
@@ -21,24 +27,60 @@ concurrency:
 
 jobs:
   build:
+    # Normal pushes/manual runs always build.
+    # Metrics-triggered runs only build if metrics succeeded.
+    if: >
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # Explicitly grab documentation source from main.
+      - name: Checkout documentation source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # Grab the legacy metrics directory from gh-pages.
+      - name: Checkout legacy metrics
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: legacy-pages
+          sparse-checkout: |
+            metrics
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r requirements-docs.txt
-      - run: mkdocs build --strict
-      - uses: actions/upload-pages-artifact@v3
+
+      - name: Install documentation dependencies
+        run: pip install -r requirements-docs.txt
+
+      - name: Build MkDocs
+        run: mkdocs build --strict
+
+      - name: Add metrics dashboard
+        run: |
+          mkdir -p site/metrics
+          cp -a legacy-pages/metrics/. site/metrics/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
           path: site
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - id: deployment
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
