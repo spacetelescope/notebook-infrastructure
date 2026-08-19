@@ -2,7 +2,10 @@
 
 ## Overview
 
-The `notebook-infrastructure` repository provides standards and software infrastructure to support Jupyter notebooks intended for public consumption at the Space Telescope Science Institute (STScI). It includes documentation, templates, and tools to assist with the creation, management, and deployment of high-quality, reviewable notebooks.
+This repository is for notebook maintainers and writers. If you are looking for user-facing materials, please see the [notebooks homepage](https://spacetelescope.github.io/notebook-infrastructure/). 
+
+
+`notebook-infrastructure` provides templates and software infrastructure to support developing Jupyter notebook collections. It includes documentation, templates, and tools to assist with the creation, management, and deployment of high-quality, reviewable notebooks.
 
 ## Repository Structure
 
