@@ -61,6 +61,41 @@
       <!-- OVERVIEW -->
       <div id="overviewView">
         <section id="kpis" class="kpis"></section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Notebook Success Rate</h3>
+              <p class="muted">Share of notebooks passing, latest run vs previous run</p>
+            </div>
+            <span id="successRateDelta" class="badge blue">—</span>
+          </div>
+
+          <div class="success-rate-body">
+            <div class="success-rate-headline">
+              <div id="successRateLatest" class="success-rate-value">—</div>
+              <div id="successRateCaption" class="muted">Loading…</div>
+            </div>
+
+            <div class="success-rate-bars">
+              <div class="rate-row">
+                <div class="rate-label">Latest</div>
+                <div class="rate-track">
+                  <div id="rateFillLatest" class="rate-fill latest"></div>
+                </div>
+                <div id="rateFigureLatest" class="rate-figure">—</div>
+              </div>
+              <div class="rate-row">
+                <div class="rate-label">Previous</div>
+                <div class="rate-track">
+                  <div id="rateFillPrevious" class="rate-fill previous"></div>
+                </div>
+                <div id="rateFigurePrevious" class="rate-figure">—</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="panel-grid">
           <section class="panel">
             <div class="panel-header">
@@ -109,31 +144,31 @@
               <canvas id="repoChart"></canvas>
             </div>
           </section>
-        </section>
 
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3>Repository Summary</h3>
-              <p class="muted">Current state across all monitored repositories</p>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Repository Summary</h3>
+                <p class="muted">Current state across all monitored repositories</p>
+              </div>
             </div>
-          </div>
 
-          <div class="table-wrap">
-            <table id="repoTable">
-              <thead>
-                <tr>
-                  <th>Repository</th>
-                  <th>Failures</th>
-                  <th>New</th>
-                  <th>Resolved</th>
-                  <th>Consistent</th>
-                  <th>Latest Run</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
+            <div class="table-wrap">
+              <table id="repoTable">
+                <thead>
+                  <tr>
+                    <th>Repository</th>
+                    <th>Failures</th>
+                    <th>New</th>
+                    <th>Resolved</th>
+                    <th>Consistent</th>
+                    <th>Latest Run</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
         </section>
 
         <section class="panel">

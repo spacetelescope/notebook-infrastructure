@@ -144,6 +144,61 @@ function renderKpis(data, errorsCount) {
   }
 }
 
+function successRate(pass, total) {
+  if (!total) return null;
+  return (pass / total) * 100;
+}
+
+function formatRate(rate) {
+  return rate === null ? "—" : `${rate.toFixed(1)}%`;
+}
+
+function renderSuccessRate(data) {
+  const totals = data.reduce((acc, d) => {
+    acc.passLatest += d.summary.pass_latest || 0;
+    acc.totalLatest += d.summary.total_latest || 0;
+    acc.passPrevious += d.summary.pass_previous || 0;
+    acc.totalPrevious += d.summary.total_previous || 0;
+    return acc;
+  }, { passLatest: 0, totalLatest: 0, passPrevious: 0, totalPrevious: 0 });
+
+  const latestRate = successRate(totals.passLatest, totals.totalLatest);
+  const previousRate = successRate(totals.passPrevious, totals.totalPrevious);
+
+  requireEl("successRateLatest").textContent = formatRate(latestRate);
+  requireEl("successRateCaption").textContent = totals.totalLatest
+    ? `${totals.passLatest} of ${totals.totalLatest} notebooks passing in the latest run`
+    : "No notebook results in the latest run";
+
+  requireEl("rateFigureLatest").textContent = totals.totalLatest
+    ? `${formatRate(latestRate)} · ${totals.passLatest}/${totals.totalLatest}`
+    : "—";
+  requireEl("rateFigurePrevious").textContent = totals.totalPrevious
+    ? `${formatRate(previousRate)} · ${totals.passPrevious}/${totals.totalPrevious}`
+    : "—";
+
+  requireEl("rateFillLatest").style.width = `${latestRate ?? 0}%`;
+  requireEl("rateFillPrevious").style.width = `${previousRate ?? 0}%`;
+
+  const delta = requireEl("successRateDelta");
+
+  if (latestRate === null || previousRate === null) {
+    delta.className = "badge blue";
+    delta.textContent = "No comparison";
+    return;
+  }
+
+  const diff = latestRate - previousRate;
+
+  if (Math.abs(diff) < 0.05) {
+    delta.className = "badge blue";
+    delta.textContent = "No change";
+  } else {
+    delta.className = `badge ${diff > 0 ? "green" : "red"}`;
+    delta.textContent = `${diff > 0 ? "▲" : "▼"} ${Math.abs(diff).toFixed(1)} pts vs previous`;
+  }
+}
+
 function renderRepoNav(data, filter = "") {
   const nav = requireEl("repoNav");
   nav.innerHTML = "";
@@ -533,6 +588,7 @@ function rerender() {
   const repoFilter = requireEl("repoSearch").value || "";
 
   renderKpis(scoped, 0);
+  renderSuccessRate(scoped);
   renderRepoNav(scoped, repoFilter);
   renderRepoTable(scoped);
   renderRecentNotebookTable(scoped);
