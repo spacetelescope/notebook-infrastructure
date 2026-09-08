@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T04:06:32Z",
+  "generated_at": "2026-09-08T14:21:08Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -58,7 +58,7 @@
       },
       "summary": {
         "fail_latest": 9,
-        "pass_latest": 77,
+        "pass_latest": 78,
         "total_latest": 88,
         "fail_previous": 7,
         "pass_previous": 81,
@@ -66,7 +66,7 @@
         "new_failures": 4,
         "resolved_failures": 1,
         "consistent_failures": 5,
-        "consistent_successes": 76
+        "consistent_successes": 77
       },
       "recent_notebooks_60d": [
         {
@@ -80,9 +80,9 @@
       "details": {
         "new_failures": [
           "notebooks/SDSS/SDSS_LEGACY_IMAGING_cmd/cmd_diagram.ipynb",
+          "notebooks/SDSS/SDSS_LEGACY_IMAGING_galaxy_morphology/galaxy_morphology.ipynb",
           "notebooks/SDSS/eBOSS_HST_hubbles_law/hubbles_law.ipynb",
-          "notebooks/TESS/making_tess_cubes_and_cutouts/making_tess_cubes_and_cutouts.ipynb",
-          "notebooks/multi_mission/beginner_zcut/beginner_zcut.ipynb"
+          "notebooks/TESS/making_tess_cubes_and_cutouts/making_tess_cubes_and_cutouts.ipynb"
         ],
         "resolved_failures": [
           "notebooks/SDSS/SDSS_SEGUE_spectra/sdss_stellar_spectra.ipynb"
@@ -164,6 +164,7 @@
           "notebooks/TESS/interm_tesscut_dss_overlay/interm_tesscut_dss_overlay.ipynb",
           "notebooks/TESS/interm_tesscut_requests/interm_tesscut_requests.ipynb",
           "notebooks/Visualizations/mast_sky/mast_sky.ipynb",
+          "notebooks/multi_mission/beginner_zcut/beginner_zcut.ipynb",
           "notebooks/multi_mission/cloud_data_access/cloud_data_access.ipynb",
           "notebooks/multi_mission/display_footprints/display_footprints.ipynb",
           "notebooks/multi_mission/large_downloads/large_downloads.ipynb",
@@ -173,11 +174,6 @@
           "notebooks/multi_mission/wildcard_searches/wildcard_searches.ipynb"
         ],
         "changed_other": [
-          {
-            "notebook": "notebooks/SDSS/SDSS_LEGACY_IMAGING_galaxy_morphology/galaxy_morphology.ipynb",
-            "previous": "success",
-            "current": "cancelled"
-          },
           {
             "notebook": "notebooks/multi_mission/beginner_search/beginner_search.ipynb",
             "previous": "failure",
@@ -406,16 +402,16 @@
         "created_at": "2026-08-30T02:21:19Z"
       },
       "summary": {
-        "fail_latest": 3,
-        "pass_latest": 33,
+        "fail_latest": 2,
+        "pass_latest": 34,
         "total_latest": 37,
         "fail_previous": 2,
         "pass_previous": 35,
         "total_previous": 37,
-        "new_failures": 1,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 2,
-        "consistent_successes": 33
+        "consistent_successes": 34
       },
       "recent_notebooks_60d": [
         {
@@ -448,9 +444,7 @@
         }
       ],
       "details": {
-        "new_failures": [
-          "notebooks/crds_reference_files/gain_reffile.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/aperture_photometry/aperture_photometry.ipynb",
@@ -466,6 +460,7 @@
           "notebooks/crds_reference_files/dark_reffile.ipynb",
           "notebooks/crds_reference_files/distortion_reffile.ipynb",
           "notebooks/crds_reference_files/flat_reffile.ipynb",
+          "notebooks/crds_reference_files/gain_reffile.ipynb",
           "notebooks/crds_reference_files/linearity_reffile.ipynb",
           "notebooks/crds_reference_files/photom_reffile.ipynb",
           "notebooks/crds_reference_files/psf_reffile.ipynb",
@@ -515,22 +510,20 @@
         "created_at": "2026-08-30T02:24:39Z"
       },
       "summary": {
-        "fail_latest": 1,
-        "pass_latest": 16,
+        "fail_latest": 0,
+        "pass_latest": 17,
         "total_latest": 17,
         "fail_previous": 0,
         "pass_previous": 17,
         "total_previous": 17,
-        "new_failures": 1,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 0,
-        "consistent_successes": 16
+        "consistent_successes": 17
       },
       "recent_notebooks_60d": [],
       "details": {
-        "new_failures": [
-          "notebooks/NIRCAM/Imaging/JWPipeNB-nircam-imaging.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [],
         "consistent_successes": [
@@ -541,6 +534,7 @@
           "notebooks/MIRI/LRS-slitless-TSO/JWPipeNB-MIRI-LRS-slitless-TSO.ipynb",
           "notebooks/MIRI/MRS/JWPipeNB-MIRI-MRS.ipynb",
           "notebooks/NIRCAM/Coronagraphy/JWPipeNB-nircam-coronagraphy.ipynb",
+          "notebooks/NIRCAM/Imaging/JWPipeNB-nircam-imaging.ipynb",
           "notebooks/NIRCAM/LW_Grism_Time_Series/JWPipeNB-NIRCam-LWGTS.ipynb",
           "notebooks/NIRISS/AMI/JWPipeNB-niriss-ami.ipynb",
           "notebooks/NIRISS/Imaging/JWPipeNB-niriss-imaging.ipynb",
