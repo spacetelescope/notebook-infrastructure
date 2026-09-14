@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-08T14:21:08Z",
+  "generated_at": "2026-09-14T04:06:42Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -47,52 +47,54 @@
     {
       "repo": "spacetelescope/mast_notebooks",
       "latest_run": {
+        "number": 54,
+        "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/34733057128",
+        "created_at": "2026-09-13T02:26:36Z"
+      },
+      "previous_run": {
         "number": 53,
         "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/34006477760",
         "created_at": "2026-09-06T02:26:16Z"
       },
-      "previous_run": {
-        "number": 52,
-        "url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/33287994179",
-        "created_at": "2026-08-30T02:26:41Z"
-      },
       "summary": {
-        "fail_latest": 9,
-        "pass_latest": 78,
+        "fail_latest": 8,
+        "pass_latest": 80,
         "total_latest": 88,
-        "fail_previous": 7,
-        "pass_previous": 81,
+        "fail_previous": 9,
+        "pass_previous": 78,
         "total_previous": 88,
-        "new_failures": 4,
-        "resolved_failures": 1,
+        "new_failures": 3,
+        "resolved_failures": 4,
         "consistent_failures": 5,
-        "consistent_successes": 77
+        "consistent_successes": 75
       },
       "recent_notebooks_60d": [
         {
           "notebook": "notebooks/HSC/HSCV4_SMC_CASJOBS/hscv4_smc_casjobs.ipynb",
           "added_at": "2026-08-21",
           "current_status": "success",
-          "latest_run_url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/34006477760",
-          "latest_run_number": 53
+          "latest_run_url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/34733057128",
+          "latest_run_number": 54
         }
       ],
       "details": {
         "new_failures": [
+          "notebooks/HSC/HCV_API/HCV_API_demo.ipynb",
+          "notebooks/HSC/HCV_CASJOBS/HCV_casjobs_demo.ipynb",
+          "notebooks/HSC/HSCV3_API/hscv3_api.ipynb"
+        ],
+        "resolved_failures": [
           "notebooks/SDSS/SDSS_LEGACY_IMAGING_cmd/cmd_diagram.ipynb",
           "notebooks/SDSS/SDSS_LEGACY_IMAGING_galaxy_morphology/galaxy_morphology.ipynb",
           "notebooks/SDSS/eBOSS_HST_hubbles_law/hubbles_law.ipynb",
-          "notebooks/TESS/making_tess_cubes_and_cutouts/making_tess_cubes_and_cutouts.ipynb"
-        ],
-        "resolved_failures": [
-          "notebooks/SDSS/SDSS_SEGUE_spectra/sdss_stellar_spectra.ipynb"
+          "notebooks/SDSS/eBOSS_JWST_tutorial/eBOSS_JWST_tutorial.ipynb"
         ],
         "consistent_failures": [
           "execute-all / process-notebooks (notebooks/Kepler/lightkurve_custom_aperture_photometry/lightkurve_custom_apert...",
           "notebooks/HSC/SWEEPS_HSCV3P1/sweeps_hscv3p1.ipynb",
           "notebooks/HSC/SWEEPS_HSCV3P1_API/sweeps_hscv3p1_api.ipynb",
-          "notebooks/SDSS/eBOSS_JWST_tutorial/eBOSS_JWST_tutorial.ipynb",
-          "notebooks/TESS/beginner_tess_tap_search/beginner_tess_tap_search.ipynb"
+          "notebooks/TESS/beginner_tess_tap_search/beginner_tess_tap_search.ipynb",
+          "notebooks/TESS/making_tess_cubes_and_cutouts/making_tess_cubes_and_cutouts.ipynb"
         ],
         "consistent_successes": [
           "execute-all / process-notebooks (notebooks/IUE/exploring_UV_extinction_curves/exploring_UV_extinction_curves.ip...",
@@ -123,9 +125,6 @@
           "execute-all / process-notebooks (notebooks/multi_mission/galex_panstarrs_bulk_download/galex_panstarrs_bulk_dow...",
           "execute-all / process-notebooks (notebooks/multi_mission/historic_quasar_observations/historic_quasar_observati...",
           "notebooks/GALEX/mis_mosaic/mis_mosaic.ipynb",
-          "notebooks/HSC/HCV_API/HCV_API_demo.ipynb",
-          "notebooks/HSC/HCV_CASJOBS/HCV_casjobs_demo.ipynb",
-          "notebooks/HSC/HSCV3_API/hscv3_api.ipynb",
           "notebooks/HSC/HSCV3_SMC_API/hscv3_smc_api.ipynb",
           "notebooks/HSC/HSCV4_SMC_CASJOBS/hscv4_smc_casjobs.ipynb",
           "notebooks/HSC/HSC_TAP/HSC_TAP.ipynb",
@@ -147,6 +146,7 @@
           "notebooks/PanSTARRS/PS1_image/PS1_image.ipynb",
           "notebooks/SDSS/APOGEE_TESS_tutorial/APOGEE_TESS_tutorial.ipynb",
           "notebooks/SDSS/MaNGA_HST_tutorial/MaNGA_HST_tutorial.ipynb",
+          "notebooks/SDSS/SDSS_SEGUE_spectra/sdss_stellar_spectra.ipynb",
           "notebooks/TESS/asteroid_rotation/asteroid_rotation.ipynb",
           "notebooks/TESS/asteroid_rotation/asteroid_rotation_soutions.ipynb",
           "notebooks/TESS/beginner_astroquery_dv/beginner_astroquery_dv.ipynb",
@@ -176,8 +176,8 @@
         "changed_other": [
           {
             "notebook": "notebooks/multi_mission/beginner_search/beginner_search.ipynb",
-            "previous": "failure",
-            "current": "cancelled"
+            "previous": "cancelled",
+            "current": "success"
           }
         ],
         "only_in_latest": [],
@@ -187,30 +187,33 @@
     {
       "repo": "spacetelescope/jdat_notebooks",
       "latest_run": {
+        "number": 45,
+        "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/34732830884",
+        "created_at": "2026-09-13T02:21:08Z"
+      },
+      "previous_run": {
         "number": 44,
         "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/34006250058",
         "created_at": "2026-09-06T02:20:57Z"
       },
-      "previous_run": {
-        "number": 43,
-        "url": "https://github.com/spacetelescope/jdat_notebooks/actions/runs/33287792138",
-        "created_at": "2026-08-30T02:21:25Z"
-      },
       "summary": {
-        "fail_latest": 7,
-        "pass_latest": 47,
+        "fail_latest": 9,
+        "pass_latest": 45,
         "total_latest": 54,
         "fail_previous": 7,
         "pass_previous": 47,
         "total_previous": 54,
-        "new_failures": 0,
+        "new_failures": 2,
         "resolved_failures": 0,
         "consistent_failures": 7,
-        "consistent_successes": 47
+        "consistent_successes": 45
       },
       "recent_notebooks_60d": [],
       "details": {
-        "new_failures": [],
+        "new_failures": [
+          "execute-all / process-notebooks (notebooks/cross_instrument/update_pure_parallel_wcs/NIRISS_correct_pure_parall...",
+          "notebooks/jdaviz_demo/notebooks/Imviz.ipynb"
+        ],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/MIRI/psf_photometry/miri_1028.ipynb",
@@ -231,7 +234,6 @@
           "execute-all / process-notebooks (notebooks/NIRSpec/transit_spectroscopy_notebook/Exoplanet_Transmission_Spectra...",
           "execute-all / process-notebooks (notebooks/cross_instrument/background_estimation_imaging/Imaging_Sky_Backgroun...",
           "execute-all / process-notebooks (notebooks/cross_instrument/specviz_notebookGUI_interaction/specviz_notebook_gu...",
-          "execute-all / process-notebooks (notebooks/cross_instrument/update_pure_parallel_wcs/NIRISS_correct_pure_parall...",
           "notebooks/MIRI/MIRI_IFU_YSOs_in_the_LMC/isha_nayak_ysos_in_the_lmc.ipynb",
           "notebooks/MIRI/MIRI_LRS_spectral_extraction/miri_lrs_advanced_extraction.ipynb",
           "notebooks/MIRI/MRS_Mstar_analysis/JWST_Mstar_dataAnalysis_analysis.ipynb",
@@ -266,7 +268,6 @@
           "notebooks/cross_instrument/photometry_extragalactic/photutils_example.ipynb",
           "notebooks/example_notebook/example_notebook.ipynb",
           "notebooks/jdaviz_demo/notebooks/Cubeviz.ipynb",
-          "notebooks/jdaviz_demo/notebooks/Imviz.ipynb",
           "notebooks/jdaviz_demo/notebooks/Specviz_Specviz2d.ipynb",
           "notebooks/jdaviz_demo/notebooks/specreduce_extraction.ipynb"
         ],
@@ -278,14 +279,14 @@
     {
       "repo": "spacetelescope/hst_notebooks",
       "latest_run": {
+        "number": 47,
+        "url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/34732901458",
+        "created_at": "2026-09-13T02:22:49Z"
+      },
+      "previous_run": {
         "number": 46,
         "url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/34006322865",
         "created_at": "2026-09-06T02:22:38Z"
-      },
-      "previous_run": {
-        "number": 45,
-        "url": "https://github.com/spacetelescope/hst_notebooks/actions/runs/33287863070",
-        "created_at": "2026-08-30T02:23:16Z"
       },
       "summary": {
         "fail_latest": 5,
@@ -392,59 +393,40 @@
     {
       "repo": "spacetelescope/roman_notebooks",
       "latest_run": {
+        "number": 43,
+        "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/34732814919",
+        "created_at": "2026-09-13T02:20:45Z"
+      },
+      "previous_run": {
         "number": 42,
         "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/34006242984",
         "created_at": "2026-09-06T02:20:48Z"
       },
-      "previous_run": {
-        "number": 41,
-        "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/33287788257",
-        "created_at": "2026-08-30T02:21:19Z"
-      },
       "summary": {
-        "fail_latest": 2,
+        "fail_latest": 3,
         "pass_latest": 34,
         "total_latest": 37,
         "fail_previous": 2,
-        "pass_previous": 35,
+        "pass_previous": 34,
         "total_previous": 37,
-        "new_failures": 0,
+        "new_failures": 1,
         "resolved_failures": 0,
         "consistent_failures": 2,
-        "consistent_successes": 34
+        "consistent_successes": 33
       },
       "recent_notebooks_60d": [
         {
-          "notebook": "notebooks/ccs_simulations/ccs_simulations.ipynb",
-          "added_at": "2026-07-15",
-          "current_status": "success",
-          "latest_run_url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/34006242984",
-          "latest_run_number": 42
-        },
-        {
-          "notebook": "notebooks/data_visualization/jdaviz_data_visualization.ipynb",
-          "added_at": "2026-07-14",
-          "current_status": "success",
-          "latest_run_url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/34006242984",
-          "latest_run_number": 42
-        },
-        {
           "notebook": "notebooks/target_visibility_tool/roman_target_visibility_tool.ipynb",
           "added_at": "2026-07-16",
-          "current_status": "cancelled",
-          "latest_run_url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/34006242984",
-          "latest_run_number": 42
-        },
-        {
-          "notebook": "notebooks/time_domain_analysis/time_domain_analysis.ipynb",
-          "added_at": "2026-07-15",
           "current_status": "success",
-          "latest_run_url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/34006242984",
-          "latest_run_number": 42
+          "latest_run_url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/34732814919",
+          "latest_run_number": 43
         }
       ],
       "details": {
-        "new_failures": [],
+        "new_failures": [
+          "notebooks/crds_reference_files/crds_reference_files.ipynb"
+        ],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/aperture_photometry/aperture_photometry.ipynb",
@@ -456,7 +438,6 @@
           "notebooks/ccs_simulations/ccs_simulations.ipynb",
           "notebooks/crds_reference_files/area_reffile.ipynb",
           "notebooks/crds_reference_files/bad_pixels_mask_reffile.ipynb",
-          "notebooks/crds_reference_files/crds_reference_files.ipynb",
           "notebooks/crds_reference_files/dark_reffile.ipynb",
           "notebooks/crds_reference_files/distortion_reffile.ipynb",
           "notebooks/crds_reference_files/flat_reffile.ipynb",
@@ -489,8 +470,8 @@
         "changed_other": [
           {
             "notebook": "notebooks/target_visibility_tool/roman_target_visibility_tool.ipynb",
-            "previous": "success",
-            "current": "cancelled"
+            "previous": "cancelled",
+            "current": "success"
           }
         ],
         "only_in_latest": [],
@@ -500,19 +481,19 @@
     {
       "repo": "spacetelescope/jwst-pipeline-notebooks",
       "latest_run": {
+        "number": 34,
+        "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/34732971005",
+        "created_at": "2026-09-13T02:24:29Z"
+      },
+      "previous_run": {
         "number": 33,
         "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/34006390763",
         "created_at": "2026-09-06T02:24:15Z"
       },
-      "previous_run": {
-        "number": 32,
-        "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/33287915711",
-        "created_at": "2026-08-30T02:24:39Z"
-      },
       "summary": {
         "fail_latest": 0,
-        "pass_latest": 17,
-        "total_latest": 17,
+        "pass_latest": 18,
+        "total_latest": 18,
         "fail_previous": 0,
         "pass_previous": 17,
         "total_previous": 17,
@@ -521,7 +502,15 @@
         "consistent_failures": 0,
         "consistent_successes": 17
       },
-      "recent_notebooks_60d": [],
+      "recent_notebooks_60d": [
+        {
+          "notebook": "notebooks/NIRCAM/WFSS/JWPipeNB-nircam-wfss.ipynb",
+          "added_at": "2026-09-09",
+          "current_status": "success",
+          "latest_run_url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/34732971005",
+          "latest_run_number": 34
+        }
+      ],
       "details": {
         "new_failures": [],
         "resolved_failures": [],
@@ -546,7 +535,12 @@
           "notebooks/NIRSPEC/MOS/JWPipeNB-NIRSpec-MOS.ipynb"
         ],
         "changed_other": [],
-        "only_in_latest": [],
+        "only_in_latest": [
+          {
+            "notebook": "notebooks/NIRCAM/WFSS/JWPipeNB-nircam-wfss.ipynb",
+            "conclusion": "success"
+          }
+        ],
         "only_in_previous": []
       }
     }
