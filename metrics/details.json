@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-14T04:06:42Z",
+  "generated_at": "2026-09-15T15:14:27Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -197,23 +197,20 @@
         "created_at": "2026-09-06T02:20:57Z"
       },
       "summary": {
-        "fail_latest": 9,
-        "pass_latest": 45,
+        "fail_latest": 7,
+        "pass_latest": 47,
         "total_latest": 54,
         "fail_previous": 7,
         "pass_previous": 47,
         "total_previous": 54,
-        "new_failures": 2,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 7,
-        "consistent_successes": 45
+        "consistent_successes": 47
       },
       "recent_notebooks_60d": [],
       "details": {
-        "new_failures": [
-          "execute-all / process-notebooks (notebooks/cross_instrument/update_pure_parallel_wcs/NIRISS_correct_pure_parall...",
-          "notebooks/jdaviz_demo/notebooks/Imviz.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/MIRI/psf_photometry/miri_1028.ipynb",
@@ -234,6 +231,7 @@
           "execute-all / process-notebooks (notebooks/NIRSpec/transit_spectroscopy_notebook/Exoplanet_Transmission_Spectra...",
           "execute-all / process-notebooks (notebooks/cross_instrument/background_estimation_imaging/Imaging_Sky_Backgroun...",
           "execute-all / process-notebooks (notebooks/cross_instrument/specviz_notebookGUI_interaction/specviz_notebook_gu...",
+          "execute-all / process-notebooks (notebooks/cross_instrument/update_pure_parallel_wcs/NIRISS_correct_pure_parall...",
           "notebooks/MIRI/MIRI_IFU_YSOs_in_the_LMC/isha_nayak_ysos_in_the_lmc.ipynb",
           "notebooks/MIRI/MIRI_LRS_spectral_extraction/miri_lrs_advanced_extraction.ipynb",
           "notebooks/MIRI/MRS_Mstar_analysis/JWST_Mstar_dataAnalysis_analysis.ipynb",
@@ -268,6 +266,7 @@
           "notebooks/cross_instrument/photometry_extragalactic/photutils_example.ipynb",
           "notebooks/example_notebook/example_notebook.ipynb",
           "notebooks/jdaviz_demo/notebooks/Cubeviz.ipynb",
+          "notebooks/jdaviz_demo/notebooks/Imviz.ipynb",
           "notebooks/jdaviz_demo/notebooks/Specviz_Specviz2d.ipynb",
           "notebooks/jdaviz_demo/notebooks/specreduce_extraction.ipynb"
         ],
@@ -403,30 +402,20 @@
         "created_at": "2026-09-06T02:20:48Z"
       },
       "summary": {
-        "fail_latest": 3,
-        "pass_latest": 34,
+        "fail_latest": 2,
+        "pass_latest": 35,
         "total_latest": 37,
         "fail_previous": 2,
         "pass_previous": 34,
         "total_previous": 37,
-        "new_failures": 1,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 2,
-        "consistent_successes": 33
+        "consistent_successes": 34
       },
-      "recent_notebooks_60d": [
-        {
-          "notebook": "notebooks/target_visibility_tool/roman_target_visibility_tool.ipynb",
-          "added_at": "2026-07-16",
-          "current_status": "success",
-          "latest_run_url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/34732814919",
-          "latest_run_number": 43
-        }
-      ],
+      "recent_notebooks_60d": [],
       "details": {
-        "new_failures": [
-          "notebooks/crds_reference_files/crds_reference_files.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/aperture_photometry/aperture_photometry.ipynb",
@@ -438,6 +427,7 @@
           "notebooks/ccs_simulations/ccs_simulations.ipynb",
           "notebooks/crds_reference_files/area_reffile.ipynb",
           "notebooks/crds_reference_files/bad_pixels_mask_reffile.ipynb",
+          "notebooks/crds_reference_files/crds_reference_files.ipynb",
           "notebooks/crds_reference_files/dark_reffile.ipynb",
           "notebooks/crds_reference_files/distortion_reffile.ipynb",
           "notebooks/crds_reference_files/flat_reffile.ipynb",
