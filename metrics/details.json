@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-21T04:06:21Z",
+  "generated_at": "2026-09-21T13:22:29Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -301,22 +301,20 @@
         "created_at": "2026-09-13T02:22:49Z"
       },
       "summary": {
-        "fail_latest": 6,
-        "pass_latest": 71,
+        "fail_latest": 5,
+        "pass_latest": 72,
         "total_latest": 77,
         "fail_previous": 5,
         "pass_previous": 72,
         "total_previous": 77,
-        "new_failures": 1,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 5,
-        "consistent_successes": 71
+        "consistent_successes": 72
       },
       "recent_notebooks_60d": [],
       "details": {
-        "new_failures": [
-          "notebooks/ACS/hst_orbits_ephem/hst_orbits_ephem.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/COS/LSF/LSF.ipynb",
@@ -348,6 +346,7 @@
           "notebooks/ACS/acs_saturation_trails/acs_saturation_trails.ipynb",
           "notebooks/ACS/acs_sbc_dark_analysis/acs_sbc_dark_analysis.ipynb",
           "notebooks/ACS/acs_subarrays/acs_subarrays.ipynb",
+          "notebooks/ACS/hst_orbits_ephem/hst_orbits_ephem.ipynb",
           "notebooks/COS/AsnFile/AsnFile.ipynb",
           "notebooks/COS/CalCOS/CalCOS.ipynb",
           "notebooks/COS/DataDl/DataDl.ipynb",
@@ -416,22 +415,20 @@
         "created_at": "2026-09-13T02:20:45Z"
       },
       "summary": {
-        "fail_latest": 3,
-        "pass_latest": 34,
+        "fail_latest": 2,
+        "pass_latest": 35,
         "total_latest": 37,
         "fail_previous": 2,
         "pass_previous": 35,
         "total_previous": 37,
-        "new_failures": 1,
+        "new_failures": 0,
         "resolved_failures": 0,
         "consistent_failures": 2,
-        "consistent_successes": 34
+        "consistent_successes": 35
       },
       "recent_notebooks_60d": [],
       "details": {
-        "new_failures": [
-          "notebooks/grism_spectral_extraction/grism_spectral_extraction.ipynb"
-        ],
+        "new_failures": [],
         "resolved_failures": [],
         "consistent_failures": [
           "notebooks/aperture_photometry/aperture_photometry.ipynb",
@@ -459,6 +456,7 @@
           "notebooks/data_visualization/jdaviz_data_visualization.ipynb",
           "notebooks/exposure_pipeline/exposure_pipeline.ipynb",
           "notebooks/footprint_visualization/footprint_visualization.ipynb",
+          "notebooks/grism_spectral_extraction/grism_spectral_extraction.ipynb",
           "notebooks/ground_test_analysis/wfi_tvac_brightstar.ipynb",
           "notebooks/measuring_galaxy_shapes/measuring_galaxy_shapes.ipynb",
           "notebooks/mosaic_pipeline/mosaic_pipeline.ipynb",
