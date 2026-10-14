@@ -1,6 +1,6 @@
 # Notebook CI – Latest vs Previous Run Comparison
 
-_Generated 2026-10-12 15:02 UTC_
+_Generated 2026-10-14 15:13 UTC_
 
 Workflow name: `Notebook CI - Scheduled`
 
@@ -10,7 +10,6 @@ Workflow name: `Notebook CI - Scheduled`
 |---|---|---|---:|---:|---:|---:|
 | `spacetelescope/hellouniverse` | [#37](https://github.com/spacetelescope/hellouniverse/actions/runs/38105177034) | [#36](https://github.com/spacetelescope/hellouniverse/actions/runs/37172364549) | 0 | 0 | 1 | 1 |
 | `spacetelescope/mast_notebooks` | [#58](https://github.com/spacetelescope/mast_notebooks/actions/runs/38105675647) | [#57](https://github.com/spacetelescope/mast_notebooks/actions/runs/37173002538) | 0 | 1 | 6 | 6 |
-| `spacetelescope/jdat_notebooks` | [#49](https://github.com/spacetelescope/jdat_notebooks/actions/runs/38105402060) | [#48](https://github.com/spacetelescope/jdat_notebooks/actions/runs/37172730371) | 0 | 0 | 1 | 1 |
 | `spacetelescope/hst_notebooks` | [#51](https://github.com/spacetelescope/hst_notebooks/actions/runs/38105487794) | [#50](https://github.com/spacetelescope/hst_notebooks/actions/runs/37172816569) | 1 | 1 | 5 | 6 |
 | `spacetelescope/roman_notebooks` | [#47](https://github.com/spacetelescope/roman_notebooks/actions/runs/38105383085) | [#46](https://github.com/spacetelescope/roman_notebooks/actions/runs/37172728061) | 2 | 0 | 3 | 5 |
 | `spacetelescope/jwst-pipeline-notebooks` | [#38](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/38105571696) | [#37](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/37172916321) | 1 | 0 | 0 | 1 |
@@ -177,85 +176,6 @@ _No new failures_ ✅
 - `execute-all / process-notebooks (notebooks/PanSTARRS/PS1_20_query_tutorials/PS1_20q_query_cutouts_tutorial/PS1_...` (success)
 - `execute-all / process-notebooks (notebooks/PanSTARRS/PS1_20_query_tutorials/PS1_20q_spatial_binning/PS1_20q_spa...` (success)
 - `notebooks/PanSTARRS/PS1_query_chunking/PS1_query_chunking.ipynb` (success)
-
-
-## `spacetelescope/jdat_notebooks`
-
-| | Run | Date | Pass | Fail | Total |
-|---|---|---|---|---|---|
-| **Latest** | [#49](https://github.com/spacetelescope/jdat_notebooks/actions/runs/38105402060) | 2026-10-11 | 47 | 1 | 48 |
-| **Previous** | [#48](https://github.com/spacetelescope/jdat_notebooks/actions/runs/37172730371) | 2026-10-04 | 47 | 1 | 48 |
-
-- **New failures:** 0
-- **Resolved failures:** 0
-- **Consistent failures:** 1
-
-### 🔴 New Failures (0)
-
-_No new failures_ ✅
-
-### 🟢 Resolved Failures (0)
-
-_No resolved failures_
-
-### 🟡 Consistent Failures (1)
-
-- `notebooks/cross_instrument/rgb_imviz/imviz_rgb_carina.ipynb`
-
-### ✅ Consistent Successes (47)
-
-<details>
-<summary>Click to expand</summary>
-
-- `execute-all / process-notebooks (notebooks/NIRCam/NIRCam_PSF-matched_photometry/NIRCam_PSF_matched_multiband_ph...`
-- `execute-all / process-notebooks (notebooks/NIRCam/NIRCam_WFSS_Box_extraction/BoxExtraction_using_Grismconf_CRDS...`
-- `execute-all / process-notebooks (notebooks/NIRCam/NIRCam_WFSS_simulating_spectra/Simulating_WFSS_spectra_CRDS.i...`
-- `execute-all / process-notebooks (notebooks/NIRISS/NIRISS_WFSS_postpipeline/01_Combine_and_normalize_1D_spectra....`
-- `execute-all / process-notebooks (notebooks/NIRISS/NIRISS_WFSS_postpipeline/03_Spatially_resolved_emission_line_...`
-- `execute-all / process-notebooks (notebooks/NIRSpec/extract_fixedslit_from_mos_ifu/extract_fixedslit_from_mos_if...`
-- `execute-all / process-notebooks (notebooks/NIRSpec/transit_spectroscopy_notebook/Exoplanet_Transmission_Spectra...`
-- `execute-all / process-notebooks (notebooks/cross_instrument/background_estimation_imaging/Imaging_Sky_Backgroun...`
-- `execute-all / process-notebooks (notebooks/cross_instrument/specviz_notebookGUI_interaction/specviz_notebook_gu...`
-- `execute-all / process-notebooks (notebooks/cross_instrument/update_pure_parallel_wcs/NIRISS_correct_pure_parall...`
-- `notebooks/MIRI/MIRI_IFU_YSOs_in_the_LMC/isha_nayak_ysos_in_the_lmc.ipynb`
-- `notebooks/MIRI/MIRI_LRS_spectral_extraction/miri_lrs_advanced_extraction.ipynb`
-- `notebooks/MIRI/MRS_Mstar_analysis/JWST_Mstar_dataAnalysis_analysis.ipynb`
-- `notebooks/MIRI/psf_photometry/miri_photutils.ipynb`
-- `notebooks/MIRI/psf_photometry/miri_spacephot.ipynb`
-- `notebooks/NIRCam/NIRCam_claw_detection/nircam_claw_detection.ipynb`
-- `notebooks/NIRCam/NIRCam_photometry/NIRCam_multiband_photometry.ipynb`
-- `notebooks/NIRCam/NIRCam_wisp_subtraction/nircam_wisp_subtraction.ipynb`
-- `notebooks/NIRCam/aperture_photometry/NIRCam_Aperture_Photometry_Example.ipynb`
-- `notebooks/NIRCam/psf_photometry/NIRCam_PSF_Photometry_Example.ipynb`
-- `notebooks/NIRCam/psf_photometry_basics/psf_photometry_basics.ipynb`
-- `notebooks/NIRCam/psf_photometry_with_space_phot/nircam_spacephot.ipynb`
-- `notebooks/NIRISS/NIRISS_WFSS_postpipeline/00_Optimal_extraction.ipynb`
-- `notebooks/NIRISS/NIRISS_WFSS_postpipeline/02_Cross_correlation_template.ipynb`
-- `notebooks/NIRSpec/IFU_cube_continuum_fit/NGC4151_FeII_ContinuumFit.ipynb`
-- `notebooks/NIRSpec/NIRSpec_NSClean/BOTS_NSClean_example.ipynb`
-- `notebooks/NIRSpec/NIRSpec_NSClean/FS_NSClean_example.ipynb`
-- `notebooks/NIRSpec/NIRSpec_NSClean/IFU_NSClean_example.ipynb`
-- `notebooks/NIRSpec/NIRSpec_NSClean/MOS_NSClean_example.ipynb`
-- `notebooks/NIRSpec/cube_fitting/cube_fitting.ipynb`
-- `notebooks/NIRSpec/galaxy_redshift/redshift_fitting.ipynb`
-- `notebooks/NIRSpec/ifu_optimal/ifu_optimal.ipynb`
-- `notebooks/NIRSpec/mos_master_background/Master_Background_MOS_Demo.ipynb`
-- `notebooks/NIRSpec/mos_slits_to_sky/NIRSpec_MOS_slits_to_sky.ipynb`
-- `notebooks/NIRSpec/mos_spectroscopy_advanced/MOSspec_advanced.ipynb`
-- `notebooks/NIRSpec/msa_metafile/NIRSpec_MOS_MSA_metafile.ipynb`
-- `notebooks/NIRSpec/optimal_extraction/Spectral_Extraction-static.ipynb`
-- `notebooks/cross_instrument/asdf_example/asdf_example.ipynb`
-- `notebooks/cross_instrument/composite_model_fitting/specfit_demo_3.ipynb`
-- `notebooks/cross_instrument/photometry_extragalactic/imviz.ipynb`
-- `notebooks/cross_instrument/photometry_extragalactic/photutils_example.ipynb`
-- `notebooks/cross_instrument/stpsf_examples/stpsf_examples.ipynb`
-- `notebooks/example_notebook/example_notebook.ipynb`
-- `notebooks/jdaviz_demo/notebooks/Cubeviz.ipynb`
-- `notebooks/jdaviz_demo/notebooks/Imviz.ipynb`
-- `notebooks/jdaviz_demo/notebooks/Specviz_Specviz2d.ipynb`
-- `notebooks/jdaviz_demo/notebooks/specreduce_extraction.ipynb`
-
-</details>
 
 
 ## `spacetelescope/hst_notebooks`
@@ -482,3 +402,7 @@ _No consistent failures_ ✅
 
 - `notebooks/MIRI/MRS/JWPipeNB-MIRI-MRS.ipynb`: `success` → `cancelled`
 
+
+## Errors
+
+- `spacetelescope/jdat_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/jdat_notebooks/actions/runs/38105402060/jobs?per_page=100&filter=all
