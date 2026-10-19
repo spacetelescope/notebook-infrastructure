@@ -1,129 +1,81 @@
 {
-  "generated_at": "2026-10-19T15:33:42Z",
+  "generated_at": "2026-10-19T15:45:01Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
-      "repo": "spacetelescope/hellouniverse",
+      "repo": "spacetelescope/jwst-pipeline-notebooks",
       "latest_run": {
+        "number": 39,
+        "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/39089851968",
+        "created_at": "2026-10-18T02:22:28Z"
+      },
+      "previous_run": {
         "number": 38,
-        "url": "https://github.com/spacetelescope/hellouniverse/actions/runs/39089472595",
-        "created_at": "2026-10-18T02:16:01Z"
-      },
-      "previous_run": {
-        "number": 37,
-        "url": "https://github.com/spacetelescope/hellouniverse/actions/runs/38105177034",
-        "created_at": "2026-10-11T02:26:49Z"
+        "url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/38105571696",
+        "created_at": "2026-10-11T02:34:03Z"
       },
       "summary": {
-        "fail_latest": 1,
-        "pass_latest": 5,
-        "total_latest": 6,
+        "fail_latest": 0,
+        "pass_latest": 18,
+        "total_latest": 18,
         "fail_previous": 1,
-        "pass_previous": 5,
-        "total_previous": 6,
+        "pass_previous": 16,
+        "total_previous": 18,
         "new_failures": 0,
-        "resolved_failures": 0,
-        "consistent_failures": 1,
-        "consistent_successes": 5
+        "resolved_failures": 1,
+        "consistent_failures": 0,
+        "consistent_successes": 16
       },
-      "recent_notebooks_60d": [],
+      "recent_notebooks_60d": [
+        {
+          "notebook": "notebooks/NIRCAM/WFSS/JWPipeNB-nircam-wfss.ipynb",
+          "added_at": "2026-09-09",
+          "current_status": "success",
+          "latest_run_url": "https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/39089851968",
+          "latest_run_number": 39
+        }
+      ],
       "details": {
         "new_failures": [],
-        "resolved_failures": [],
-        "consistent_failures": [
-          "execute-all / process-notebooks (notebooks/hello-universe/Classifying_TESS_flares_with_CNNs/Classifying_TESS_fl..."
+        "resolved_failures": [
+          "notebooks/NIRSPEC/MOS/JWPipeNB-NIRSpec-MOS.ipynb"
         ],
+        "consistent_failures": [],
         "consistent_successes": [
-          "execute-all / process-notebooks (notebooks/hello-universe/Classifying_JWST-HST_galaxy_mergers_with_CNNs/Classif...",
-          "execute-all / process-notebooks (notebooks/hello-universe/Classifying_PanSTARRS_sources_with_unsupervised_learn...",
-          "execute-all / process-notebooks (notebooks/hello-universe/Estimating_TESS_rotation_periods_with_CNNs/Estimating...",
-          "execute-all / process-notebooks (notebooks/hello-universe/Regressing_3D-HST_galaxy_redshift_with_decision_trees...",
-          "notebooks/hello-universe/Interpreting_CNNs/Interpreting_CNNs.ipynb"
+          "notebooks/MIRI/Coronagraphy/JWPipeNB-MIRI-Coron.ipynb",
+          "notebooks/MIRI/Imaging-TSO/JWPipeNB-MIRI-imaging-TSO.ipynb",
+          "notebooks/MIRI/Imaging/JWPipeNB-MIRI-imaging.ipynb",
+          "notebooks/MIRI/LRS-slit/JWPipeNB-MIRI-LRS-slit.ipynb",
+          "notebooks/MIRI/LRS-slitless-TSO/JWPipeNB-MIRI-LRS-slitless-TSO.ipynb",
+          "notebooks/NIRCAM/Coronagraphy/JWPipeNB-nircam-coronagraphy.ipynb",
+          "notebooks/NIRCAM/Imaging/JWPipeNB-nircam-imaging.ipynb",
+          "notebooks/NIRCAM/LW_Grism_Time_Series/JWPipeNB-NIRCam-LWGTS.ipynb",
+          "notebooks/NIRCAM/WFSS/JWPipeNB-nircam-wfss.ipynb",
+          "notebooks/NIRISS/AMI/JWPipeNB-niriss-ami.ipynb",
+          "notebooks/NIRISS/Imaging/JWPipeNB-niriss-imaging.ipynb",
+          "notebooks/NIRISS/SOSS/JWPipeNB-niriss-soss.ipynb",
+          "notebooks/NIRISS/WFSS/JWPipeNB-niriss-wfss.ipynb",
+          "notebooks/NIRSPEC/BOTS/JWPipeNB-NIRSpec-BOTS.ipynb",
+          "notebooks/NIRSPEC/FSlit/JWPipeNB-NIRSpec-FS.ipynb",
+          "notebooks/NIRSPEC/IFU/JWPipeNB-NIRSpec-IFU.ipynb"
         ],
-        "changed_other": [],
-        "only_in_latest": [],
-        "only_in_previous": []
-      }
-    },
-    {
-      "repo": "spacetelescope/roman_notebooks",
-      "latest_run": {
-        "number": 48,
-        "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/39089657748",
-        "created_at": "2026-10-18T02:19:11Z"
-      },
-      "previous_run": {
-        "number": 47,
-        "url": "https://github.com/spacetelescope/roman_notebooks/actions/runs/38105383085",
-        "created_at": "2026-10-11T02:30:35Z"
-      },
-      "summary": {
-        "fail_latest": 5,
-        "pass_latest": 32,
-        "total_latest": 37,
-        "fail_previous": 5,
-        "pass_previous": 32,
-        "total_previous": 37,
-        "new_failures": 0,
-        "resolved_failures": 0,
-        "consistent_failures": 5,
-        "consistent_successes": 32
-      },
-      "recent_notebooks_60d": [],
-      "details": {
-        "new_failures": [],
-        "resolved_failures": [],
-        "consistent_failures": [
-          "notebooks/aperture_photometry/aperture_photometry.ipynb",
-          "notebooks/catalog_database_access/catalog_database_access.ipynb",
-          "notebooks/roman_cutouts/roman_cutouts.ipynb",
-          "notebooks/stpsf/stpsf.ipynb",
-          "notebooks/time_domain_simulations/time_domain_simulations.ipynb"
+        "changed_other": [
+          {
+            "notebook": "notebooks/MIRI/MRS/JWPipeNB-MIRI-MRS.ipynb",
+            "previous": "cancelled",
+            "current": "success"
+          }
         ],
-        "consistent_successes": [
-          "notebooks/background_visualization_tool/RBVT.ipynb",
-          "notebooks/ccs_simulations/ccs_simulations.ipynb",
-          "notebooks/crds_reference_files/area_reffile.ipynb",
-          "notebooks/crds_reference_files/bad_pixels_mask_reffile.ipynb",
-          "notebooks/crds_reference_files/crds_reference_files.ipynb",
-          "notebooks/crds_reference_files/dark_reffile.ipynb",
-          "notebooks/crds_reference_files/distortion_reffile.ipynb",
-          "notebooks/crds_reference_files/flat_reffile.ipynb",
-          "notebooks/crds_reference_files/gain_reffile.ipynb",
-          "notebooks/crds_reference_files/linearity_reffile.ipynb",
-          "notebooks/crds_reference_files/photom_reffile.ipynb",
-          "notebooks/crds_reference_files/psf_reffile.ipynb",
-          "notebooks/crds_reference_files/readnoise_reffile.ipynb",
-          "notebooks/crds_reference_files/reference_pixel_reffile.ipynb",
-          "notebooks/crds_reference_files/saturation_reffile.ipynb",
-          "notebooks/data_discovery_and_access/data_discovery_and_access.ipynb",
-          "notebooks/data_visualization/data_visualization.ipynb",
-          "notebooks/data_visualization/jdaviz_data_visualization.ipynb",
-          "notebooks/exposure_pipeline/exposure_pipeline.ipynb",
-          "notebooks/footprint_visualization/footprint_visualization.ipynb",
-          "notebooks/grism_spectral_extraction/grism_spectral_extraction.ipynb",
-          "notebooks/ground_test_analysis/wfi_tvac_brightstar.ipynb",
-          "notebooks/measuring_galaxy_shapes/measuring_galaxy_shapes.ipynb",
-          "notebooks/mosaic_pipeline/mosaic_pipeline.ipynb",
-          "notebooks/pandeia/pandeia.ipynb",
-          "notebooks/rist/rist.ipynb",
-          "notebooks/romanisim/romanisim.ipynb",
-          "notebooks/stips/stips.ipynb",
-          "notebooks/synphot/synphot.ipynb",
-          "notebooks/target_visibility_tool/roman_target_visibility_tool.ipynb",
-          "notebooks/time_domain_analysis/time_domain_analysis.ipynb",
-          "notebooks/working_with_asdf/working_with_asdf.ipynb"
-        ],
-        "changed_other": [],
         "only_in_latest": [],
         "only_in_previous": []
       }
     }
   ],
   "errors": [
+    "`spacetelescope/hellouniverse`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/hellouniverse/actions/runs/39089472595/jobs?per_page=100&filter=all",
     "`spacetelescope/mast_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/mast_notebooks/actions/runs/39089977385/jobs?per_page=100&filter=all",
     "`spacetelescope/jdat_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/jdat_notebooks/actions/runs/39089674519/jobs?per_page=100&filter=all",
-    "`spacetelescope/hst_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/hst_notebooks/actions/runs/38105487794/jobs?per_page=100&filter=all",
-    "`spacetelescope/jwst-pipeline-notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/jwst-pipeline-notebooks/actions/runs/39089851968/jobs?per_page=100&filter=all"
+    "`spacetelescope/hst_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/hst_notebooks/actions/runs/39089757439/jobs?per_page=100&filter=all",
+    "`spacetelescope/roman_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/roman_notebooks/actions/runs/39089657748/jobs?per_page=100&filter=all"
   ]
 }
