@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T17:18:06Z",
+  "generated_at": "2026-10-20T17:34:33Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -69,15 +69,7 @@
         "consistent_failures": 4,
         "consistent_successes": 85
       },
-      "recent_notebooks_60d": [
-        {
-          "notebook": "notebooks/HSC/HSCV4_SMC_CASJOBS/hscv4_smc_casjobs.ipynb",
-          "added_at": "2026-08-21",
-          "current_status": "success",
-          "latest_run_url": "https://github.com/spacetelescope/mast_notebooks/actions/runs/39089977385",
-          "latest_run_number": 59
-        }
-      ],
+      "recent_notebooks_60d": [],
       "details": {
         "new_failures": [
           "notebooks/multi_mission/beginner_zcut/beginner_zcut.ipynb"
@@ -334,6 +326,6 @@
   ],
   "errors": [
     "`spacetelescope/jdat_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/jdat_notebooks/actions/runs/39089674519/jobs?per_page=100&filter=all",
-    "`spacetelescope/hst_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repositories/605151805/actions/runs/38105487794/jobs?per_page=100&filter=all&page=3"
+    "`spacetelescope/hst_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repositories/605151805/actions/runs/38105487794/jobs?per_page=100&filter=all&page=2"
   ]
 }

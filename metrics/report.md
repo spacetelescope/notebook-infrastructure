@@ -1,6 +1,6 @@
 # Notebook CI – Latest vs Previous Run Comparison
 
-_Generated 2026-10-19 17:18 UTC_
+_Generated 2026-10-20 17:34 UTC_
 
 Workflow name: `Notebook CI - Scheduled`
 
@@ -300,4 +300,4 @@ _No consistent failures_ ✅
 ## Errors
 
 - `spacetelescope/jdat_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/jdat_notebooks/actions/runs/39089674519/jobs?per_page=100&filter=all
-- `spacetelescope/hst_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repositories/605151805/actions/runs/38105487794/jobs?per_page=100&filter=all&page=3
+- `spacetelescope/hst_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repositories/605151805/actions/runs/38105487794/jobs?per_page=100&filter=all&page=2
