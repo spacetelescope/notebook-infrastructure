@@ -1,6 +1,6 @@
 # Notebook CI – Latest vs Previous Run Comparison
 
-_Generated 2026-11-16 19:59 UTC_
+_Generated 2026-11-16 20:02 UTC_
 
 Workflow name: `Notebook CI - Scheduled`
 
