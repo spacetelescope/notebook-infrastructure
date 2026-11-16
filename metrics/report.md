@@ -1,6 +1,6 @@
 # Notebook CI – Latest vs Previous Run Comparison
 
-_Generated 2026-11-16 20:02 UTC_
+_Generated 2026-11-16 21:01 UTC_
 
 Workflow name: `Notebook CI - Scheduled`
 
@@ -10,7 +10,6 @@ Workflow name: `Notebook CI - Scheduled`
 |---|---|---|---:|---:|---:|---:|
 | `spacetelescope/hellouniverse` | [#42](https://github.com/spacetelescope/hellouniverse/actions/runs/43666596948) | [#41](https://github.com/spacetelescope/hellouniverse/actions/runs/42437418994) | 0 | 0 | 1 | 1 |
 | `spacetelescope/jdat_notebooks` | [#54](https://github.com/spacetelescope/jdat_notebooks/actions/runs/43666735164) | [#53](https://github.com/spacetelescope/jdat_notebooks/actions/runs/42437590074) | 1 | 0 | 3 | 4 |
-| `spacetelescope/roman_notebooks` | [#52](https://github.com/spacetelescope/roman_notebooks/actions/runs/43666729023) | [#51](https://github.com/spacetelescope/roman_notebooks/actions/runs/42437589564) | 0 | 2 | 4 | 4 |
 | `spacetelescope/jwst-pipeline-notebooks` | [#43](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/43666908259) | [#42](https://github.com/spacetelescope/jwst-pipeline-notebooks/actions/runs/42437740801) | 0 | 0 | 0 | 0 |
 
 ## Per-Repository Details
@@ -130,73 +129,6 @@ _No resolved failures_
 </details>
 
 
-## `spacetelescope/roman_notebooks`
-
-| | Run | Date | Pass | Fail | Total |
-|---|---|---|---|---|---|
-| **Latest** | [#52](https://github.com/spacetelescope/roman_notebooks/actions/runs/43666729023) | 2026-11-15 | 33 | 4 | 37 |
-| **Previous** | [#51](https://github.com/spacetelescope/roman_notebooks/actions/runs/42437589564) | 2026-11-08 | 31 | 6 | 37 |
-
-- **New failures:** 0
-- **Resolved failures:** 2
-- **Consistent failures:** 4
-
-### 🔴 New Failures (0)
-
-_No new failures_ ✅
-
-### 🟢 Resolved Failures (2)
-
-- `notebooks/catalog_database_access/catalog_database_access.ipynb`
-- `notebooks/roman_cutouts/roman_cutouts.ipynb`
-
-### 🟡 Consistent Failures (4)
-
-- `notebooks/aperture_photometry/aperture_photometry.ipynb`
-- `notebooks/stips/stips.ipynb`
-- `notebooks/stpsf/stpsf.ipynb`
-- `notebooks/time_domain_simulations/time_domain_simulations.ipynb`
-
-### ✅ Consistent Successes (31)
-
-<details>
-<summary>Click to expand</summary>
-
-- `notebooks/background_visualization_tool/RBVT.ipynb`
-- `notebooks/ccs_simulations/ccs_simulations.ipynb`
-- `notebooks/crds_reference_files/area_reffile.ipynb`
-- `notebooks/crds_reference_files/bad_pixels_mask_reffile.ipynb`
-- `notebooks/crds_reference_files/crds_reference_files.ipynb`
-- `notebooks/crds_reference_files/dark_reffile.ipynb`
-- `notebooks/crds_reference_files/distortion_reffile.ipynb`
-- `notebooks/crds_reference_files/flat_reffile.ipynb`
-- `notebooks/crds_reference_files/gain_reffile.ipynb`
-- `notebooks/crds_reference_files/linearity_reffile.ipynb`
-- `notebooks/crds_reference_files/photom_reffile.ipynb`
-- `notebooks/crds_reference_files/psf_reffile.ipynb`
-- `notebooks/crds_reference_files/readnoise_reffile.ipynb`
-- `notebooks/crds_reference_files/reference_pixel_reffile.ipynb`
-- `notebooks/crds_reference_files/saturation_reffile.ipynb`
-- `notebooks/data_discovery_and_access/data_discovery_and_access.ipynb`
-- `notebooks/data_visualization/data_visualization.ipynb`
-- `notebooks/data_visualization/jdaviz_data_visualization.ipynb`
-- `notebooks/exposure_pipeline/exposure_pipeline.ipynb`
-- `notebooks/footprint_visualization/footprint_visualization.ipynb`
-- `notebooks/grism_spectral_extraction/grism_spectral_extraction.ipynb`
-- `notebooks/ground_test_analysis/wfi_tvac_brightstar.ipynb`
-- `notebooks/measuring_galaxy_shapes/measuring_galaxy_shapes.ipynb`
-- `notebooks/mosaic_pipeline/mosaic_pipeline.ipynb`
-- `notebooks/pandeia/pandeia.ipynb`
-- `notebooks/rist/rist.ipynb`
-- `notebooks/romanisim/romanisim.ipynb`
-- `notebooks/synphot/synphot.ipynb`
-- `notebooks/target_visibility_tool/roman_target_visibility_tool.ipynb`
-- `notebooks/time_domain_analysis/time_domain_analysis.ipynb`
-- `notebooks/working_with_asdf/working_with_asdf.ipynb`
-
-</details>
-
-
 ## `spacetelescope/jwst-pipeline-notebooks`
 
 | | Run | Date | Pass | Fail | Total |
@@ -249,5 +181,6 @@ _No consistent failures_ ✅
 
 ## Errors
 
-- `spacetelescope/mast_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repositories/596163036/actions/runs/42437806143/jobs?per_page=100&filter=all&page=2
+- `spacetelescope/mast_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/mast_notebooks/actions/runs/42437806143/jobs?per_page=100&filter=all
 - `spacetelescope/hst_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repositories/605151805/actions/runs/42437615761/jobs?per_page=100&filter=all&page=2
+- `spacetelescope/roman_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/roman_notebooks/actions/runs/42437589564/jobs?per_page=100&filter=all
