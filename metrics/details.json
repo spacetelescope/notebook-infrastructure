@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-16T21:01:00Z",
+  "generated_at": "2026-11-17T18:57:03Z",
   "workflow_name": "Notebook CI - Scheduled",
   "repositories": [
     {
@@ -187,7 +187,7 @@
     }
   ],
   "errors": [
-    "`spacetelescope/mast_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/mast_notebooks/actions/runs/42437806143/jobs?per_page=100&filter=all",
+    "`spacetelescope/mast_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repositories/596163036/actions/runs/42437806143/jobs?per_page=100&filter=all&page=2",
     "`spacetelescope/hst_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repositories/605151805/actions/runs/42437615761/jobs?per_page=100&filter=all&page=2",
     "`spacetelescope/roman_notebooks`: 502 Server Error: Bad Gateway for url: https://api.github.com/repos/spacetelescope/roman_notebooks/actions/runs/42437589564/jobs?per_page=100&filter=all"
   ]
